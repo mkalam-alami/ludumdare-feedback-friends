@@ -156,7 +156,7 @@ function scraping_run($db, $timeout = 10) {
 			}
 		}
 	
-		if (!$over) {
+		if (!$over && !LDFF_SCRAPING_PSEUDO_CRON) {
 			usleep(LDFF_SCRAPING_SLEEP * 1000000);
 		}
 
@@ -176,6 +176,7 @@ function scraping_run($db, $timeout = 10) {
 	$report['slept_per_step'] = LDFF_SCRAPING_SLEEP;
 	$report['timeout'] = $timeout;
 
+	// TODO Format and log report in file
 	return $report;
 }
 

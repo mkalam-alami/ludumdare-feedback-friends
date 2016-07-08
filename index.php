@@ -21,8 +21,7 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	}
 }
 
-
-print_r(http_fetch_entry(55626));
+//print_r(http_fetch_entry(55626));
 
 mysqli_close($db);
 

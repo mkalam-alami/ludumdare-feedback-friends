@@ -46,8 +46,14 @@ function http_fetch_entry($uid) {
 		'Web' => ['web']
 	);
 
-	$data = _http_fetch_page('uid=' . $uid);
-	phpQuery::newDocumentHTML($data);
+	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
+	$html = _http_fetch_page('uid=' . $uid);
+ 	preg_match_all('/<script.*?>[\s\S]*?<\/script>/', $html, $tmp);
+    $scripts_array = $tmp[0]; 
+    foreach ($scripts_array as $script_id => $script_item){
+        $html = str_replace($script_item, '', $html);
+    }
+	phpQuery::newDocumentHTML($html);
 
 	// Figure out platforms
 	$platforms = '';
@@ -75,7 +81,6 @@ function http_fetch_entry($uid) {
 		$platforms = 'Unknown';
 	}
 
-	// TODO Fix for pages with embedded games
 	$entry = array(
 		'uid' => $uid,
 		'author' => pq('#compo2 a strong')->text(),
