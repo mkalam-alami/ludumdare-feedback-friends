@@ -4,9 +4,6 @@ require_once(__DIR__ . '/includes/init.php');
 
 $db = db_connect();
 
-
-echo "<h1>hello world</h1>";
-
 // Run scraping through pseudo cron
 if (LDFF_SCRAPING_PSEUDO_CRON) {
 	$last_run = intval(setting_read($db, 'pseudo_scraping_last_run', 0));
@@ -21,9 +18,11 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	}
 }
 
-//print_r(http_fetch_entry(55626));
-
 mysqli_close($db);
 
-?>
+//print_r(http_fetch_entry(55626)); // DEBUG
 
+$template = $mustache->loadTemplate('header');
+echo $template->render(array('test' => LDFF_COMPETITION_PAGE));
+
+?>

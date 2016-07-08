@@ -25,7 +25,7 @@ function _scraping_run_step_uids($db, $page) {
 
 function _scraping_run_step_entry($db, $uid) {
 	$entry = http_fetch_entry($uid);
-	$timestamp = time();
+	$timestamp = time(); // TODO Fix
 
 	mysqli_query($db, "UPDATE entry SET 
 			author = '" . _escape($entry['author']) . "',

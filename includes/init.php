@@ -25,5 +25,12 @@ else {
 	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 }
 
+// Templating
+
+$mustache_loader_options = array('extension' => '.html');
+$mustache = new Mustache_Engine(array(
+    	'loader' => new Mustache_Loader_FilesystemLoader(__DIR__.'/../templates', $mustache_loader_options)
+    ));
+
 ?>
 
