@@ -24,8 +24,8 @@ function _scraping_run_step_uids($db, $page) {
 }
 
 function _scraping_run_step_entry($db, $uid) {
-	$entry = http_fetch_entry($uid);
-	$timestamp = time(); // TODO Fix
+	$entry = http_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
+	$timestamp = time(); // TODO Fix timestamp
 
 	mysqli_query($db, "UPDATE entry SET 
 			author = '" . _escape($entry['author']) . "',

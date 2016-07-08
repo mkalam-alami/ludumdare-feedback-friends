@@ -18,11 +18,31 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	}
 }
 
-mysqli_close($db);
-
 //print_r(http_fetch_entry(55626)); // DEBUG
 
-$template = $mustache->loadTemplate('header');
-echo $template->render(array('test' => LDFF_COMPETITION_PAGE));
+// Context
+$context = array();
+$context['test'] = LDFF_COMPETITION_PAGE; // DEBUG
+$context['entries'] = array();
+$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
+
+$results = mysqli_query($db, "SELECT * FROM entry ORDER BY timestamp DESC LIMIT 10");
+while ($row = mysqli_fetch_array($results)) {
+	$context['entries'][] = $row;
+}
+
+mysqli_close($db);
+
+
+// Templates rendering
+
+function render($template_name) {
+	global $mustache, $context;
+	$template = $mustache->loadTemplate($template_name);
+	echo $template->render($context);
+}
+
+render('header');
+render('contents');
 
 ?>
