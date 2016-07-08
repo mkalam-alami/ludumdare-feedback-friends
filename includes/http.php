@@ -35,9 +35,9 @@ function http_fetch_uids($page = 1) {
 */
 function http_fetch_entry($uid) {
 	static $PLATFORM_KEYWORDS = array(
-		'Windows' => ['windows', 'win32', 'win64', 'java', 'jar'],
-		'Linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
-		'OSX' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
+		'Windows' => ['windows', 'win32', 'win64', 'java'],
+		'Linux' => ['linux', 'debian', 'ubuntu', 'java'],
+		'OS X' => ['mac', 'osx', 'os/x', 'os x', 'java'],
 		'Android' => ['android'],
 
 		'Web (Flash)' => ['flash', 'swf'],
@@ -50,7 +50,7 @@ function http_fetch_entry($uid) {
 	phpQuery::newDocumentHTML($data);
 
 	// Figure out platforms
-	$platforms = null;
+	$platforms = '';
 	$platforms_text = strtolower(pq('.links li')->text());
 	foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
 		$found = false;
@@ -62,7 +62,7 @@ function http_fetch_entry($uid) {
 		}
 
 		if ($found) {
-			if ($platforms != null) {
+			if ($platforms != '') {
 				$platforms .= ', ';
 			}
 			$platforms .= $platform_name;
@@ -71,7 +71,11 @@ function http_fetch_entry($uid) {
 			}
 		}
 	}
+	if ($platforms == '') {
+		$platforms = 'Unknown';
+	}
 
+	// TODO Fix for pages with embedded games
 	$entry = array(
 		'uid' => $uid,
 		'author' => pq('#compo2 a strong')->text(),

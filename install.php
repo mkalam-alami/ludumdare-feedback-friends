@@ -3,13 +3,13 @@
 require_once('includes/init.php');
 
 function read_version($db) {
-	$current_version = read_setting($db, 'current_version', 0);
+	$current_version = setting_read($db, 'current_version', 0);
 	echo 'Current version is '.$current_version.'<br />';
 	return $current_version;
 }
 
 function write_version($db, $version) {
-	write_setting($db, 'current_version', $version);
+	setting_write($db, 'current_version', $version);
 	echo 'Upgraded version to '.$version.'!<br />';
 	return $version;
 }
