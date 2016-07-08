@@ -166,8 +166,6 @@ function scraping_run($db, $timeout = 10) {
 		$last_step_time = $time;
 		$steps++;
 		$average_step_duration = ($last_step_time - $start_time) / $steps;
-
-		if ($steps > 10) break;
 	}
 
 	$report['step_count'] = $steps;
