@@ -20,4 +20,4 @@ It will try to favor constructive criticism by giving more points to longer comm
 ## Notes
 
 * "Feedback friends" just means other authors with whom you commented on each other's game
-* Instead of ratings, I'm considering a stupid but potentially fun trophy system, that will analyze keywords in comments to give awards such as "Most WTF Entry", "Cutest Entry", "Least Playable Entry", etc.
+* Instead of ratings, I'm considering a stupid but potentially fun trophy system, that will analyze keywords in comments to give awards at the end of the competition, such as "Most WTF Entry", "Cutest Entry", "Least Playable Entry", etc. The awards could then actually be added (manually) on the user entry pages.
