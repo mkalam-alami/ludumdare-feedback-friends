@@ -5,7 +5,10 @@
 require_once('includes/init.php');
 
 $db = db_connect();
-scraping_run($db);
+
+echo '<pre>';
+print_r(scraping_run($db));
+
 mysqli_close($db);
 
 ?>
