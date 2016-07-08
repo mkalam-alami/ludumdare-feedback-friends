@@ -25,18 +25,20 @@ if ($current_version < LDFF_VERSION) {
 			`uid` INT NOT NULL ,
 			`author` VARCHAR(255) NOT NULL ,
 			`title` VARCHAR(255) NOT NULL ,
+			`type` VARCHAR(5) NOT NULL,
+			`description` VARCHAR(8192) ,
 			`platforms` VARCHAR(255) NOT NULL ,
 			`picture` VARCHAR(255) ,
-			`comments_given` INT NOT NULL ,
-			`comments_received` INT NOT NULL , 
-			`coolness` INT NOT NULL , 
+			`comments_given` INT NOT NULL DEFAULT '0',
+			`comments_received` INT NOT NULL DEFAULT '0', 
+			`coolness` INT NOT NULL DEFAULT '0', 
 			`timestamp` DATE NOT NULL , 
 			PRIMARY KEY (`uid`),
 			INDEX `comments_given_index` (`comments_given`),
 			INDEX `comments_received_index` (`comments_received`), 
 			INDEX `coolness` (`coolness`), 
 			FULLTEXT INDEX `index_platforms` (`platforms`) , 
-			FULLTEXT INDEX `index_full` (`author`, `title`, `platforms`)
+			FULLTEXT INDEX `index_full` (`author`, `title`, `description`, `platforms`, `type`)
 			) ENGINE = InnoDB") or die("Failed to create entry table");
 		mysqli_query($db, "CREATE TABLE `comment` (
 			`uid_author` INT NOT NULL ,
