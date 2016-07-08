@@ -41,7 +41,7 @@ function http_fetch_entry($uid) {
 		'Android' => ['android'],
 
 		'Web (Flash)' => ['flash', 'swf'],
-		'Web (HTML5)' => ['html'],
+		'Web (HTML5)' => ['html', 'webgl'],
 		'Web (Unity)' => ['unity'],
 		'Web' => ['web']
 	);
@@ -88,7 +88,7 @@ function http_fetch_entry($uid) {
 		'type' => (pq('#compo2 > div > i')->text() == 'Compo Entry') ? 'compo' : 'jam',
 		'description' => pq('#compo2 p')->eq(1)->html(),
 		'platforms' => $platforms,
-		'picture' => str_replace('//', '/', pq('.shot-nav img')->attr('src'))
+		'picture' => pq('.shot-nav img')->attr('src')
 	);
 
 	return $entry;

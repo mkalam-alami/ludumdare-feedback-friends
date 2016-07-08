@@ -1,7 +1,12 @@
-<h2>Latest scraped entries</h2>
+<h2>Latest scraped entries (total: {{entry_count}})</h2>
 
-<ul>
 {{#entries}}
-	<li><a href="{{ld_root}}uid={{uid}}">{{title}}</a> by {{author}}</li>
+	<a class="entry" href="{{ld_root}}uid={{uid}}">
+		<img class="entry-picture" src="{{picture}}" />
+		<div class="entry-caption">
+			<div class="entry-title">{{title}}</div>
+			<div class="entry-author">by {{author}}</div>
+			<div class="entry-notes">{{type}} | {{platforms}}</div>
+		</div>
+	</a>
 {{/entries}}
-</ul>

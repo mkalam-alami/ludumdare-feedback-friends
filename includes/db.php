@@ -14,4 +14,15 @@ function db_connect() {
 	return $db;
 }
 
+function db_select_single_row($db, $query) {
+	$results = mysqli_query($db, $query);
+	return mysqli_fetch_array($results);
+}
+
+function db_select_single_value($db, $query) {
+	$results = mysqli_query($db, $query);
+	$row = mysqli_fetch_array($results);
+	return $row[0];
+}
+
 ?>

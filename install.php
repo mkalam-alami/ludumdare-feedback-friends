@@ -32,7 +32,7 @@ if ($current_version < LDFF_VERSION) {
 			`comments_given` INT NOT NULL DEFAULT '0',
 			`comments_received` INT NOT NULL DEFAULT '0', 
 			`coolness` INT NOT NULL DEFAULT '0', 
-			`timestamp` DATE NOT NULL , 
+			`last_updated` DATETIME on update CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
 			PRIMARY KEY (`uid`),
 			INDEX `comments_given_index` (`comments_given`),
 			INDEX `comments_received_index` (`comments_received`), 

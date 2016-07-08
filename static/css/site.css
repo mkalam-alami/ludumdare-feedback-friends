@@ -1,0 +1,69 @@
+body {
+	background-color: #468;
+	font-family: Arial, sans-serif;
+	padding: 20px;
+	font-size: 16px;
+}
+
+a {
+	color: black;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+
+h1, h2 {
+	color: white;
+}
+
+/* Entry block */
+
+.entry {
+	display: inline-block;
+	background-color: #FFF;
+	box-shadow: 2px 2px 2px #333;
+	margin: 2%;
+	width: 20%;
+	min-width: 150px;
+	max-width: 260px;
+	text-align: center;
+	border-radius: 8px 8px 0 0;
+	padding: 20px;
+	padding-bottom: 0;
+}
+.entry:hover {
+	background-color: #FDA;
+	text-decoration: none;
+}
+
+.entry-picture {
+	width: 100%;
+	border-radius: 8px 8px 0 0;
+	border: 1px solid #ACE;
+}
+
+.entry-caption {
+	height: 100px;
+	overflow: hidden;
+	padding-top: 10px;
+}
+
+.entry-title {
+	color: black;
+	font-weight: bold;
+	padding: 5px;
+	padding-bottom: 0px;
+	font-size: 1rem;
+}
+
+.entry-author {
+	color: #333;
+	padding: 5px;
+	padding-top: 0px;
+	font-size: 0.8rem;
+}
+
+.entry-notes {
+	font-size: 0.7rem;
+}
