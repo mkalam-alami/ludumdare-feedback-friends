@@ -13,7 +13,7 @@ require_once(__DIR__ . '/../vendor/autoload.php'); // TODO Optimize imports
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/db.php');
 require_once(__DIR__ . '/setting.php');
-require_once(__DIR__ . '/http.php');
+require_once(__DIR__ . '/ludumdare.php');
 require_once(__DIR__ . '/scraping.php');
 
 // PHP Errors level

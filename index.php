@@ -40,9 +40,15 @@ function render($template_name) {
 }
 
 // TODO Let ajax requests return a single, chosen template
-render('header');
-render('contents');
-render('footer');
+if (isset($_GET['ajax'])) {
+	$template_name = util_query_param('ajax');
+	render($template_name);
+}
+else {
+	render('header');
+	render('index');
+	render('footer');
+}
 
 /*if (isset($report)) { // DEBUG
 	echo "<pre>";
@@ -51,3 +57,6 @@ render('footer');
 }*/
 
 ?>
+<button type="button" class="btn btn-default" aria-label="Left Align">
+  <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
+</button>

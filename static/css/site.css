@@ -1,8 +1,5 @@
 body {
-	background-color: #468;
-	font-family: Arial, sans-serif;
 	padding: 20px;
-	font-size: 16px;
 }
 
 a {
@@ -14,19 +11,25 @@ a:hover {
 }
 
 h1, h2 {
-	color: white;
+	color: #333;
+}
+
+/* Search block */
+
+.search {
+	margin-bottom: 30px;
 }
 
 /* Entry block */
 
 .entry {
+	background-color: #CCC;
 	display: inline-block;
-	background-color: #FFF;
 	box-shadow: 2px 2px 2px #333;
-	margin: 2%;
-	width: 20%;
-	min-width: 150px;
-	max-width: 260px;
+	margin: auto;
+	margin-bottom: 20px;
+	width: 100%;
+	max-width: 220px;
 	text-align: center;
 	border-radius: 8px 8px 0 0;
 	padding: 20px;
@@ -39,6 +42,7 @@ h1, h2 {
 
 .entry-picture {
 	width: 100%;
+	max-width: 180px;
 	border-radius: 8px 8px 0 0;
 	border: 1px solid #ACE;
 }
@@ -54,16 +58,16 @@ h1, h2 {
 	font-weight: bold;
 	padding: 5px;
 	padding-bottom: 0px;
-	font-size: 1rem;
+	font-size: 1.5rem;
 }
 
 .entry-author {
 	color: #333;
 	padding: 5px;
 	padding-top: 0px;
-	font-size: 0.8rem;
+	font-size: 1.2rem;
 }
 
 .entry-notes {
-	font-size: 0.7rem;
+	font-size: 1rem;
 }
