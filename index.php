@@ -15,9 +15,9 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 		setting_write($db, 'pseudo_scraping_last_run', $now);
 		$report = scraping_run($db, LDFF_SCRAPING_TIMEOUT);
 
-		echo "<pre>";
+		/*echo "<pre>";
 		print_r($report);
-		echo "</pre>";
+		echo "</pre>";*/
 	}
 }
 
