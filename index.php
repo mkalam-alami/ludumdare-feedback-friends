@@ -22,7 +22,7 @@ $context = array();
 $context['competition'] = LDFF_COMPETITION_PAGE;
 $context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
 $context['entries'] = array();
-$results = mysqli_query($db, "SELECT * FROM entry ORDER BY last_updated DESC LIMIT 10");
+$results = mysqli_query($db, "SELECT * FROM entry ORDER BY last_updated DESC LIMIT 10"); // TODO Pagination (through a "load more" button)
 while ($row = mysqli_fetch_array($results)) {
 	$context['entries'][] = $row;
 }
