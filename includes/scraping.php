@@ -26,24 +26,28 @@ function _scraping_run_step_uids($db, $page) {
 function _scraping_run_step_entry($db, $uid) {
 	$entry = http_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
 
+	// Save picture
+	$picture_data = file_get_contents($entry['picture']);
+	file_put_contents(util_get_picture_path($uid), $picture_data)
+		or die('Cannot write in data/ folder');
+
+	// Update entry table
 	mysqli_query($db, "UPDATE entry SET 
 			author = '" . _escape($entry['author']) . "',
 			title = '" . _escape($entry['title']) . "',
 			type = '" . _escape($entry['type']) . "',
 			description = '" . _escape($entry['description']) . "',
-			platforms = '" . _escape($entry['platforms']) . "',
-			picture = '" . _escape($entry['picture']) . "'
+			platforms = '" . _escape($entry['platforms']) . "'
 			WHERE uid = '$uid'");
 	if (mysqli_affected_rows($db) == 0) {
 		mysqli_query($db, "INSERT INTO 
-			entry(uid,author,title,type,description,platforms,picture) 
+			entry(uid,author,title,type,description,platforms) 
 			VALUES('$uid',
 				'" . _escape($entry['author']). "',
 				'" . _escape($entry['title']). "',
 				'" . _escape($entry['type']). "',
 				'" . _escape($entry['description']). "',
-				'" . _escape($entry['platforms']). "',
-				'" . _escape($entry['picture']). "'
+				'" . _escape($entry['platforms']). "'
 				)");
 	}
 

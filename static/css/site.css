@@ -25,26 +25,33 @@ h1, h2 {
 .entry {
 	background-color: #CCC;
 	display: inline-block;
-	box-shadow: 2px 2px 2px #333;
 	margin: auto;
 	margin-bottom: 20px;
-	width: 100%;
-	max-width: 220px;
+	width: 220px;
+	height: 280px;
 	text-align: center;
 	border-radius: 8px 8px 0 0;
-	padding: 20px;
 	padding-bottom: 0;
+	padding: 20px;
+	position: relative;
 }
 .entry:hover {
-	background-color: #FDA;
+	background-color: #CCC !important;
+	color: #333 !important;
 	text-decoration: none;
+	transition: 0.3s;
 }
 
 .entry-picture {
 	width: 100%;
 	max-width: 180px;
 	border-radius: 8px 8px 0 0;
-	border: 1px solid #ACE;
+}
+
+.entry-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .entry-caption {
@@ -54,7 +61,6 @@ h1, h2 {
 }
 
 .entry-title {
-	color: black;
 	font-weight: bold;
 	padding: 5px;
 	padding-bottom: 0px;
@@ -62,7 +68,6 @@ h1, h2 {
 }
 
 .entry-author {
-	color: #333;
 	padding: 5px;
 	padding-top: 0px;
 	font-size: 1.2rem;

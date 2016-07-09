@@ -24,6 +24,7 @@ $context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?actio
 $context['entries'] = array();
 $results = mysqli_query($db, "SELECT * FROM entry ORDER BY last_updated DESC LIMIT 10"); // TODO Pagination (through a "load more" button)
 while ($row = mysqli_fetch_array($results)) {
+	$row['picture'] = util_get_picture_path($row['uid']);
 	$context['entries'][] = $row;
 }
 $context['entry_count'] = db_select_single_value($db, "SELECT COUNT(*) FROM entry");
@@ -57,6 +58,3 @@ else {
 }*/
 
 ?>
-<button type="button" class="btn btn-default" aria-label="Left Align">
-  <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
-</button>

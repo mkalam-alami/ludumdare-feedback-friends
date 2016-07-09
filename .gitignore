@@ -1,3 +1,5 @@
 vendor/
 composer.lock
 config.php
+data/*
+*~

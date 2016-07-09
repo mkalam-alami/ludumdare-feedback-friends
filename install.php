@@ -28,7 +28,6 @@ if ($current_version < LDFF_VERSION) {
 			`type` VARCHAR(5) NOT NULL,
 			`description` VARCHAR(8192) ,
 			`platforms` VARCHAR(255) NOT NULL ,
-			`picture` VARCHAR(255) ,
 			`comments_given` INT NOT NULL DEFAULT '0',
 			`comments_received` INT NOT NULL DEFAULT '0', 
 			`coolness` INT NOT NULL DEFAULT '0', 

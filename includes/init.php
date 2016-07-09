@@ -11,6 +11,7 @@ define('LDFF_SCRAPING_PAGE_SIZE', 24);
 
 require_once(__DIR__ . '/../vendor/autoload.php'); // TODO Optimize imports
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/db.php');
 require_once(__DIR__ . '/setting.php');
 require_once(__DIR__ . '/ludumdare.php');
