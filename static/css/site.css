@@ -1,5 +1,4 @@
 body {
-	padding: 20px;
 }
 
 a {
@@ -12,11 +11,28 @@ a:hover {
 
 h1, h2 {
 	color: #333;
+	margin: 0 0 20px 0;
+}
+
+.container {
+	padding: 20px;
+}
+
+/* Header */
+
+#header {
+	background-color: #DDD;
+	padding: 20px;
+}
+
+#header img {
+	display: block;
+	margin: auto;
 }
 
 /* Search block */
 
-.search {
+#search {
 	margin-bottom: 30px;
 }
 
