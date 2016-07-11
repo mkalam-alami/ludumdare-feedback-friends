@@ -27,10 +27,6 @@ function score_comments_received($db, $uid) {
 }
 
 function score_coolness($given, $received) {
-	// "When you play the game of feedback, you play or you die"
-	if ($given == 0 && $received >= 5) {
-		return LDFF_COOLNESS_NO_COMMENT;
-	}
 	return $given - $received;
 }
 

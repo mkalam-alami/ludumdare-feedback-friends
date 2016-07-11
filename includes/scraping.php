@@ -63,7 +63,8 @@ function _scraping_run_step_entry($db, $uid) {
 			platforms = '" . _escape($entry['platforms']) . "',
 			comments_given = '$comments_given',
 			comments_received = '$comments_received',
-			coolness = '$coolness'
+			coolness = '$coolness',
+			last_updated = CURRENT_TIMESTAMP()
 			WHERE uid = '$uid'");
 	if (mysqli_affected_rows($db) == 0) {
 		mysqli_query($db, "INSERT INTO 

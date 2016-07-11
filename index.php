@@ -36,8 +36,7 @@ function render($template_name, $context) {
 
 function _page_details_list_comments($db, $where_clause) {
 	$results = mysqli_query($db, "SELECT comment.*, entry.author FROM comment, entry 
-			WHERE comment.uid_author = entry.uid  
-			AND $where_clause ORDER BY `date`, `order`")
+			WHERE $where_clause ORDER BY `date` DESC, `order` DESC")
 		or die('Failed to fetch comments: '.mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
@@ -59,8 +58,23 @@ function page_details($db) {
 		or die('Failed to fetch entry: '.mysqli_error($db)); 
 	$entry = mysqli_fetch_array($results);
 	$entry['picture'] = util_get_picture_path($entry['uid']);
-	$entry['received'] = _page_details_list_comments($db, "uid_entry = $uid and uid_author != $uid");
-	$entry['given'] = _page_details_list_comments($db, "uid_author = $uid and uid_entry != $uid");
+	$entry['received'] = _page_details_list_comments($db,
+		"comment.uid_author = entry.uid AND uid_entry = $uid and uid_author != $uid");
+	$entry['given'] = _page_details_list_comments($db,
+		"comment.uid_entry = entry.uid AND uid_author = $uid and uid_entry != $uid");
+
+	$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
+			WHERE comment1.uid_author = $uid
+			AND comment2.uid_author != $uid
+			AND comment1.uid_entry = comment2.uid_author
+			AND comment2.uid_entry = $uid
+			AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC")
+		or die('Failed to fetch comments: '.mysqli_error($db)); 
+	$friends = array();
+	while ($friend = mysqli_fetch_array($results)) {
+		$friends[] = $friend;
+	}
+	$entry['friends'] = $friends;
 
 	// Build context
 	$context = init_context();
@@ -102,10 +116,10 @@ function page_browse($db) {
 		$sql .= " 1";
 	}
 	if ($has_score) {
-		$sql .= " ORDER BY score DESC";
+		$sql .= " ORDER BY score, coolness DESC";
 	}
 	else {
-		$sql .= " ORDER BY last_updated DESC";
+		$sql .= " ORDER BY coolness DESC, last_updated DESC";
 	}
 	$sql .= " LIMIT 10";
 	if (isset($_GET['page'])) {

@@ -2,43 +2,60 @@
 	{{#entry}}
 
 	<div class="row">
-		<div class="col-xs-12">
-			<h2>{{title}} <i>(Coolness: {{coolness}})</i></h2>
-		</div>
-	</div>
-	<div class="row">
 		<div class="col-md-4 text-center">
 			{{> cartridge}}
 			<br /><br />
 			<p class="bg-warning">
 				<b>N.B.</b> Comments take a while to appear (up to ~30mn), so don't worry if some comments are missing and your coolness is off.<br />
-				<a href="?uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh*</a><br />
-				<span style="font-style: italic; font-size: 1.1rem">*This will refresh everything except your "Given comments".</span>
+				<a href="?uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh* <span style="font-size: 1.1rem"><br />(last updated {{last_updated}})</span></a><br />
+				<span style="font-size: 1.1rem">*This button will refresh everything except your "Given comments".</span>
 			</p>
-
-
 		</div>
-		<div class="col-md-4">
-			<h3>Given: {{comments_given}}p</h3>
-			<table class="table">
-			{{#given}}
-				<tr><td>
-					<h4>{{author}} <i>({{score}}p)</i></h4>
-					{{{comment}}}
-				</td></tr>
-			{{/given}}
-			</table>
-		</div>
-		<div class="col-md-4">
-			<h3>Received: {{comments_received}}p</h3>
-			<table class="table">
-			{{#received}}
-				<tr><td>
-					<h4>{{author}} <i>({{score}}p)</i></h4>
-					{{{comment}}}
-				</td></tr>
-			{{/received}}
-			</table>
+		<div class="col-md-8">
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-8">
+						<h2>{{title}} <i>(Coolness: {{coolness}})</i></h2>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-xs-8">
+						<h3>Feedback friends</h3>
+
+						<table class="table">
+							{{#friends}}
+								<a href="?uid={{uid_author}}" class="btn btn-default">{{author}}</a>&nbsp;
+							{{/friends}}
+						</table>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<h3>Given: {{comments_given}}p</h3>
+						<table class="table">
+						{{#given}}
+							<tr><td>
+								<h4>to <a href="?uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
+								{{{comment}}}
+							</td></tr>
+						{{/given}}
+						</table>
+					</div>
+					<div class="col-md-4">
+						<h3>Received: {{comments_received}}p</h3>
+						<table class="table">
+						{{#received}}
+							<tr><td>
+								<h4><a href="?uid={{uid_author}}">{{author}}</a> <i>({{score}}p)</i></h4>
+								{{{comment}}}
+							</td></tr>
+						{{/received}}
+						</table>
+					</div>
+				</div>
+			</div>
 		</div>
 
 	</div>

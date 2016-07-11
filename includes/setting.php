@@ -11,11 +11,13 @@ function setting_read($db, $id, $default_value = null) {
 }
 
 function setting_write($db, $id, $value) {
-	mysqli_query($db, "UPDATE setting SET value = '$value' WHERE id = '$id'")
-		or die("Failed to update setting '$id' with value '$value'");
-	if (mysqli_affected_rows($db) == 0) {
+	if (setting_read($db, $id, null) === null) {
 		mysqli_query($db, "INSERT INTO setting(id,value) VALUES('$id', '$value')")
 			or die("Failed to insert setting '$id' with value '$value'");
+	}
+	else {
+		mysqli_query($db, "UPDATE setting SET value = '$value' WHERE id = '$id'")
+			or die("Failed to update setting '$id' with value '$value'");
 	}
 }
 
