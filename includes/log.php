@@ -1,5 +1,8 @@
 <?php
 
-// TODO Logging tools
+function util_log_error($message) {
+	// TODO File logging
+	die($message);
+}
 
 ?>

@@ -13,7 +13,8 @@ function _scraping_run_step_uids($db, $page) {
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
-			if (strpos($missing_uids, $uid.',') === false) {
+			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid");
+			if ($found < 1 && strpos($missing_uids, $uid.',') === false) {
 				$missing_uids .= $uid.',';
 			}
 		}
@@ -31,27 +32,59 @@ function _scraping_run_step_entry($db, $uid) {
 	file_put_contents(util_get_picture_path($uid), $picture_data)
 		or die('Cannot write in data/ folder');
 
+	// Save comments
+	$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid'");
+	$order = 1;
+	foreach ($entry['comments'] as $comment) {
+		if ($order++ > $max_order) {
+			mysqli_query($db, "INSERT IGNORE INTO `comment`(`uid_entry`,`order`,`uid_author`,`comment`,`date`,`score`)
+				VALUES ('$uid',
+					'".$comment['order']."',
+					'"._escape($comment['uid_author'])."',
+					'"._escape($comment['comment'])."',
+					'".date_format($comment['date'], 'Y-m-d H:i')."',
+					'".score_evaluate_comment(_escape($comment['uid_author']), $uid, $comment['comment'])."'
+					)") or util_log_error(mysqli_error($db));
+		}
+	}
+	mysqli_query($db, "COMMIT");
+
+	// Coolness
+	$comments_given = score_comments_given($db, $uid);
+	$comments_received = score_comments_received($db, $uid);
+	$coolness = score_coolness($comments_given, $comments_received);
+
 	// Update entry table
 	mysqli_query($db, "UPDATE entry SET 
 			author = '" . _escape($entry['author']) . "',
 			title = '" . _escape($entry['title']) . "',
 			type = '" . _escape($entry['type']) . "',
 			description = '" . _escape($entry['description']) . "',
-			platforms = '" . _escape($entry['platforms']) . "'
+			platforms = '" . _escape($entry['platforms']) . "',
+			comments_given = '$comments_given',
+			comments_received = '$comments_received',
+			coolness = '$coolness'
 			WHERE uid = '$uid'");
 	if (mysqli_affected_rows($db) == 0) {
 		mysqli_query($db, "INSERT INTO 
-			entry(uid,author,title,type,description,platforms) 
+			entry(uid,author,title,type,description,platforms,comments_given,comments_received,coolness) 
 			VALUES('$uid',
 				'" . _escape($entry['author']). "',
 				'" . _escape($entry['title']). "',
 				'" . _escape($entry['type']). "',
 				'" . _escape($entry['description']). "',
-				'" . _escape($entry['platforms']). "'
+				'" . _escape($entry['platforms']). "',
+				'$comments_given',
+				'$comments_received',
+				'$coolness'
 				)");
 	}
 
 	return $entry;
+}
+
+function scraping_refresh_entry($db, $uid) {
+	_scraping_run_step_entry($db, $uid);
 }
 
 /*

@@ -52,7 +52,6 @@ h1, h2, h3 {
 	background-color: #CCC;
 	display: inline-block;
 	margin: auto;
-	margin-bottom: 20px;
 	width: 220px;
 	height: 280px;
 	text-align: center;
@@ -99,4 +98,9 @@ h1, h2, h3 {
 
 .entry-notes {
 	font-size: 1rem;
+}
+
+.entry-button {
+	margin: 5px;
+	margin-bottom: 20px;
 }

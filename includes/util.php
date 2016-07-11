@@ -1,7 +1,10 @@
 <?php
 
 function util_sanitize($value) {
-	return preg_replace("/(([\w*,+-]*))/", '$0', $value); // only keep alpha-numeric chars
+	// Only keep alpha-numeric chars
+	// AND "+- " for search
+	// TODO " "
+	return preg_replace("/(([\w+\- ]*))/", '$0', $value);
 }
 
 function util_sanitize_query_param($key) {

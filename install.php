@@ -44,7 +44,8 @@ if ($current_version < LDFF_VERSION) {
 			`uid_entry` INT NOT NULL ,
 			`order` INT NOT NULL , 
 			`uid_author` INT NOT NULL ,
-			`comment` VARCHAR(8192) NOT NULL , 
+			`comment` VARCHAR(8192) NOT NULL ,
+			`date` DATETIME NOT NULL ,
 			`score` INT NOT NULL , 
 			PRIMARY KEY(`uid_entry`, `order`),
 			INDEX `uid_author_index` (`uid_author`)

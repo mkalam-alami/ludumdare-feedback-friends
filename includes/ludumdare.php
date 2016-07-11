@@ -43,7 +43,7 @@ function http_fetch_entry($uid) {
 		'web flash' => ['flash', 'swf'],
 		'web html5' => ['html', 'webgl'],
 		'web unity' => ['unity'],
-		'wab' => ['web']
+		'web' => ['web']
 	);
 
 	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
@@ -81,6 +81,19 @@ function http_fetch_entry($uid) {
 		$platforms = 'Unknown';
 	}
 
+	// Gather comments
+	$comments = array();
+	$order = 1;
+	foreach (pq('.comment') as $comment) {
+		$comments[] = array(
+			'uid_author' => intval(str_replace('?action=preview&uid=', '', pq('a', $comment)->attr('href'))),
+			'order' => $order++,
+			'comment' => pq('p', $comment)->html(),
+			'date' => date_create_from_format('M d, Y @ g:ia', pq('small', $comment)->text())
+		);
+	}
+
+	// Build entry array
 	$entry = array(
 		'uid' => $uid,
 		'author' => pq('#compo2 a strong')->text(),
@@ -88,9 +101,10 @@ function http_fetch_entry($uid) {
 		'type' => (pq('#compo2 > div > i')->text() == 'Compo Entry') ? 'compo' : 'jam',
 		'description' => pq('#compo2 p')->eq(1)->html(),
 		'platforms' => $platforms,
-		'picture' => pq('.shot-nav img')->attr('src')
+		'picture' => pq('.shot-nav img')->attr('src'),
+		'comments' => $comments
 	);
-
+	
 	return $entry;
 }
 

@@ -1,0 +1,48 @@
+<div class="container">
+	{{#entry}}
+
+	<div class="row">
+		<div class="col-xs-12">
+			<h2>{{title}} <i>(Coolness: {{coolness}})</i></h2>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4 text-center">
+			{{> cartridge}}
+			<br /><br />
+			<p class="bg-warning">
+				<b>N.B.</b> Comments take a while to appear (up to ~30mn), so don't worry if some comments are missing and your coolness is off.<br />
+				<a href="?uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh*</a><br />
+				<span style="font-style: italic; font-size: 1.1rem">*This will refresh everything except your "Given comments".</span>
+			</p>
+
+
+		</div>
+		<div class="col-md-4">
+			<h3>Given: {{comments_given}}p</h3>
+			<table class="table">
+			{{#given}}
+				<tr><td>
+					<h4>{{author}} <i>({{score}}p)</i></h4>
+					{{{comment}}}
+				</td></tr>
+			{{/given}}
+			</table>
+		</div>
+		<div class="col-md-4">
+			<h3>Received: {{comments_received}}p</h3>
+			<table class="table">
+			{{#received}}
+				<tr><td>
+					<h4>{{author}} <i>({{score}}p)</i></h4>
+					{{{comment}}}
+				</td></tr>
+			{{/received}}
+			</table>
+		</div>
+
+	</div>
+
+	{{/entry}}
+</div>
+
