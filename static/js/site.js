@@ -5,6 +5,20 @@ $(window).load(function() {
 	configureEntries();
 });
 
+// AJAX/History support
+
+window.onpopstate = function (e) {
+	refreshResults(e.state['html']);
+};
+
+function pushResults(url, html) {
+	window.history.pushState({"html": html}, "", url);
+}
+
+function refreshResults(html) {
+	$('#results').html(html);
+	configureEntries();
+}
 
 // Search form binding
 
@@ -16,6 +30,17 @@ function bindSearch() {
 		$('#search-platforms').multiselect('refresh');
 		$('#search-query').val('');
 	});
+
+	$('#search').submit(function(e) {
+		e.preventDefault();
+		var url = '?' + $(this).serialize();
+		$.get(url + '&ajax=results', function(html) {
+			refreshResults(html);
+			pushResults(url, html);
+		})
+	});
+
+	pushResults(window.location.href, $('#results').html());
 }
 
 // Entries dynamic CSS

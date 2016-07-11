@@ -1,17 +1,25 @@
-<div class="col-xs-12">
-	<h3>Found: {{entry_count}}</h3>
+<h2>{{title}}</h2>
+
+<div class="row">
+	<div class="col-xs-12">
+		<h3>Found: {{entry_count}}</h3>
+	</div>
+	
+	{{#entries}}
+		<div class="col-xs-6 col-sm-4">
+			<a class="entry" href="{{ld_root}}uid={{uid}}">
+				<img class="entry-picture" src="{{picture}}" />
+				<img class="entry-overlay" src="static/img/cartridge.png" />
+				<div class="entry-caption">
+					<div class="entry-title">{{title}}</div>
+					<div class="entry-author">by {{author}}</div>
+					<div class="entry-notes">{{type}} | {{platforms}}{{#score}} | score: {{score}}{{/score}}</div>
+				</div>
+			</a>
+		</div>
+	{{/entries}}
 </div>
 
-{{#entries}}
-	<div class="col-xs-6 col-sm-4">
-		<a class="entry" href="{{ld_root}}uid={{uid}}">
-			<img class="entry-picture" src="{{picture}}" />
-			<img class="entry-overlay" src="static/img/cartridge.png" />
-			<div class="entry-caption">
-				<div class="entry-title">{{title}}</div>
-				<div class="entry-author">by {{author}}</div>
-				<div class="entry-notes">{{type}} | {{platforms}}{{#score}} | score: {{score}}{{/score}}</div>
-			</div>
-		</a>
-	</div>
-{{/entries}}
+<div class="row">
+	Page loaded in {{time}}s
+</div>

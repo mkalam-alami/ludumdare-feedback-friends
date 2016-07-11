@@ -1,5 +1,7 @@
 <?php
 
+$time = microtime();
+
 require_once(__DIR__ . '/includes/init.php');
 
 $db = db_connect();
@@ -32,7 +34,7 @@ if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 	}
 	$sql .= " MATCH(platforms) AGAINST('";
 	foreach ($_GET['platforms'] as $raw_platform) {
-		$sql .= util_sanitize($raw_platform);
+		$sql .= util_sanitize($raw_platform).' ';
 	}
 	$sql .= "')";
 	$empty_where = false;
@@ -52,6 +54,7 @@ if (isset($_GET['page'])) {
 	$page = intval(util_sanitize_query_param('page'));
 	$sql .= " OFFSET " . (($page - 1) * 10);
 }
+//die($sql);
 
 $entries = array();
 $results = mysqli_query($db, $sql) or die('Failed to fetch entries: '.mysqli_error($db)); 
@@ -76,6 +79,7 @@ if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 
 mysqli_close($db);
 
+$context['time'] = microtime() - $time;
 
 // Templates rendering
 

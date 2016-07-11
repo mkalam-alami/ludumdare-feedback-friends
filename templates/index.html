@@ -10,7 +10,7 @@
 						<option value="linux">Linux</option>
 						<option value="osx">OS X</option>
 						<optgroup label="Web">
-							<option value="web">All web entries</option>
+							<option value="web">All</option>
 							<option value="html5">HTML5</option>
 							<option value="unity">Unity</option>
 							<option value="flash">Flash</option>
@@ -29,11 +29,8 @@
 				</div>
 			</form>
 		</div>
-		<div class="col-md-9">
-			<h2>{{title}}</h2>
-			<div class="row">
-				{{> results}}
-			</div>
+		<div id="results" class="col-md-9">
+			{{> results}}
 		</div>
 	</div>
 
