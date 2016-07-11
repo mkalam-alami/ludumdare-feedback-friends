@@ -26,6 +26,7 @@ window.onpopstate = function (e) {
 
 function refreshResults(html) {
 	$('#results').html(html);
+	bindMore();
 	entriesStyling();
 }
 
@@ -81,7 +82,6 @@ function bindMore() {
 		$.get('?ajax=results&page=' + nextPage, function(html) {
 			var oldHtml = $('#results').html();
 			refreshResults(oldHtml + html);
-			bindMore();
 			$('#loader').hide();
 		})
 	});

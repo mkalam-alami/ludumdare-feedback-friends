@@ -193,10 +193,10 @@ else {
 mysqli_close($db);
 
 // DEBUG
-if (isset($report)) { 
+/*if (isset($report)) { 
 	echo "<pre>";
 	print_r($report);
 	echo "</pre>";
-}
+}*/
 
 ?>
