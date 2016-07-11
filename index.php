@@ -23,7 +23,7 @@ $empty_where = true;
 $has_score = false;
 if (isset($_GET['query']) && $_GET['query']) {
 	$query = util_sanitize_query_param('query');
-	$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN NATURAL LANGUAGE MODE)"; // WITH QUERY EXPANSION
+	$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN BOOLEAN MODE)"; // WITH QUERY EXPANSION
 	$sql = "SELECT *, $fulltext_part AS score FROM entry WHERE ($fulltext_part OR uid = '$query')";
 	$empty_where = false;
 	$has_score = true;

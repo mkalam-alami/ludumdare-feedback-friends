@@ -22,9 +22,13 @@
 				<label for="query">Search</label>
 				<div class="input-group">
 				  <input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" />
+				  <ul class="search-syntax-tips">
+				  	<li>OR: ludum dare</li>
+				  	<li>AND: +ludum +dare</li>
+				  	<li>NOT: ludum -dare</li>
+				  </ul>
 				</div>
-				<div class="input-group btn-group btn-group-lg">
-					<button type="submit" class="btn btn-default btn-primary">Submit</button>
+				<div class="input-group btn-group">
 					<button id="search-reset" type="button" class="btn btn-default">Clear</button>
 				</div>
 			</form>

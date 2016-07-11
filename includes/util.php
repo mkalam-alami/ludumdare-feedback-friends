@@ -1,7 +1,7 @@
 <?php
 
 function util_sanitize($value) {
-	return preg_replace("/(([\w*,]*))/", '$0', $value); // only keep alpha-numeric chars
+	return preg_replace("/(([\w*,+-]*))/", '$0', $value); // only keep alpha-numeric chars
 }
 
 function util_sanitize_query_param($key) {
