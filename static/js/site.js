@@ -31,11 +31,22 @@ function refreshResults(html) {
 // Search form
 
 function bindSearch() {
+	var lastKeyDown = 0;
+
 	$('#search-platforms').val($('#search-platforms-values').text().split(', '));
 	$('#search-platforms').multiselect();
 	$('#search-platforms').change(runSearch);
 
-	$('#search-query').change(runSearch);
+	$('#search-query').keydown(function() { // Trigger search after .5s without a keypress
+		var currentDate = new Date().getTime();
+		lastKeyDown = currentDate;
+
+		setTimeout(function() {
+			if (lastKeyDown == currentDate) {
+				runSearch();
+			}
+		}, 500);
+	});
 
 	$('#search-reset').bind("keypress click", function() {
 		$('#search-platforms').val([]);
