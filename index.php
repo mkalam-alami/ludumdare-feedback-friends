@@ -18,12 +18,13 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 
 // Pages
 
-function init_context() {
+function init_context($db) {
 	global $time;
 
 	$context = array();
 	$context['competition'] = LDFF_COMPETITION_PAGE;
 	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
+	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry ORDER BY last_updated LIMIT 1");
 	$context['time'] = microtime(true) - $time;
 	return $context;
 }
@@ -77,7 +78,7 @@ function page_details($db) {
 	$entry['friends'] = $friends;
 
 	// Build context
-	$context = init_context();
+	$context = init_context($db);
 	$context['entry'] = $entry;
 
 	// Render
@@ -139,7 +140,7 @@ function page_browse($db) {
 
 	// Build context
 
-	$context = init_context();
+	$context = init_context($db);
 	$context['title'] = $not_coolness_search ? 'Search results' : 'These entries need feedback!';
 	$context['entries'] = $entries;
 	if ($not_coolness_search) {
