@@ -63,6 +63,7 @@ function page_details($db) {
 		"comment.uid_author = entry.uid AND uid_entry = $uid and uid_author != $uid");
 	$entry['given'] = _page_details_list_comments($db,
 		"comment.uid_entry = entry.uid AND uid_author = $uid and uid_entry != $uid");
+	$entry['given_average'] = score_average($entry['given']);
 
 	$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
 			WHERE comment1.uid_author = $uid
@@ -75,7 +76,8 @@ function page_details($db) {
 	while ($friend = mysqli_fetch_array($results)) {
 		$friends[] = $friend;
 	}
-	$entry['friends'] = $friends;
+	$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // split for rendering
+	$entry['friends_count'] = count($friends);
 
 	// Build context
 	$context = init_context($db);

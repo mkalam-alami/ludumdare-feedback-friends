@@ -30,5 +30,15 @@ function score_coolness($given, $received) {
 	return $given - $received;
 }
 
+function score_average($comments) {
+	$total = 0;
+	$count = 0;
+	foreach ($comments as $comment) {
+		$total += $comment['score'];
+		$count++;
+	}
+	return round(1. * $total / $count, 2);
+}
+
 
 ?>

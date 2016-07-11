@@ -10,7 +10,7 @@
 
 require_once('includes/init.php');
 
-set_time_limit(LDFF_SCRAPING_TIMEOUT * 1.5);
+set_time_limit(LDFF_SCRAPING_TIMEOUT + 30);
 
 $db = db_connect();
 
