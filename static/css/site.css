@@ -46,6 +46,24 @@ h1, h2, h3 {
 	-webkit-padding-start: 20px;
 }
 
+/* Results */
+
+#results-container {
+	postition: relative;
+}
+
+#loader {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: white;
+	opacity: 0.8;
+	text-align: center;
+	padding: 100px;
+}
+
 /* Entry block */
 
 .entry {
@@ -98,6 +116,14 @@ h1, h2, h3 {
 
 .entry-notes {
 	font-size: 1rem;
+}
+
+.entry-coolness {
+	display: inline-block;
+	font-size: 1.2rem;
+	color: #888;
+	vertical-align: top;
+	margin-top: 5px;
 }
 
 .entry-button {

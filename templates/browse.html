@@ -34,8 +34,13 @@
 			</form>
 			<a href="?p=faq">FAQ</a>
 		</div>
-		<div id="results" class="col-md-9 text-center">
-			{{> results}}
+		<div id="results-container" class="col-md-9 text-center">
+			<div id="results">
+				{{> results}}
+			</div>
+			<div id="loader" style="display: none">
+				<img src="static/img/ajax-loader.gif" />
+			</div>
 		</div>
 	</div>
 

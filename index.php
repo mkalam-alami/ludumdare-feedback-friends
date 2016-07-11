@@ -1,6 +1,6 @@
 <?php
 
-$time = microtime();
+$time = microtime(true);
 
 require_once(__DIR__ . '/includes/init.php');
 
@@ -12,7 +12,7 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	$now = time();
 	if ($now - $last_run > LDFF_SCRAPING_PSEUDO_CRON_DELAY) {
 		setting_write($db, 'pseudo_scraping_last_run', $now);
-		$report = scraping_run($db, LDFF_SCRAPING_TIMEOUT);
+		$report = scraping_run($db);
 	}
 }
 
@@ -24,7 +24,7 @@ function init_context() {
 	$context = array();
 	$context['competition'] = LDFF_COMPETITION_PAGE;
 	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
-	$context['time'] = microtime() - $time;
+	$context['time'] = microtime(true) - $time;
 	return $context;
 }
 
@@ -91,7 +91,7 @@ function page_browse($db) {
 	// Build query according to search params
 
 	$empty_where = true;
-	$has_score = false;
+	$not_coolness_search = false;
 
 	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE";
 	if (isset($_GET['query']) && $_GET['query']) {
@@ -99,7 +99,7 @@ function page_browse($db) {
 		$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN BOOLEAN MODE)"; // WITH QUERY EXPANSION
 		$sql = "SELECT *, $fulltext_part AS score FROM entry WHERE ($fulltext_part OR uid = '$query')";
 		$empty_where = false;
-		$has_score = true;
+		$not_coolness_search = true;
 	}
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 		if (!$empty_where) {
@@ -115,7 +115,7 @@ function page_browse($db) {
 	if ($empty_where) {
 		$sql .= " 1";
 	}
-	if ($has_score) {
+	if ($not_coolness_search) {
 		$sql .= " ORDER BY score, coolness DESC";
 	}
 	else {
@@ -140,15 +140,15 @@ function page_browse($db) {
 	// Build context
 
 	$context = init_context();
-	$context['title'] = $empty_where ? 'Last updated entries' : 'Search results';;
+	$context['title'] = $not_coolness_search ? 'Search results' : 'These entries need feedback!';
 	$context['entries'] = $entries;
-	$context['entry_count'] = $entry_count;
+	if ($not_coolness_search) {
+		$context['entry_count'] = $entry_count;
+	}
 	$context['search_query'] = util_sanitize_query_param('query');
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 		$context['search_platforms'] = implode(', ', $_GET['platforms']);
 	}
-
-	mysqli_close($db);
 
 	// Render
 
@@ -180,6 +180,8 @@ else if (isset($_GET['p']) == 'faq') {
 else {
 	page_browse($db);
 }
+
+mysqli_close($db);
 
 // DEBUG
 if (isset($report)) { 

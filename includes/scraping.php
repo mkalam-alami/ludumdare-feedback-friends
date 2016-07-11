@@ -103,7 +103,7 @@ function scraping_refresh_entry($db, $uid) {
 
 
 */
-function scraping_run($db, $timeout = 10) {
+function scraping_run($db) {
 	static $SETTING_LAST_READ_PAGE = 'scraping_last_read_page';
 	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
 	static $SETTING_LAST_READ_ENTRY = 'scraping_last_read_entry';
@@ -112,7 +112,6 @@ function scraping_run($db, $timeout = 10) {
 	$report['steps'] = array();
 
 	// Time management init
-	$micro_timeout = $timeout;
 	$start_time = microtime(true);
 	$last_step_time = $start_time;
 	$steps = 0;
@@ -121,7 +120,7 @@ function scraping_run($db, $timeout = 10) {
 
 	// Loop until we're about to reach the timeout
 	while (!$over) {
-		$over = $last_step_time - $start_time + $average_step_duration > $micro_timeout;
+		$over = $last_step_time - $start_time + $average_step_duration > LDFF_SCRAPING_TIMEOUT;
 
 		$report_entry = array();
 
@@ -207,7 +206,7 @@ function scraping_run($db, $timeout = 10) {
 	$report['average_step_duration'] = $average_step_duration;
 	$report['total_duration'] = $last_step_time - $start_time;
 	$report['slept_per_step'] = LDFF_SCRAPING_SLEEP;
-	$report['timeout'] = $timeout;
+	$report['timeout'] = LDFF_SCRAPING_TIMEOUT;
 
 	// TODO Format and log report in file
 	return $report;

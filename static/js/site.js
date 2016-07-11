@@ -61,10 +61,12 @@ function bindSearch() {
 }
 
 function runSearch() {
+	$('#loader').show();
 	var url = '?' + $('#search').serialize();
 	$.get(url + '&ajax=results', function(html) {
 		refreshResults(html);
 		pushHistory(url);
+		$('#loader').hide();
 	})
 }
 
