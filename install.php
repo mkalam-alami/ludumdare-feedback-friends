@@ -39,7 +39,7 @@ if ($current_version < LDFF_VERSION) {
 			INDEX `coolness` (`coolness`), 
 			FULLTEXT INDEX `index_platforms` (`platforms`) , 
 			FULLTEXT INDEX `index_full` (`uid`, `author`, `title`, `description`, `platforms`, `type`)
-			) ENGINE = InnoDB") or die("Failed to create entry table");
+			) ENGINE = MyISAM") or die("Failed to create entry table");  // MyISAM required for fulltext indexes on MySQL < 5.6
 		mysqli_query($db, "CREATE TABLE `comment` (
 			`uid_entry` INT NOT NULL ,
 			`order` INT NOT NULL , 

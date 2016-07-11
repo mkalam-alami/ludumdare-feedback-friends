@@ -75,7 +75,7 @@ function _scraping_run_step_entry($db, $uid) {
 			WHERE uid = '$uid'");
 	if (mysqli_affected_rows($db) == 0) {
 		mysqli_query($db, "INSERT INTO 
-			entry(uid,author,title,type,description,platforms,comments_given,comments_received,coolness) 
+			entry(uid,author,title,type,description,platforms,comments_given,comments_received,coolness,last_updated) 
 			VALUES('$uid',
 				'" . _escape($entry['author']). "',
 				'" . _escape($entry['title']). "',
@@ -84,7 +84,8 @@ function _scraping_run_step_entry($db, $uid) {
 				'" . _escape($entry['platforms']). "',
 				'$comments_given',
 				'$comments_received',
-				'$coolness'
+				'$coolness',
+				CURRENT_TIMESTAMP()
 				)");
 	}
 
