@@ -1,27 +1,33 @@
-<h2>{{title}}</h2>
+{{^entries_only}}
+	<h2>{{title}}</h2>
 
-<div class="row">
 	{{#entry_count}}
-	<div class="col-xs-12">
-		<h3>Found: {{entry_count}}</h3>
-	</div>
-	{{/entry_count}}
-	
-	{{#entries}}
-		<div class="col-xs-6 col-sm-4">
-			{{> cartridge}}
-			<div class="row">
-				<div class="entry-coolness text-left">
-					<b>Coolness: {{coolness}}</b><br />
-					({{comments_given}}p given - {{comments_received}}p rec.)
-				</div>
-				<a href="?uid={{uid}}" class="btn btn-default entry-button">
-					Entry details...
-				</a>
-			</div>
+		<div class="col-xs-12">
+			<h3>Found: {{entry_count}}</h3>
 		</div>
-	{{/entries}}
-	{{^entries}}
-		Nothing found.
-	{{/entries}}
-</div>
+	{{/entry_count}}
+{{/entries_only}}
+
+{{#entries}}
+	<div class="col-xs-6 col-sm-4">
+		{{> cartridge}}
+		<div class="row">
+			<div class="entry-coolness text-left">
+				<b>Coolness: {{coolness}}</b><br />
+				({{comments_given}}p given - {{comments_received}}p rec.)
+			</div>
+			<a href="?uid={{uid}}" class="btn btn-default entry-button">
+				Entry details...
+			</a>
+		</div>
+	</div>
+{{/entries}}
+
+{{#entries_found}}
+	<div id="more-container" class="col-xs-12">
+		<button id="more" class="btn btn-default" data-page="{{page}}">Load more...</button>
+	</div>
+{{/entries_found}}
+{{^entries_found}}
+	Nothing found.
+{{/entries_found}}

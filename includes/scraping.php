@@ -35,19 +35,26 @@ function _scraping_run_step_entry($db, $uid) {
 	// Save comments
 	$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid'");
 	$order = 1;
+	$new_comments = false;
+	$new_comments_sql = "INSERT IGNORE INTO `comment`(`uid_entry`,`order`,`uid_author`,`comment`,`date`,`score`) VALUES";
 	foreach ($entry['comments'] as $comment) {
 		if ($order++ > $max_order) {
-			mysqli_query($db, "INSERT IGNORE INTO `comment`(`uid_entry`,`order`,`uid_author`,`comment`,`date`,`score`)
-				VALUES ('$uid',
+			if ($new_comments) {
+				$new_comments_sql .= ", ";
+			}
+			$new_comments = true;
+			$new_comments_sql .= "('$uid',
 					'".$comment['order']."',
 					'"._escape($comment['uid_author'])."',
 					'"._escape($comment['comment'])."',
 					'".date_format($comment['date'], 'Y-m-d H:i')."',
 					'".score_evaluate_comment(_escape($comment['uid_author']), $uid, $comment['comment'])."'
-					)") or util_log_error(mysqli_error($db));
+					)";
 		}
 	}
-	mysqli_query($db, "COMMIT");
+	if ($new_comments) {
+		mysqli_query($db, $new_comments_sql) or util_log_error(mysqli_error($db));
+	}
 
 	// Coolness
 	$comments_given = score_comments_given($db, $uid);

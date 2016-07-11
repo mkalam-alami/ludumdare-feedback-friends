@@ -124,10 +124,11 @@ function page_browse($db) {
 	else {
 		$sql .= " ORDER BY coolness DESC, last_updated DESC";
 	}
-	$sql .= " LIMIT 10";
+	$sql .= " LIMIT ".LDFF_PAGE_SIZE;
+	$page = 1;
 	if (isset($_GET['page'])) {
 		$page = intval(util_sanitize_query_param('page'));
-		$sql .= " OFFSET " . (($page - 1) * 10);
+		$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 	}
 
 	// Fetch entries
@@ -144,13 +145,18 @@ function page_browse($db) {
 
 	$context = init_context($db);
 	$context['title'] = $not_coolness_search ? 'Search results' : 'These entries need feedback!';
+	$context['page'] = $page;
 	$context['entries'] = $entries;
 	if ($not_coolness_search) {
 		$context['entry_count'] = $entry_count;
 	}
+	$context['entries_found'] = $entry_count > 0;
 	$context['search_query'] = util_sanitize_query_param('query');
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 		$context['search_platforms'] = implode(', ', $_GET['platforms']);
+	}
+	if (isset($_GET['page'])) {
+		$context['entries_only'] = true;
 	}
 
 	// Render

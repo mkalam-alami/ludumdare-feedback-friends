@@ -4,6 +4,7 @@ $(window).load(function() {
 	bindSearch();
 	entriesStyling();
 	pushHistory(window.location.href, $('#results').html());
+	bindMore();
 });
 
 // AJAX/History support
@@ -68,6 +69,22 @@ function runSearch() {
 		pushHistory(url);
 		$('#loader').hide();
 	})
+}
+
+// "Load more" button
+
+function bindMore() {
+	$('#more').click(function() {
+		$('#more-container').remove();
+		$('#loader').show();
+		var nextPage = parseInt($(this).attr('data-page')) + 1;
+		$.get('?ajax=results&page=' + nextPage, function(html) {
+			var oldHtml = $('#results').html();
+			refreshResults(oldHtml + html);
+			bindMore();
+			$('#loader').hide();
+		})
+	});
 }
 
 // Entries styling
