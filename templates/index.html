@@ -2,13 +2,35 @@
 
 	<div class="row">
 		<div class="col-md-3">
-			<div id="search">
-				Search form incoming
-			</div>
+			<form id="search" action="." method="get">
+				<label for="platforms">Restrict platforms</label>
+				<div class="input-group">
+					<select id="search-platforms" name="platforms[]" multiple="multiple">
+						<option value="windows">Windows</option>
+						<option value="linux">Linux</option>
+						<option value="osx">OS X</option>
+						<optgroup label="Web">
+							<option value="web">All web entries</option>
+							<option value="html5">HTML5</option>
+							<option value="unity">Unity</option>
+							<option value="flash">Flash</option>
+						</optgroup>
+					</select>
+					<div id="search-platforms-values" class="hidden">{{search_platforms}}</div>
+				</div>
+
+				<label for="query">Search</label>
+				<div class="input-group">
+				  <input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" />
+				</div>
+				<div class="input-group btn-group btn-group-lg">
+					<button type="submit" class="btn btn-default btn-primary">Submit</button>
+					<button id="search-reset" type="button" class="btn btn-default">Clear</button>
+				</div>
+			</form>
 		</div>
 		<div class="col-md-9">
-			<h2>Latest scraped entries (total: {{entry_count}})</h2>
-
+			<h2>{{title}}</h2>
 			<div class="row">
 				{{> results}}
 			</div>

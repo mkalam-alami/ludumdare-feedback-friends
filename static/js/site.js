@@ -1,9 +1,26 @@
 (function() {
 
-$(window).load(init);
+$(window).load(function() {
+	bindSearch();
+	configureEntries();
+});
 
-function init() {
 
+// Search form binding
+
+function bindSearch() {
+	$('#search-platforms').val($('#search-platforms-values').text().split(', '));
+	$('#search-platforms').multiselect();
+	$('#search-reset').bind("keypress click", function() {
+		$('#search-platforms').val([]);
+		$('#search-platforms').multiselect('refresh');
+		$('#search-query').val('');
+	});
+}
+
+// Entries dynamic CSS
+
+function configureEntries() {
 	$('.entry').each(function(index, entry) {
 		var entryImg = $('img', entry).get(0);
 		if (entryImg) {

@@ -14,20 +14,65 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	}
 }
 
-//print_r(http_fetch_entry(55626)); // DEBUG
+// Fetch entries according to search params
 
-// Context
+$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE";
+$empty_where = true;
+$has_score = false;
+if (isset($_GET['query']) && $_GET['query']) {
+	$query = util_sanitize_query_param('query');
+	$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN NATURAL LANGUAGE MODE)"; // WITH QUERY EXPANSION
+	$sql = "SELECT *, $fulltext_part AS score FROM entry WHERE ($fulltext_part OR uid = '$query')";
+	$empty_where = false;
+	$has_score = true;
+}
+if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
+	if (!$empty_where) {
+		$sql .= " AND";
+	}
+	$sql .= " MATCH(platforms) AGAINST('";
+	foreach ($_GET['platforms'] as $raw_platform) {
+		$sql .= util_sanitize($raw_platform);
+	}
+	$sql .= "')";
+	$empty_where = false;
+}
+if ($empty_where) {
+	$sql .= " 1";
+}
+
+if ($has_score) {
+	$sql .= " ORDER BY score DESC";
+}
+else {
+	$sql .= " ORDER BY last_updated DESC";
+}
+$sql .= " LIMIT 10";
+if (isset($_GET['page'])) {
+	$page = intval(util_sanitize_query_param('page'));
+	$sql .= " OFFSET " . (($page - 1) * 10);
+}
+
+$entries = array();
+$results = mysqli_query($db, $sql) or die('Failed to fetch entries: '.mysqli_error($db)); 
+while ($row = mysqli_fetch_array($results)) {
+	$row['picture'] = util_get_picture_path($row['uid']);
+	$entries[] = $row;
+}
+$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
+
+// Build context
 
 $context = array();
 $context['competition'] = LDFF_COMPETITION_PAGE;
 $context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
-$context['entries'] = array();
-$results = mysqli_query($db, "SELECT * FROM entry ORDER BY last_updated DESC LIMIT 10"); // TODO Pagination (through a "load more" button)
-while ($row = mysqli_fetch_array($results)) {
-	$row['picture'] = util_get_picture_path($row['uid']);
-	$context['entries'][] = $row;
+$context['title'] = $empty_where ? 'Last updated entries' : 'Search results';
+$context['entries'] = $entries;
+$context['entry_count'] = $entry_count;
+$context['search_query'] = util_sanitize_query_param('query');
+if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
+	$context['search_platforms'] = implode(', ', $_GET['platforms']);
 }
-$context['entry_count'] = db_select_single_value($db, "SELECT COUNT(*) FROM entry");
 
 mysqli_close($db);
 
@@ -42,7 +87,7 @@ function render($template_name) {
 
 // TODO Let ajax requests return a single, chosen template
 if (isset($_GET['ajax'])) {
-	$template_name = util_query_param('ajax');
+	$template_name = util_sanitize_query_param('ajax');
 	render($template_name);
 }
 else {

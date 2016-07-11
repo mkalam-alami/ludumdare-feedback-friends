@@ -35,15 +35,15 @@ function http_fetch_uids($page = 1) {
 */
 function http_fetch_entry($uid) {
 	static $PLATFORM_KEYWORDS = array(
-		'Windows' => ['windows', 'win32', 'win64', 'java'],
-		'Linux' => ['linux', 'debian', 'ubuntu', 'java'],
-		'OS X' => ['mac', 'osx', 'os/x', 'os x', 'java'],
-		'Android' => ['android'],
+		'windows' => ['windows', 'win32', 'win64', 'java'],
+		'linux' => ['linux', 'debian', 'ubuntu', 'java'],
+		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java'],
+		'android' => ['android'],
 
-		'Web (Flash)' => ['flash', 'swf'],
-		'Web (HTML5)' => ['html', 'webgl'],
-		'Web (Unity)' => ['unity'],
-		'Web' => ['web']
+		'web flash' => ['flash', 'swf'],
+		'web html5' => ['html', 'webgl'],
+		'web unity' => ['unity'],
+		'wab' => ['web']
 	);
 
 	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
@@ -69,11 +69,11 @@ function http_fetch_entry($uid) {
 
 		if ($found) {
 			if ($platforms != '') {
-				$platforms .= ', ';
+				$platforms .= ' ';
 			}
 			$platforms .= $platform_name;
-			if (strpos($platform_name, 'Web') !== false) {
-				break; // Don't add multiple web platforms (e.g. "Web (Unity)" + "Web")
+			if (strpos($platform_name, 'web') !== false) {
+				break; // Don't add multiple web platforms (e.g. "web unity" + "web")
 			}
 		}
 	}

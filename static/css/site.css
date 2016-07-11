@@ -9,8 +9,7 @@ a:hover {
 	text-decoration: underline;
 }
 
-h1, h2 {
-	color: #333;
+h1, h2, h3 {
 	margin: 0 0 20px 0;
 }
 
@@ -34,6 +33,10 @@ h1, h2 {
 
 #search {
 	margin-bottom: 30px;
+}
+
+#search .input-group {
+	margin-bottom: 20px;
 }
 
 /* Entry block */
@@ -79,13 +82,11 @@ h1, h2 {
 .entry-title {
 	font-weight: bold;
 	padding: 5px;
-	padding-bottom: 0px;
 	font-size: 1.5rem;
+	line-height: 1.3rem;
 }
 
 .entry-author {
-	padding: 5px;
-	padding-top: 0px;
 	font-size: 1.2rem;
 }
 

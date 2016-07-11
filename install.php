@@ -21,6 +21,7 @@ if ($current_version < LDFF_VERSION) {
 
 	$target_version = 1;
 	if ($current_version < $target_version) {
+		// TODO create an index with only title/author for better relevance?
 		mysqli_query($db, "CREATE TABLE `entry` (
 			`uid` INT NOT NULL ,
 			`author` VARCHAR(255) NOT NULL ,
@@ -37,16 +38,16 @@ if ($current_version < LDFF_VERSION) {
 			INDEX `comments_received_index` (`comments_received`), 
 			INDEX `coolness` (`coolness`), 
 			FULLTEXT INDEX `index_platforms` (`platforms`) , 
-			FULLTEXT INDEX `index_full` (`author`, `title`, `description`, `platforms`, `type`)
+			FULLTEXT INDEX `index_full` (`uid`, `author`, `title`, `description`, `platforms`, `type`)
 			) ENGINE = InnoDB") or die("Failed to create entry table");
 		mysqli_query($db, "CREATE TABLE `comment` (
-			`uid_author` INT NOT NULL ,
 			`uid_entry` INT NOT NULL ,
 			`order` INT NOT NULL , 
+			`uid_author` INT NOT NULL ,
 			`comment` VARCHAR(8192) NOT NULL , 
 			`score` INT NOT NULL , 
-			INDEX `uid_author_index` (`uid_author`) , 
-			INDEX `uid_entry_index` (`uid_entry`)
+			PRIMARY KEY(`uid_entry`, `order`),
+			INDEX `uid_author_index` (`uid_author`)
 			) ENGINE = InnoDB") or die("Failed to create comment table");
 		mysqli_query($db, "CREATE TABLE `setting` (
 			`id` VARCHAR(255) NOT NULL , 
