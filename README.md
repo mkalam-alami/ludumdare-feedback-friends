@@ -10,11 +10,11 @@ It will try to favor constructive criticism by giving more points to longer comm
 
 ## Current state
 
-* Ludum Dare entries scraping: MOSTLY DONE
-* Basic games listing: MOSTLY DONE
-* Search tools: **TODO**
-* Comments scoring system: **TODO**
-* Good-looking theme, "feedback friends" listing and overall sugar: **TODO**
+* Ludum Dare entries scraping: DONE (WITH A FEW BUGS)
+* Basic games listing: DONE
+* Search tools: DONE
+* Comments scoring system: DONE
+* Good-looking theme, "feedback friends" listing and overall sugar: WORK IN PROGRESS
 * Trophy system(?): **TODO**
 
 ## Notes
