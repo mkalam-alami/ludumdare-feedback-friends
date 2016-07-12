@@ -23,11 +23,11 @@
 	</div>
 {{/entries}}
 
-{{#entries_found}}
-	<div id="more-container" class="col-xs-12">
+<div id="more-container" class="col-xs-12">
+	{{#entries_found}}
 		<button id="more" class="btn btn-default" data-page="{{page}}">Load more...</button>
-	</div>
-{{/entries_found}}
-{{^entries_found}}
-	Nothing found.
-{{/entries_found}}
+	{{/entries_found}}
+	{{^entries_found}}
+		Nothing found.
+	{{/entries_found}}
+</div>

@@ -73,6 +73,8 @@ function bindSearch() {
 		$('#search-platforms').val([]);
 		$('#search-platforms').multiselect('refresh');
 		$('#search-query').val('');
+		$('#search-sorting').val('coolness');
+		refreshSorting();
 		runSearch();
 	});
 
@@ -131,17 +133,17 @@ function configureImageColor(entry, entryImg) {
     var swatches = vibrant.swatches();
     if (swatches) {
     	var vibrantColor = swatches['Vibrant'] || swatches['DarkVibrant'] || swatches['LightVibrant'];
-    	var mutedColor = swatches['Muted'] || swatches['DarkMuted'] || swatches['LightMuted'] || vibrantColor;
+    	//var mutedColor = swatches['Muted'] || swatches['DarkMuted'] || swatches['LightMuted'] || vibrantColor;
     	
     	if (vibrantColor) {
     		$(entry).attr('style',
     			'background-color: ' + vibrantColor.getHex() + '; ' + 
     			'color: ' + vibrantColor.getBodyTextColor());
 	    }
-    	if (mutedColor) {
-    		/*$('img', entry).attr('style',
-    			'border: 1px solid ' + mutedColor.getHex());*/
-	    }
+    	/*if (mutedColor) {
+    		$('img', entry).attr('style',
+    			'border: 1px solid ' + mutedColor.getHex());
+	    }*/
 	}
 }
 

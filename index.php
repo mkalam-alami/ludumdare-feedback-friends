@@ -153,7 +153,7 @@ function page_browse($db) {
 	if ($not_coolness_search) {
 		$context['entry_count'] = $entry_count;
 	}
-	$context['entries_found'] = $entry_count > 0;
+	$context['entries_found'] = count($entries) > 0;
 	$context['search_query'] = util_sanitize_query_param('query');
 	$context['search_sorting'] = $sorting;
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
