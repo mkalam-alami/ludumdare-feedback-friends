@@ -100,7 +100,7 @@ function page_browse($db) {
 	if (isset($_GET['query']) && $_GET['query']) {
 		$query = util_sanitize_query_param('query');
 		$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN BOOLEAN MODE)"; // WITH QUERY EXPANSION
-		$sql = "SELECT *, $fulltext_part AS score FROM entry WHERE ($fulltext_part OR uid = '$query')";
+		$sql = "SELECT * FROM entry WHERE ($fulltext_part OR uid = '$query')"; /*, $fulltext_part AS score*/
 		$empty_where = false;
 		$not_coolness_search = true;
 	}
@@ -118,11 +118,14 @@ function page_browse($db) {
 	if ($empty_where) {
 		$sql .= " 1";
 	}
-	if ($not_coolness_search) {
-		$sql .= " ORDER BY score, coolness DESC";
+	$sorting = 'coolness';
+	if (isset($_GET['sorting'])) {
+		$sorting = util_sanitize_query_param('sorting');
 	}
-	else {
-		$sql .= " ORDER BY coolness DESC, last_updated DESC";
+	switch ($sorting) {
+		case 'random': $sql .= " ORDER BY RAND()"; break;
+		case 'comments': $sql .= " ORDER BY comments_received, last_updated DESC"; break;
+		default: $sql .= " ORDER BY coolness DESC, last_updated DESC";
 	}
 	$sql .= " LIMIT ".LDFF_PAGE_SIZE;
 	$page = 1;
@@ -152,6 +155,7 @@ function page_browse($db) {
 	}
 	$context['entries_found'] = $entry_count > 0;
 	$context['search_query'] = util_sanitize_query_param('query');
+	$context['search_sorting'] = $sorting;
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 		$context['search_platforms'] = implode(', ', $_GET['platforms']);
 	}
@@ -173,7 +177,7 @@ function page_browse($db) {
 }
 
 function page_faq($db) {
-	$context = init_context();
+	$context = init_context($db);
 	render('header', $context);
 	render('faq', $context);
 	render('footer', $context);

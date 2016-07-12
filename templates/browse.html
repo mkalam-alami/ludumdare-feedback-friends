@@ -3,8 +3,25 @@
 	<div class="row">
 		<div class="col-md-3">
 			<form id="search" action="." method="get">
+				<label for="platforms">Entries sorting</label>
+				<div class="list-group">
+				  <a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
+				    <h4 class="list-group-item-heading">Balance</h4>
+				    <p class="list-group-item-text">Show me the games that need feedback the most</p>
+				  </a>
+				  <a id="search-sorting-button-comments" class="search-sorting-button list-group-item" data-value="comments" href="#" >
+				    <h4 class="list-group-item-heading">Comments</h4>
+				    <p class="list-group-item-text">Games with little to no comments</p>
+				  </a>
+				  <a id="search-sorting-button-random" class="search-sorting-button list-group-item" data-value="random" href="#" >
+				    <h4 class="list-group-item-heading">Random</h4>
+				    <p class="list-group-item-text">I'm feeling lucky</p>
+				  </a>
+				</div>
+				<input id="search-sorting" type="hidden" name="sorting" value="{{search_sorting}}" />
+
 				<label for="platforms">Restrict platforms</label>
-				<div class="input-group">
+				<div class="input-group search-platforms-container">
 					<select id="search-platforms" name="platforms[]" multiple="multiple">
 						<option value="windows">Windows</option>
 						<option value="linux">Linux</option>
@@ -44,4 +61,9 @@
 		</div>
 	</div>
 
+	<script type="text/javascript" src="static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="static/js/bootstrap-multiselect.js"></script>
+	<script type="text/javascript" src="static/js/vibrant.min.js"></script>
+	<script type="text/javascript" src="static/js/site.js"></script>
 </div>

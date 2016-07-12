@@ -18,10 +18,12 @@ function pushHistory(url, html) {
 }
 
 window.onpopstate = function (e) {
-	refreshResults(e.state['html']);
-	$('#search-platforms').val(e.state['search-platforms']);
-	$('#search-query').val(e.state['search-query']);
-	$('#search-platforms').multiselect('refresh');
+	if (e.state) {
+		refreshResults(e.state['html']);
+		$('#search-platforms').val(e.state['search-platforms']);
+		$('#search-query').val(e.state['search-query']);
+		$('#search-platforms').multiselect('refresh');
+	}
 };
 
 function refreshResults(html) {
@@ -32,13 +34,29 @@ function refreshResults(html) {
 
 // Search form
 
-function bindSearch() {
-	var lastKeyDown = 0;
+function refreshSorting() {
+	var value = $('#search-sorting').val();
+	$('.search-sorting-button').removeClass('active');
+	$('#search-sorting-button-' + value).addClass('active');
+}
 
+function bindSearch() {
+
+	// Sorting
+	refreshSorting();
+	$('.search-sorting-button').click(function () {
+		$('#search-sorting').val($(this).attr('data-value'));
+		refreshSorting();
+		runSearch();
+	});
+
+	// Platforms
 	$('#search-platforms').val($('#search-platforms-values').text().split(', '));
 	$('#search-platforms').multiselect();
 	$('#search-platforms').change(runSearch);
 
+	// Query
+	var lastKeyDown = 0;
 	$('#search-query').keydown(function() { // Trigger search after .5s without a keypress
 		var currentDate = new Date().getTime();
 		lastKeyDown = currentDate;
@@ -50,6 +68,7 @@ function bindSearch() {
 		}, 500);
 	});
 
+	// Reset
 	$('#search-reset').bind("keypress click", function() {
 		$('#search-platforms').val([]);
 		$('#search-platforms').multiselect('refresh');
@@ -57,6 +76,7 @@ function bindSearch() {
 		runSearch();
 	});
 
+	// Prevent keyboard submit
 	$('#search').submit(function(e) {
 		e.preventDefault();
 	});
@@ -79,7 +99,8 @@ function bindMore() {
 		$('#more-container').remove();
 		$('#loader').show();
 		var nextPage = parseInt($(this).attr('data-page')) + 1;
-		$.get('?ajax=results&page=' + nextPage, function(html) {
+		var url = '?' + $('#search').serialize();
+		$.get(url + '&ajax=results&page=' + nextPage, function(html) {
 			var oldHtml = $('#results').html();
 			refreshResults(oldHtml + html);
 			$('#loader').hide();

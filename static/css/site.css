@@ -39,6 +39,10 @@ h1, h2, h3 {
 	margin-bottom: 20px;
 }
 
+.search-platforms-container button, .search-platforms-container li, #search-query {
+	font-size: 1.6rem;
+}
+
 .search-syntax-tips {
 	clear: both;
 	font-size: 1.1rem;

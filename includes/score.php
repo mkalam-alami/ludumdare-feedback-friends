@@ -37,7 +37,13 @@ function score_average($comments) {
 		$total += $comment['score'];
 		$count++;
 	}
-	return round(1. * $total / $count, 2);
+
+	if ($count > 0) {
+		return round(1. * $total / $count, 2);
+	}
+	else {
+		return 0;
+	}
 }
 
 
