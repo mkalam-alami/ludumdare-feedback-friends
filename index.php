@@ -26,7 +26,7 @@ function init_context($db) {
 	$context['competition'] = $event_id;
 	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . $event_id . '?action=preview&';
 	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
-	$context['time'] = microtime(true) - $time;
+	$context['time'] = round(microtime(true) - $time, 3);
 	return $context;
 }
 
@@ -36,12 +36,15 @@ function render($template_name, $context) {
 	echo $template->render($context);
 }
 
-function _page_details_list_comments($db, $where_clause) {
+function _page_details_list_comments($db, $join_clause, $where_clause) {
 	global $event_id;
 
-	$results = mysqli_query($db, "SELECT comment.*, entry.author FROM comment, entry 
-			WHERE event_id = '$event_id' AND $where_clause ORDER BY `date` DESC, `order` DESC")
-		or die('Failed to fetch comments: '.mysqli_error($db)); 
+	$results = mysqli_query($db, "SELECT comment.*, entry.author FROM comment 
+			LEFT JOIN entry ON $join_clause AND entry.event_id = '$event_id'
+			WHERE comment.event_id = '$event_id' 
+			AND $where_clause 
+			ORDER BY `date` DESC, `order` DESC")
+		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
 		$comments[] = $comment;
@@ -61,13 +64,13 @@ function page_details($db) {
 
 	// Gather entry info
 	$results = mysqli_query($db, "SELECT * FROM entry WHERE event_id = '$event_id' AND uid = ".$uid)
-		or die('Failed to fetch entry: '.mysqli_error($db)); 
+		or log_error_and_die('Failed to fetch entry', mysqli_error($db)); 
 	$entry = mysqli_fetch_array($results);
 	$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
 	$entry['received'] = _page_details_list_comments($db,
-		"comment.uid_author = entry.uid AND uid_entry = $uid AND uid_author != $uid");
+		"comment.uid_author = entry.uid", "comment.uid_entry = $uid AND comment.uid_author != $uid");
 	$entry['given'] = _page_details_list_comments($db,
-		"comment.uid_entry = entry.uid AND uid_author = $uid AND uid_entry != $uid");
+		"comment.uid_entry = entry.uid", "comment.uid_author = $uid AND comment.uid_entry != $uid");
 	$entry['given_average'] = score_average($entry['given']);
 
 	$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
@@ -78,7 +81,7 @@ function page_details($db) {
 			AND comment1.uid_entry = comment2.uid_author
 			AND comment2.uid_entry = $uid
 			AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC")
-		or die('Failed to fetch comments: '.mysqli_error($db)); 
+		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$friends = array();
 	while ($friend = mysqli_fetch_array($results)) {
 		$friends[] = $friend;
@@ -137,7 +140,7 @@ function page_browse($db) {
 	// Fetch entries
 
 	$entries = array();
-	$results = mysqli_query($db, $sql) or die('Failed to fetch entries: '.mysqli_error($db)); 
+	$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch entries', mysqli_error($db)); 
 	while ($row = mysqli_fetch_array($results)) {
 		$row['picture'] = util_get_picture_path($event_id, $row['uid']);
 		$entries[] = $row;

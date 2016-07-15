@@ -27,6 +27,11 @@ function log_error($message) {
 	return $log_entry;
 }
 
+function log_error_and_die($public_message, $message) {
+	log_error($public_message.': '.$message);
+	die($public_message);
+}
+
 function _log($level, $message) {
 	$log_entry = _log_format($level, $message);
 	if (LDFF_LOG_ENABLED) {

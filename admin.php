@@ -44,6 +44,10 @@ else if (isset($_GET['reset']) && $_GET['reset'] == LDFF_ACTIVE_EVENT_ID) {
 	mysqli_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'") or die(mysqli_error($db)); 
 }
 
+else {
+	echo '?coolness, ?reset=[event]';
+}
+
 mysqli_close($db);
 
 echo '<br />Done.';

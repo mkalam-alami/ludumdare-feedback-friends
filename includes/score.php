@@ -27,7 +27,7 @@ function score_comments_received($db, $uid) {
 }
 
 function score_coolness($given, $received) {
-	return $given - $received;
+	return 100 + $given - $received; // Don't use zero as the origin because negative scores are not cool
 }
 
 function score_average($comments) {
