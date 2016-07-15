@@ -1,5 +1,11 @@
 <?php
 
+$start_time = microtime(true);
+function util_time_elapsed() {
+	global $start_time;
+	return round(microtime(true) - $start_time, 3);
+}
+
 function util_require_admin() {
 	if (LDFF_PRODUCTION && !isset($_GET['p']) && $_GET['p'] != LDFF_ADMIN_PASSWORD) {
 		http_response_code(403);

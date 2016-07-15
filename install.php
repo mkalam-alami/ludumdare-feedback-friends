@@ -52,7 +52,9 @@ if ($current_version < LDFF_VERSION) {
 			`date` DATETIME NOT NULL ,
 			`score` INT NOT NULL , 
 			PRIMARY KEY(`uid_entry`, `event_id`, `order`),
+			INDEX `uid_entry_index` (`uid_entry`)
 			INDEX `uid_author_index` (`uid_author`)
+			INDEX `sorting_index` (`date`, `order`)
 			) ENGINE = InnoDB") or die("Failed to create comment table");
 		mysqli_query($db, "CREATE TABLE `setting` (
 			`id` VARCHAR(255) NOT NULL , 

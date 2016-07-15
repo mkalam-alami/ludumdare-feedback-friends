@@ -1,7 +1,5 @@
 <?php
 
-$time = microtime(true);
-
 require_once(__DIR__ . '/includes/init.php');
 
 $db = db_connect();
@@ -26,7 +24,7 @@ if (isset($_GET['event'])) {
 // Pages
 
 function init_context($db) {
-	global $time, $events, $event_id;
+	global $events, $event_id;
 
 	$events_render = array();
 	foreach ($events as $id => $label) {
@@ -45,29 +43,27 @@ function init_context($db) {
 	$context['search_event'] = $event_id;
 	$context['is_active_event'] = LDFF_ACTIVE_EVENT_ID == $event_id;
 	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
-	$context['time'] = round(microtime(true) - $time, 3);
-
 	return $context;
 }
 
 function render($template_name, $context) {
 	global $mustache;
 	$template = $mustache->loadTemplate($template_name);
+	$context['time'] = util_time_elapsed();
 	echo $template->render($context);
 }
 
 function _page_details_list_comments($db, $where_clause) {
 	global $event_id;
-
 	$results = mysqli_query($db, "SELECT * FROM comment 
 			WHERE event_id = '$event_id' AND $where_clause 
 			ORDER BY `date` DESC, `order` DESC")
 		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
-		if (!$comment['author']) { // Not an entry author for this event
+		/*if (!$comment['author']) { // Not an entry author for this event
 			$comment['uid_author'] = null;
-		}
+		}*/
 		$comments[] = $comment;
 	}
 	return $comments;
@@ -85,13 +81,6 @@ function _prepare_entry_for_rendering($entry) {
 	return $entry;
 }
 
-function _page_emergency($db) {
-	$context = init_context($db);
-	render('header', $context);
-	render('emergency', $context);
-	render('footer', $context);
-}
-
 function page_details($db) {
 	global $event_id;
 
@@ -99,8 +88,7 @@ function page_details($db) {
 		_page_emergency($db);
 		return;
 	}
-
-
+	
 	$uid = intval(util_sanitize_query_param('uid'));
 
 	// Force refresh
@@ -233,6 +221,13 @@ function page_faq($db) {
 	$context = init_context($db);
 	render('header', $context);
 	render('faq', $context);
+	render('footer', $context);
+}
+
+function _page_emergency($db) {
+	$context = init_context($db);
+	render('header', $context);
+	render('emergency', $context);
 	render('footer', $context);
 }
 

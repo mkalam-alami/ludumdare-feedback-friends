@@ -8,10 +8,10 @@ define('LDFF_SCRAPING_ROOT', 'http://ludumdare.com/compo/');
 
 // Includes
 
+require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/../vendor/autoload.php'); // TODO Optimize imports
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/log.php');
-require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/db.php');
 require_once(__DIR__ . '/setting.php');
 require_once(__DIR__ . '/ludumdare.php');
@@ -35,4 +35,3 @@ $mustache = new Mustache_Engine(array(
     ));
 
 ?>
-
