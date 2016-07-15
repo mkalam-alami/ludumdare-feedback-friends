@@ -6,9 +6,9 @@
 
 <?php
 
-// TODO Password-protect
-
 require_once('includes/init.php');
+
+util_require_admin();
 
 if (LDFF_SCRAPING_ENABLED) {
 

@@ -4,6 +4,8 @@
 
 require_once(__DIR__ . '/includes/init.php');
 
+util_require_admin();
+
 $db = db_connect();
 
 set_time_limit(999);

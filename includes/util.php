@@ -1,5 +1,12 @@
 <?php
 
+function util_require_admin() {
+	if (LDFF_PRODUCTION && !isset($_GET['p']) && $_GET['p'] != LDFF_ADMIN_PASSWORD) {
+		http_response_code(403);
+		die('403 Unauthorized');
+	}
+}
+
 function util_sanitize($value) {
 	// Only keep alpha-numeric chars
 	// AND "+- " for search

@@ -2,6 +2,8 @@
 
 require_once('includes/init.php');
 
+util_require_admin();
+
 function read_version($db) {
 	$current_version = setting_read($db, 'current_version', 0);
 	echo 'Current version is '.$current_version.'<br />';
