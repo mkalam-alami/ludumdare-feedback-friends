@@ -47,9 +47,21 @@ function _page_details_list_comments($db, $join_clause, $where_clause) {
 		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
+		if (!$comment['author']) { // Not an entry author for this event
+			$comment['uid_author'] = null;
+		}
 		$comments[] = $comment;
 	}
 	return $comments;
+}
+
+function _prepare_entry_for_rendering($entry) {
+	global $event_id;
+
+	$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
+	$entry['type'] = util_format_type($entry['type']);
+	$entry['platforms'] = util_format_platforms($entry['platforms']);
+	return $entry;
 }
 
 function page_details($db) {
@@ -91,7 +103,7 @@ function page_details($db) {
 
 	// Build context
 	$context = init_context($db);
-	$context['entry'] = $entry;
+	$context['entry'] = _prepare_entry_for_rendering($entry);
 
 	// Render
 	render('header', $context);
@@ -142,8 +154,7 @@ function page_browse($db) {
 	$entries = array();
 	$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch entries', mysqli_error($db)); 
 	while ($row = mysqli_fetch_array($results)) {
-		$row['picture'] = util_get_picture_path($event_id, $row['uid']);
-		$entries[] = $row;
+		$entries[] = _prepare_entry_for_rendering($row);
 	}
 	$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
 

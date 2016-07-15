@@ -53,7 +53,13 @@
 						<table class="table">
 						{{#received}}
 							<tr><td>
-								<h4><a href="?uid={{uid_author}}">{{author}}</a> <i>({{score}}p)</i></h4>
+								{{#uid_author}}
+									<h4><a href="?uid={{uid_author}}">{{author}}</a> <i>
+								{{/uid_author}}
+								{{^uid_author}}
+									<h4><span style="color: grey">Not a submitter</span> <i>
+								{{/uid_author}}
+								({{score}}p)</i></h4>
 								{{{comment}}}
 							</td></tr>
 						{{/received}}

@@ -16,6 +16,31 @@ function util_sanitize_query_param($key) {
 	}
 }
 
+function util_format_type($value) {
+	return ucfirst($value); // Compo/Jam
+}
+
+function util_format_platforms($value) {
+	static $PLATFORM_LABELS = array(
+		'osx' => 'OSX',
+		'flash' => '(Flash)',
+		'html5' => '(HTML5)',
+		'unity' => '(Unity)'
+	);
+
+	$result = '';
+	$array = explode(' ', $value);
+	foreach($array as $key => $platform) {
+		if (isset($PLATFORM_LABELS[$platform])) {
+			$result .= $PLATFORM_LABELS[$platform];
+		}
+		else {
+			$result .= ucfirst($platform);
+		}
+	}
+	return $result;
+}
+
 function util_check_picture_folder($event_id) {
 	$folder_path = "data/$event_id";
 	if (!file_exists($folder_path)) {
