@@ -18,7 +18,7 @@ if (LDFF_SCRAPING_ENABLED) {
 
 	echo '<pre>';
 	print_r(scraping_run($db));
-	echo '</pre>'
+	echo '</pre>';
 
 	mysqli_close($db);
 

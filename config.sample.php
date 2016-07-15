@@ -7,6 +7,7 @@ $events = array(
 	);
 
 // Database configuration
+define('LDFF_ROOT_URL', '/');
 define('LDFF_MYSQL_HOST', 'localhost');
 define('LDFF_MYSQL_USERNAME', 'root');
 define('LDFF_MYSQL_PASSWORD', '');

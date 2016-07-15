@@ -39,9 +39,14 @@ function init_context($db) {
 	$context = array();
 	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
 	$context['events'] = $events_render;
+	$context['root'] = LDFF_ROOT_URL;
 	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . $event_id . '?action=preview&';
+	$context['active_event'] = LDFF_ACTIVE_EVENT_ID;
+	$context['search_event'] = $event_id;
+	$context['is_active_event'] = LDFF_ACTIVE_EVENT_ID == $event_id;
 	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
 	$context['time'] = round(microtime(true) - $time, 3);
+
 	return $context;
 }
 
@@ -186,8 +191,6 @@ function page_browse($db) {
 		$context['entry_count'] = $entry_count;
 	}
 	$context['entries_found'] = count($entries) > 0;
-	$context['active_event'] = LDFF_ACTIVE_EVENT_ID;
-	$context['search_event'] = $event_id;
 	$context['search_query'] = util_sanitize_query_param('query');
 	$context['search_sorting'] = $sorting;
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {

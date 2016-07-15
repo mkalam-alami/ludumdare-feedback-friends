@@ -4,12 +4,14 @@
 
 		<div class="col-md-4">
 			{{> cartridge}}
+			{{#is_active_event}}
 			<br /><br />
 			<p class="bg-warning">
 				<b>N.B.</b> Comments take a while to appear (up to ~30mn), so don't worry if some comments are missing and the score is off.<br />
-				<a href="?uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh* <span style="font-size: 1.1rem"><br />(last updated {{last_updated}})</span></a><br />
+				<a href="?event={{search_event}}&amp;uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh* <span style="font-size: 1.1rem"><br />(last updated {{last_updated}})</span></a><br />
 				<span style="font-size: 1.1rem">*This button will refresh everything except your "Given comments".</span>
 			</p>
+			{{/is_active_event}}
 		</div>
 		<div class="col-md-8">
 			<div class="container">
@@ -27,7 +29,7 @@
 						{{#friends_rows}}
 						<div class="btn-group">
 							{{#friends}}
-								<a href="?uid={{uid_author}}" class="btn btn-primary">{{author}}</a>&nbsp;
+								<a href="?event={{search_event}}&amp;uid={{uid_author}}" class="btn btn-primary">{{author}}</a>&nbsp;
 							{{/friends}}
 						</div>
 						{{/friends_rows}}
@@ -43,7 +45,7 @@
 						<table class="table text-left">
 						{{#given}}
 							<tr><td>
-								<h4>to <a href="?uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
+								<h4>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
 								{{{comment}}}
 							</td></tr>
 						{{/given}}
@@ -55,7 +57,7 @@
 						{{#received}}
 							<tr><td>
 								{{#uid_author}}
-									<h4><a href="?uid={{uid_author}}">{{author}}</a> <i>
+									<h4><a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> <i>
 								{{/uid_author}}
 								{{^uid_author}}
 									<h4><span style="color: grey">{{author}}</span> <i>
