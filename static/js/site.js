@@ -34,13 +34,38 @@ function refreshResults(html) {
 
 // Search form
 
+function refreshEvent() {
+	var value = $('#search-event').val();
+	var label = $('#search-event-option-' + value).html();
+	$('#search-event-label').html(label);
+}
+
 function refreshSorting() {
 	var value = $('#search-sorting').val();
 	$('.search-sorting-button').removeClass('active');
 	$('#search-sorting-button-' + value).addClass('active');
 }
 
+function reset(eventId) {
+	$('#search-event').val(eventId || $('#search-event').attr('data-active-event'));
+	$('#search-sorting').val('coolness');
+	$('#search-platforms').val([]);
+	$('#search-platforms').multiselect('refresh');
+	$('#search-query').val('');
+	refreshEvent();
+	refreshSorting();
+	runSearch();
+}
+
 function bindSearch() {
+
+	// Event
+	refreshEvent();
+	$('#search-event-dropdown a').click(function () {
+		$('#search-event').val($(this).attr('data-value'));
+		refreshEvent();
+		runSearch();
+	});
 
 	// Sorting
 	refreshSorting();
@@ -70,12 +95,7 @@ function bindSearch() {
 
 	// Reset
 	$('#search-reset').bind("keypress click", function() {
-		$('#search-platforms').val([]);
-		$('#search-platforms').multiselect('refresh');
-		$('#search-query').val('');
-		$('#search-sorting').val('coolness');
-		refreshSorting();
-		runSearch();
+		reset();
 	});
 
 	// Prevent keyboard submit

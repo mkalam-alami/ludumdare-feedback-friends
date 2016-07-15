@@ -1,8 +1,8 @@
 <div class="container">
 	{{#entry}}
 
-	<div class="row">
-		<div class="col-md-4 text-center">
+	<div class="row text-center">
+		<div class="col-md-4">
 			{{> cartridge}}
 			<br /><br />
 			<p class="bg-warning">
@@ -15,6 +15,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-8">
+						<h1>{{event_title}}</h1>
 						<h2><a href="{{ld_root}}uid={{uid}}">{{title}}</a> <i>(Balance: {{coolness}})</i></h2>
 					</div>
 				</div>
@@ -39,7 +40,7 @@
 				<div class="row">
 					<div class="col-md-4">
 						<h3>Comments given<br />({{comments_given}}p, average {{given_average}}p/c)</h3>
-						<table class="table">
+						<table class="table text-left">
 						{{#given}}
 							<tr><td>
 								<h4>to <a href="?uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
@@ -50,7 +51,7 @@
 					</div>
 					<div class="col-md-4">
 						<h3>Comments received<br />({{comments_received}}p)</h3>
-						<table class="table">
+						<table class="table text-left">
 						{{#received}}
 							<tr><td>
 								{{#uid_author}}

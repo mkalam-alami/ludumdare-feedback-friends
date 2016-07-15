@@ -10,15 +10,22 @@
 
 require_once('includes/init.php');
 
-set_time_limit(LDFF_SCRAPING_TIMEOUT + 30);
+if (LDFF_SCRAPING_ENABLED) {
 
-$db = db_connect();
+	set_time_limit(LDFF_SCRAPING_TIMEOUT + 30);
 
-echo '<pre>';
-print_r(scraping_run($db));
-//print_r(http_fetch_uids($db));
+	$db = db_connect();
 
-mysqli_close($db);
+	echo '<pre>';
+	print_r(scraping_run($db));
+	echo '</pre>'
+
+	mysqli_close($db);
+
+}
+else {
+	log_info("Scraping disabled, nothing to do.");
+}
 
 ?>
 

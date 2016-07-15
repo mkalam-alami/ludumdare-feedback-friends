@@ -4,11 +4,10 @@ $time = microtime(true);
 
 require_once(__DIR__ . '/includes/init.php');
 
-$event_id = LDFF_ACTIVE_EVENT_ID; // TODO Support multiple events through a query param
 $db = db_connect();
 
 // Run scraping through pseudo cron
-if (LDFF_SCRAPING_PSEUDO_CRON) {
+if (LDFF_SCRAPING_ENABLED && LDFF_SCRAPING_PSEUDO_CRON) {
 	$last_run = intval(setting_read($db, 'pseudo_scraping_last_run', 0));
 	$now = time();
 	if ($now - $last_run > LDFF_SCRAPING_PSEUDO_CRON_DELAY) {
@@ -17,13 +16,29 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 	}
 }
 
+// Detect current event
+
+$event_id = LDFF_ACTIVE_EVENT_ID; // TODO Support multiple events through a query param
+if (isset($_GET['event'])) {
+	$event_id = util_sanitize_query_param('event');
+}
+
 // Pages
 
 function init_context($db) {
-	global $time, $event_id;
+	global $time, $events, $event_id;
+
+	$events_render = array();
+	foreach ($events as $id => $label) {
+		$events_render[] = array(
+			'id' => $id,
+			'label' => $label
+			);
+	}
 
 	$context = array();
-	$context['competition'] = $event_id;
+	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
+	$context['events'] = $events_render;
 	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . $event_id . '?action=preview&';
 	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
 	$context['time'] = round(microtime(true) - $time, 3);
@@ -120,8 +135,8 @@ function page_browse($db) {
 	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE event_id = '$event_id'";
 	if (isset($_GET['query']) && $_GET['query']) {
 		$query = util_sanitize_query_param('query');
-		$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN BOOLEAN MODE)"; // WITH QUERY EXPANSION
-		$sql = " AND ($fulltext_part OR uid = '$query')"; /*, $fulltext_part AS score*/
+		$sql .= " AND (MATCH(author,title,description,platforms,type) 
+			AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')"; // WITH QUERY EXPANSION
 		$empty_where = false;
 		$not_coolness_search = true;
 	}
@@ -161,13 +176,15 @@ function page_browse($db) {
 	// Build context
 
 	$context = init_context($db);
-	$context['title'] = $not_coolness_search ? 'Search results' : 'These entries need feedback!';
+	$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $not_coolness_search) ? 'Search results' : 'These entries need feedback!';
 	$context['page'] = $page;
 	$context['entries'] = $entries;
 	if ($not_coolness_search) {
 		$context['entry_count'] = $entry_count;
 	}
 	$context['entries_found'] = count($entries) > 0;
+	$context['active_event'] = LDFF_ACTIVE_EVENT_ID;
+	$context['search_event'] = $event_id;
 	$context['search_query'] = util_sanitize_query_param('query');
 	$context['search_sorting'] = $sorting;
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {

@@ -3,20 +3,34 @@
 	<div class="row">
 		<div class="col-md-3">
 			<form id="search" action="." method="get">
+				<label for="platforms">Event</label>
+				<div class="input-group dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<span id="search-event-label"></span>
+						<span class="caret"></span>
+					</button>
+					<ul id="search-event-dropdown" class="dropdown-menu" aria-labelledby="search-event">
+					{{#events}}
+						<li><a id="search-event-option-{{id}}" href="#" data-value="{{id}}">{{label}}</a></li>
+					{{/events}}
+					</ul>
+				</div>
+				<input id="search-event" type="hidden" name="event" value="{{search_event}}" data-active-event="{{active_event}}" />
+
 				<label for="platforms">Entries sorting</label>
 				<div class="list-group">
-				  <a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
-				    <h4 class="list-group-item-heading">Balance</h4>
-				    <p class="list-group-item-text">Show me the games that need feedback the most</p>
-				  </a>
-				  <a id="search-sorting-button-comments" class="search-sorting-button list-group-item" data-value="comments" href="#" >
-				    <h4 class="list-group-item-heading">Comments</h4>
-				    <p class="list-group-item-text">Games with little to no comments</p>
-				  </a>
-				  <a id="search-sorting-button-random" class="search-sorting-button list-group-item" data-value="random" href="#" >
-				    <h4 class="list-group-item-heading">Random</h4>
-				    <p class="list-group-item-text">I'm feeling lucky</p>
-				  </a>
+					<a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
+						<h4 class="list-group-item-heading">Balance</h4>
+						<p class="list-group-item-text">Show me the games that need feedback the most</p>
+					</a>
+					<a id="search-sorting-button-comments" class="search-sorting-button list-group-item" data-value="comments" href="#" >
+						<h4 class="list-group-item-heading">Comments</h4>
+						<p class="list-group-item-text">Games with little to no comments</p>
+					</a>
+					<a id="search-sorting-button-random" class="search-sorting-button list-group-item" data-value="random" href="#" >
+						<h4 class="list-group-item-heading">Random</h4>
+						<p class="list-group-item-text">I'm feeling lucky</p>
+					</a>
 				</div>
 				<input id="search-sorting" type="hidden" name="sorting" value="{{search_sorting}}" />
 
@@ -38,12 +52,12 @@
 
 				<label for="query">Search</label>
 				<div class="input-group">
-				  <input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" />
-				  <ul class="search-syntax-tips">
-				  	<li>OR: ludum dare</li>
-				  	<li>AND: +ludum +dare</li>
-				  	<li>NOT: ludum -dare</li>
-				  </ul>
+					<input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" />
+					<ul class="search-syntax-tips">
+						<li>OR: ludum dare</li>
+						<li>AND: +ludum +dare</li>
+						<li>NOT: ludum -dare</li>
+					</ul>
 				</div>
 				<div class="input-group btn-group">
 					<button id="search-reset" type="button" class="btn btn-default">Clear</button>
