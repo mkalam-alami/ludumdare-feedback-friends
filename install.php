@@ -21,14 +21,13 @@ if ($current_version < LDFF_VERSION) {
 
 	$target_version = 1;
 	if ($current_version < $target_version) {
-		// TODO create an index with only title/author for better relevance?
 		mysqli_query($db, "CREATE TABLE `entry` (
 			`uid` INT NOT NULL ,
 			`event_id` VARCHAR(64) NOT NULL ,
 			`author` VARCHAR(255) NOT NULL ,
 			`title` VARCHAR(255) NOT NULL ,
 			`type` VARCHAR(5) NOT NULL,
-			`description` VARCHAR(8192) ,
+			`description` VARCHAR(8192),
 			`platforms` VARCHAR(255) NOT NULL ,
 			`comments_given` INT NOT NULL DEFAULT '0',
 			`comments_received` INT NOT NULL DEFAULT '0', 
@@ -39,7 +38,7 @@ if ($current_version < LDFF_VERSION) {
 			INDEX `comments_received_index` (`comments_received`), 
 			INDEX `coolness` (`coolness`), 
 			FULLTEXT INDEX `index_platforms` (`platforms`) , 
-			FULLTEXT INDEX `index_full` (`uid`, `author`, `title`, `description`, `platforms`, `type`)
+			FULLTEXT INDEX `index_full` (`uid`, `author`, `title`, `platforms`, `type`)
 			) ENGINE = MyISAM") or die("Failed to create entry table");  // MyISAM required for fulltext indexes on MySQL < 5.6
 		mysqli_query($db, "CREATE TABLE `comment` (
 			`uid_entry` INT NOT NULL ,

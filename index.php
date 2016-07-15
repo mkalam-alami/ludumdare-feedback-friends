@@ -135,7 +135,7 @@ function page_browse($db) {
 	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE event_id = '$event_id'";
 	if (isset($_GET['query']) && $_GET['query']) {
 		$query = util_sanitize_query_param('query');
-		$sql .= " AND (MATCH(author,title,description,platforms,type) 
+		$sql .= " AND (MATCH(author,title,platforms,type) 
 			AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')"; // WITH QUERY EXPANSION
 		$empty_where = false;
 		$not_coolness_search = true;
