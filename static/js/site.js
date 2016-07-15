@@ -47,12 +47,12 @@ function refreshSorting() {
 }
 
 function reset(eventId) {
-	$('#search-event').val(eventId || $('#search-event').attr('data-active-event'));
+	//$('#search-event').val(eventId || $('#search-event').attr('data-active-event'));
 	$('#search-sorting').val('coolness');
 	$('#search-platforms').val([]);
 	$('#search-platforms').multiselect('refresh');
 	$('#search-query').val('');
-	refreshEvent();
+	//refreshEvent();
 	refreshSorting();
 	runSearch();
 }

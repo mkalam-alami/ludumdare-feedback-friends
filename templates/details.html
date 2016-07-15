@@ -1,7 +1,7 @@
 <div class="container">
-	{{#entry}}
-
 	<div class="row text-center">
+		{{#entry}}
+
 		<div class="col-md-4">
 			{{> cartridge}}
 			<br /><br />
@@ -58,7 +58,7 @@
 									<h4><a href="?uid={{uid_author}}">{{author}}</a> <i>
 								{{/uid_author}}
 								{{^uid_author}}
-									<h4><span style="color: grey">Not a submitter</span> <i>
+									<h4><span style="color: grey">{{author}}</span> <i>
 								{{/uid_author}}
 								({{score}}p)</i></h4>
 								{{{comment}}}
@@ -69,9 +69,11 @@
 				</div>
 			</div>
 		</div>
+		{{/entry}}
 
+		{{^entry}}
+			<h3>This user does not have an entry.</h3>
+		{{/entry}}
 	</div>
-
-	{{/entry}}
 </div>
 

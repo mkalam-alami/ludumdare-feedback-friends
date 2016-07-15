@@ -39,9 +39,21 @@ function _scraping_run_step_entry($db, $uid) {
 	$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid'");
 	$order = 1;
 	$new_comments = false;
-	$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,`uid_author`,`comment`,`date`,`score`) VALUES";
+	$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,`uid_author`,`author`,`comment`,`date`,`score`) VALUES";
+	$score_per_author = array();
 	foreach ($entry['comments'] as $comment) {
 		if ($order++ > $max_order) {
+			$uid_author = _escape($comment['uid_author']);
+			if (!isset($score_per_author[$uid_author])) {
+				$score_per_author[$uid_author] = 0;
+			}
+
+			$score = score_evaluate_comment($uid_author,
+				$uid,
+				$comment['comment'],
+				$score_per_author[$uid_author]);
+			$score_per_author[$uid_author] += $score;
+
 			if ($new_comments) {
 				$new_comments_sql .= ", ";
 			}
@@ -50,9 +62,10 @@ function _scraping_run_step_entry($db, $uid) {
 					'$uid',
 					'".$comment['order']."',
 					'"._escape($comment['uid_author'])."',
+					'"._escape($comment['author'])."',
 					'"._escape($comment['comment'])."',
 					'".date_format($comment['date'], 'Y-m-d H:i')."',
-					'".score_evaluate_comment(_escape($comment['uid_author']), $uid, $comment['comment'])."'
+					'".$score."'
 					)";
 		}
 	}

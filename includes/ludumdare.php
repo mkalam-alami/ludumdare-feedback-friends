@@ -79,6 +79,7 @@ function http_fetch_entry($uid) {
 	foreach (pq('.comment') as $comment) {
 		$comments[] = array(
 			'uid_author' => intval(str_replace('?action=preview&uid=', '', pq('a', $comment)->attr('href'))),
+			'author' => pq('a', $comment)->text(),
 			'order' => $order++,
 			'comment' => pq('p', $comment)->html(),
 			'date' => date_create_from_format('M d, Y @ g:ia', pq('small', $comment)->text())

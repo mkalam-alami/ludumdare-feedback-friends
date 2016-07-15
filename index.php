@@ -51,13 +51,11 @@ function render($template_name, $context) {
 	echo $template->render($context);
 }
 
-function _page_details_list_comments($db, $join_clause, $where_clause) {
+function _page_details_list_comments($db, $where_clause) {
 	global $event_id;
 
-	$results = mysqli_query($db, "SELECT comment.*, entry.author FROM comment 
-			LEFT JOIN entry ON $join_clause AND entry.event_id = '$event_id'
-			WHERE comment.event_id = '$event_id' 
-			AND $where_clause 
+	$results = mysqli_query($db, "SELECT * FROM comment 
+			WHERE event_id = '$event_id' AND $where_clause 
 			ORDER BY `date` DESC, `order` DESC")
 		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
@@ -73,9 +71,12 @@ function _page_details_list_comments($db, $join_clause, $where_clause) {
 function _prepare_entry_for_rendering($entry) {
 	global $event_id;
 
-	$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
-	$entry['type'] = util_format_type($entry['type']);
-	$entry['platforms'] = util_format_platforms($entry['platforms']);
+	if (isset($entry['type'])) {
+		$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
+		$entry['type'] = util_format_type($entry['type']);
+		$entry['platforms'] = util_format_platforms($entry['platforms']);
+	}
+	
 	return $entry;
 }
 
@@ -93,28 +94,30 @@ function page_details($db) {
 	$results = mysqli_query($db, "SELECT * FROM entry WHERE event_id = '$event_id' AND uid = ".$uid)
 		or log_error_and_die('Failed to fetch entry', mysqli_error($db)); 
 	$entry = mysqli_fetch_array($results);
-	$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
-	$entry['received'] = _page_details_list_comments($db,
-		"comment.uid_author = entry.uid", "comment.uid_entry = $uid AND comment.uid_author != $uid");
-	$entry['given'] = _page_details_list_comments($db,
-		"comment.uid_entry = entry.uid", "comment.uid_author = $uid AND comment.uid_entry != $uid");
-	$entry['given_average'] = score_average($entry['given']);
+	if (isset($entry['type'])) {
+		$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
+		$entry['received'] = _page_details_list_comments($db,
+			"uid_entry = $uid AND uid_author != $uid");
+		$entry['given'] = _page_details_list_comments($db,
+			"uid_author = $uid AND uid_entry != $uid");
+		$entry['given_average'] = score_average($entry['given']);
 
-	$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
-			WHERE comment1.event_id = '$event_id' 
-			AND comment2.event_id = '$event_id' 
-			AND comment1.uid_author = $uid
-			AND comment2.uid_author != $uid
-			AND comment1.uid_entry = comment2.uid_author
-			AND comment2.uid_entry = $uid
-			AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC")
-		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
-	$friends = array();
-	while ($friend = mysqli_fetch_array($results)) {
-		$friends[] = $friend;
+		$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
+				WHERE comment1.event_id = '$event_id' 
+				AND comment2.event_id = '$event_id' 
+				AND comment1.uid_author = $uid
+				AND comment2.uid_author != $uid
+				AND comment1.uid_entry = comment2.uid_author
+				AND comment2.uid_entry = $uid
+				AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC")
+			or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
+		$friends = array();
+		while ($friend = mysqli_fetch_array($results)) {
+			$friends[] = $friend;
+		}
+		$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // split for rendering
+		$entry['friends_count'] = count($friends);
 	}
-	$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // split for rendering
-	$entry['friends_count'] = count($friends);
 
 	// Build context
 	$context = init_context($db);

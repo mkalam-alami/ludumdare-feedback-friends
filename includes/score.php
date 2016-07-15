@@ -1,21 +1,21 @@
 <?php
 
-function score_evaluate_comment($author_uid, $entry_uid, $comment) {
+function score_evaluate_comment($author_uid, $entry_uid, $comment, $previous_comments_score) {
+	$score = 0;
 	if ($author_uid != $entry_uid) {
 		$text_length = strlen(util_sanitize($comment));
 		if ($text_length > 300) { // Elaborate comments
-			return 3;
+			$score = 3;
 		}
 		else if ($text_length > 100) { // Interesting comments
-			return 2;
+			$score = 2;
 		}
 		else { // Short comments
-			return 1;
+			$score = 1;
 		}
 	}
-	else {
-		return 0;
-	}
+	$score = max($score - $previous_comments_score, 0);
+	return $score;
 }
 
 function score_comments_given($db, $uid) { 

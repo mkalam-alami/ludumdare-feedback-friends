@@ -45,6 +45,7 @@ if ($current_version < LDFF_VERSION) {
 			`event_id` VARCHAR(64) NOT NULL ,
 			`order` INT NOT NULL , 
 			`uid_author` INT NOT NULL ,
+			`author` VARCHAR(255) NOT NULL ,
 			`comment` VARCHAR(8192) NOT NULL ,
 			`date` DATETIME NOT NULL ,
 			`score` INT NOT NULL , 
