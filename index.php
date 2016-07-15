@@ -85,8 +85,21 @@ function _prepare_entry_for_rendering($entry) {
 	return $entry;
 }
 
+function _page_emergency($db) {
+	$context = init_context($db);
+	render('header', $context);
+	render('emergency', $context);
+	render('footer', $context);
+}
+
 function page_details($db) {
 	global $event_id;
+
+	if (LDFF_EMERGENCY_MODE) {
+		_page_emergency($db);
+		return;
+	}
+
 
 	$uid = intval(util_sanitize_query_param('uid'));
 
@@ -141,23 +154,25 @@ function page_browse($db) {
 
 	$not_coolness_search = false;
 	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE event_id = '$event_id'";
-	if (isset($_GET['query']) && $_GET['query']) {
-		$query = util_sanitize_query_param('query');
-		$sql .= " AND (MATCH(author,title,platforms,type) 
-			AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')"; // WITH QUERY EXPANSION
-		$empty_where = false;
-		$not_coolness_search = true;
-	}
-	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-		$sql .= " AND MATCH(platforms) AGAINST('";
-		foreach ($_GET['platforms'] as $raw_platform) {
-			$sql .= util_sanitize($raw_platform).' ';
-		}
-		$sql .= "')";
-	}
 	$sorting = 'coolness';
-	if (isset($_GET['sorting'])) {
-		$sorting = util_sanitize_query_param('sorting');
+	if (!LDFF_EMERGENCY_MODE) {
+		if (isset($_GET['query']) && $_GET['query']) {
+			$query = util_sanitize_query_param('query');
+			$sql .= " AND (MATCH(author,title,platforms,type) 
+				AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')"; // WITH QUERY EXPANSION
+			$empty_where = false;
+			$not_coolness_search = true;
+		}
+		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
+			$sql .= " AND MATCH(platforms) AGAINST('";
+			foreach ($_GET['platforms'] as $raw_platform) {
+				$sql .= util_sanitize($raw_platform).' ';
+			}
+			$sql .= "')";
+		}
+		if (isset($_GET['sorting'])) {
+			$sorting = util_sanitize_query_param('sorting');
+		}
 	}
 	switch ($sorting) {
 		case 'random': $sql .= " ORDER BY RAND()"; break;
@@ -184,6 +199,7 @@ function page_browse($db) {
 	// Build context
 
 	$context = init_context($db);
+	$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
 	$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $not_coolness_search) ? 'Search results' : 'These entries need feedback!';
 	$context['page'] = $page;
 	$context['entries'] = $entries;

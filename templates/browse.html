@@ -2,6 +2,7 @@
 
 	<div class="row">
 		<div class="col-md-3">
+			{{^emergency_mode}}
 			<form id="search" action="." method="get">
 				<label for="platforms">Event</label>
 				<div class="input-group dropdown">
@@ -64,6 +65,14 @@
 					<button id="search-reset" type="button" class="btn btn-default">Clear</button>
 				</div>
 			</form>
+			{{/emergency_mode}}
+			{{#emergency_mode}}
+				<div class="alert alert-warning">
+					<p><span class="glyphicon glyphicon-warning-sign"></span> <b>Emergency mode</b></p>
+					<p>Due to high traffic, most features are temporarily disabled :-P</p>
+				</div>
+			{{/emergency_mode}}
+
 			<a href="?p=faq">FAQ</a>
 		</div>
 		<div id="results-container" class="col-md-9 text-center">

@@ -24,7 +24,9 @@ define('LDFF_SCRAPING_SLEEP', 0); // time to sleep betwen requests, in seconds
 define('LDFF_LOG_ENABLED', true);
 define('LDFF_LOG_PATH', __DIR__ . '/ldff.log');
 
-// Production mode (PHP logs errors only, prevent messing with the install script)
-define('LDFF_PRODUCTION', false);
+// Production
+define('LDFF_PRODUCTION', false); // PHP logs errors only, require admin password to run things
+define('LDFF_EMERGENCY_MODE', false); // No search, no entry details
+define('LDFF_ADMIN_PASSWORD', 'changeme');
 
 ?>
