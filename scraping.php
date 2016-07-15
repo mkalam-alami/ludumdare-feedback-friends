@@ -1,6 +1,6 @@
 <html>
 <head>
-  <meta http-equiv="refresh" content="1">
+ <!-- <meta http-equiv="refresh" content="1">-->
 </head>
 <body>
 
@@ -16,6 +16,7 @@ $db = db_connect();
 
 echo '<pre>';
 print_r(scraping_run($db));
+//print_r(http_fetch_uids($db));
 
 mysqli_close($db);
 

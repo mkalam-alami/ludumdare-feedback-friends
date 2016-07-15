@@ -4,6 +4,7 @@ $time = microtime(true);
 
 require_once(__DIR__ . '/includes/init.php');
 
+$event_id = LDFF_ACTIVE_EVENT_ID; // TODO Support multiple events through a query param
 $db = db_connect();
 
 // Run scraping through pseudo cron
@@ -19,12 +20,12 @@ if (LDFF_SCRAPING_PSEUDO_CRON) {
 // Pages
 
 function init_context($db) {
-	global $time;
+	global $time, $event_id;
 
 	$context = array();
-	$context['competition'] = LDFF_COMPETITION_PAGE;
-	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . LDFF_COMPETITION_PAGE . '?action=preview&';
-	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry ORDER BY last_updated LIMIT 1");
+	$context['competition'] = $event_id;
+	$context['ld_root'] = LDFF_SCRAPING_ROOT . '/' . $event_id . '?action=preview&';
+	$context['oldest_entry_updated'] = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
 	$context['time'] = microtime(true) - $time;
 	return $context;
 }
@@ -36,8 +37,10 @@ function render($template_name, $context) {
 }
 
 function _page_details_list_comments($db, $where_clause) {
+	global $event_id;
+
 	$results = mysqli_query($db, "SELECT comment.*, entry.author FROM comment, entry 
-			WHERE $where_clause ORDER BY `date` DESC, `order` DESC")
+			WHERE event_id = '$event_id' AND $where_clause ORDER BY `date` DESC, `order` DESC")
 		or die('Failed to fetch comments: '.mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
@@ -47,6 +50,8 @@ function _page_details_list_comments($db, $where_clause) {
 }
 
 function page_details($db) {
+	global $event_id;
+
 	$uid = intval(util_sanitize_query_param('uid'));
 
 	// Force refresh
@@ -55,18 +60,20 @@ function page_details($db) {
 	}
 
 	// Gather entry info
-	$results = mysqli_query($db, "SELECT * FROM entry WHERE uid = ".$uid)
+	$results = mysqli_query($db, "SELECT * FROM entry WHERE event_id = '$event_id' AND uid = ".$uid)
 		or die('Failed to fetch entry: '.mysqli_error($db)); 
 	$entry = mysqli_fetch_array($results);
-	$entry['picture'] = util_get_picture_path($entry['uid']);
+	$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
 	$entry['received'] = _page_details_list_comments($db,
-		"comment.uid_author = entry.uid AND uid_entry = $uid and uid_author != $uid");
+		"comment.uid_author = entry.uid AND uid_entry = $uid AND uid_author != $uid");
 	$entry['given'] = _page_details_list_comments($db,
-		"comment.uid_entry = entry.uid AND uid_author = $uid and uid_entry != $uid");
+		"comment.uid_entry = entry.uid AND uid_author = $uid AND uid_entry != $uid");
 	$entry['given_average'] = score_average($entry['given']);
 
 	$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
-			WHERE comment1.uid_author = $uid
+			WHERE comment1.event_id = '$event_id' 
+			AND comment2.event_id = '$event_id' 
+			AND comment1.uid_author = $uid
 			AND comment2.uid_author != $uid
 			AND comment1.uid_entry = comment2.uid_author
 			AND comment2.uid_entry = $uid
@@ -90,33 +97,25 @@ function page_details($db) {
 }
 
 function page_browse($db) {
+	global $event_id;
 
 	// Build query according to search params
 
-	$empty_where = true;
 	$not_coolness_search = false;
-
-	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE";
+	$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE event_id = '$event_id'";
 	if (isset($_GET['query']) && $_GET['query']) {
 		$query = util_sanitize_query_param('query');
 		$fulltext_part = "MATCH(author,title,description,platforms,type) AGAINST ('$query' IN BOOLEAN MODE)"; // WITH QUERY EXPANSION
-		$sql = "SELECT * FROM entry WHERE ($fulltext_part OR uid = '$query')"; /*, $fulltext_part AS score*/
+		$sql = " AND ($fulltext_part OR uid = '$query')"; /*, $fulltext_part AS score*/
 		$empty_where = false;
 		$not_coolness_search = true;
 	}
 	if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-		if (!$empty_where) {
-			$sql .= " AND";
-		}
-		$sql .= " MATCH(platforms) AGAINST('";
+		$sql .= " AND MATCH(platforms) AGAINST('";
 		foreach ($_GET['platforms'] as $raw_platform) {
 			$sql .= util_sanitize($raw_platform).' ';
 		}
 		$sql .= "')";
-		$empty_where = false;
-	}
-	if ($empty_where) {
-		$sql .= " 1";
 	}
 	$sorting = 'coolness';
 	if (isset($_GET['sorting'])) {
@@ -133,13 +132,14 @@ function page_browse($db) {
 		$page = intval(util_sanitize_query_param('page'));
 		$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 	}
+	//die($sql);
 
 	// Fetch entries
 
 	$entries = array();
 	$results = mysqli_query($db, $sql) or die('Failed to fetch entries: '.mysqli_error($db)); 
 	while ($row = mysqli_fetch_array($results)) {
-		$row['picture'] = util_get_picture_path($row['uid']);
+		$row['picture'] = util_get_picture_path($event_id, $row['uid']);
 		$entries[] = $row;
 	}
 	$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');

@@ -1,29 +1,21 @@
 <?php
 
-function _http_fetch_page($queryParam) {
-	$url = LDFF_SCRAPING_ROOT . LDFF_COMPETITION_PAGE . '/?action=preview&' . $queryParam;
+function _http_fetch_page($queryParams) {
+	$url = LDFF_SCRAPING_ROOT . LDFF_ACTIVE_EVENT_ID . '/?' . $queryParams;
 	return file_get_contents($url);
 }
 
 /*
-	Retrieves UIDs from a whole page of entries.
-	Pagination starts with index 1.
+	Retrieves UIDs from all event entries.
 */
-function http_fetch_uids($page = 1) {
+function http_fetch_uids() {
 	$entry_list = array();
 
-	$data = _http_fetch_page('start=' . (($page - 1) * LDFF_SCRAPING_PAGE_SIZE));
+	$data = _http_fetch_page('action=misc_links');
 	phpQuery::newDocumentHTML($data);
 
-	foreach(pq('.preview a') as $entry_el) {
+	foreach(pq('#compo2 td > a') as $entry_el) {
 		$entry_list[] = str_replace('?action=preview&uid=', '', pq($entry_el)->attr('href'));
-		/*$title = pq('i', $entry_el)->text();
-		$entry = array(
-			'uid' => str_replace('?action=preview&uid=', '', pq($entry_el)->attr('href')),
-			'author' => substr(pq($entry_el)->text(), strlen($title)),
-			'title' => pq('i', $entry_el)->text(),
-			'picture' => pq('img', $entry_el)->attr('src')
-		);*/
 	}
 
 	return $entry_list;
@@ -47,7 +39,7 @@ function http_fetch_entry($uid) {
 	);
 
 	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
-	$html = _http_fetch_page('uid=' . $uid);
+	$html = _http_fetch_page('action=preview&uid=' . $uid);
  	preg_match_all('/<script.*?>[\s\S]*?<\/script>/', $html, $tmp);
     $scripts_array = $tmp[0]; 
     foreach ($scripts_array as $script_id => $script_item){
@@ -99,7 +91,7 @@ function http_fetch_entry($uid) {
 		'author' => pq('#compo2 a strong')->text(),
 		'title' => pq('#compo2 h2')->eq(0)->text(),
 		'type' => (pq('#compo2 > div > i')->text() == 'Compo Entry') ? 'compo' : 'jam',
-		'description' => pq('#compo2 p')->eq(1)->html(),
+		'description' => pq(pq('#compo2 h2')->eq(1))->prev()->html(),
 		'platforms' => $platforms,
 		'picture' => pq('.shot-nav img')->attr('src'),
 		'comments' => $comments

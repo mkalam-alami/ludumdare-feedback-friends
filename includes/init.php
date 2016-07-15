@@ -3,12 +3,8 @@
 // Global constants
 
 define('LDFF_VERSION', 1);
-
 define('LDFF_PAGE_SIZE', 9);
-
 define('LDFF_SCRAPING_ROOT', 'http://ludumdare.com/compo/');
-define('LDFF_SCRAPING_PAGE_SIZE', 24);
-define('LDFF_COOLNESS_NO_COMMENT', -1000);
 
 // Includes
 

@@ -3,3 +3,4 @@ composer.lock
 config.php
 data/*
 *~
+ldff.log

@@ -24,6 +24,7 @@ if ($current_version < LDFF_VERSION) {
 		// TODO create an index with only title/author for better relevance?
 		mysqli_query($db, "CREATE TABLE `entry` (
 			`uid` INT NOT NULL ,
+			`event_id` VARCHAR(64) NOT NULL ,
 			`author` VARCHAR(255) NOT NULL ,
 			`title` VARCHAR(255) NOT NULL ,
 			`type` VARCHAR(5) NOT NULL,
@@ -33,7 +34,7 @@ if ($current_version < LDFF_VERSION) {
 			`comments_received` INT NOT NULL DEFAULT '0', 
 			`coolness` INT NOT NULL DEFAULT '0', 
 			`last_updated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-			PRIMARY KEY (`uid`),
+			PRIMARY KEY (`uid`, `event_id`),
 			INDEX `comments_given_index` (`comments_given`),
 			INDEX `comments_received_index` (`comments_received`), 
 			INDEX `coolness` (`coolness`), 
@@ -42,17 +43,18 @@ if ($current_version < LDFF_VERSION) {
 			) ENGINE = MyISAM") or die("Failed to create entry table");  // MyISAM required for fulltext indexes on MySQL < 5.6
 		mysqli_query($db, "CREATE TABLE `comment` (
 			`uid_entry` INT NOT NULL ,
+			`event_id` VARCHAR(64) NOT NULL ,
 			`order` INT NOT NULL , 
 			`uid_author` INT NOT NULL ,
 			`comment` VARCHAR(8192) NOT NULL ,
 			`date` DATETIME NOT NULL ,
 			`score` INT NOT NULL , 
-			PRIMARY KEY(`uid_entry`, `order`),
+			PRIMARY KEY(`uid_entry`, `event_id`, `order`),
 			INDEX `uid_author_index` (`uid_author`)
 			) ENGINE = InnoDB") or die("Failed to create comment table");
 		mysqli_query($db, "CREATE TABLE `setting` (
 			`id` VARCHAR(255) NOT NULL , 
-			`value` VARCHAR(1024) NOT NULL , 
+			`value` MEDIUMTEXT NOT NULL , 
 			PRIMARY KEY (`id`)
 			) ENGINE = InnoDB") or die("Failed to create setting table");
 		
