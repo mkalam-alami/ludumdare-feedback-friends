@@ -38,7 +38,7 @@ function init_context($db) {
 	}
 
 	$oldest_entry_updated = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
-	$oldest_entry_age = round((time() - strtotime($oldest_entry_updated)) / 60);
+	$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
 
 	$context = array();
 	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
@@ -232,6 +232,7 @@ function page_browse($db) {
 			$context['entry_count'] = $entry_count;
 		}
 		$context['entries_found'] = count($entries) > 0;
+		$context['several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {

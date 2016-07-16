@@ -26,7 +26,9 @@
 
 <div id="more-container" class="col-xs-12">
 	{{#entries_found}}
+		{{#several_pages_found}}
 		<button id="more" class="btn btn-default" data-page="{{page}}">Load more...</button>
+		{{/several_pages_found}}
 	{{/entries_found}}
 	{{^entries_found}}
 		Nothing found.
