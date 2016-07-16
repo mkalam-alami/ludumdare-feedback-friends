@@ -308,7 +308,7 @@ function scraping_run($db) {
 		_scraping_log_step($report_entry);
 		$last_step_time = $time;
 		$steps++;
-		$average_step_duration = ($last_step_time - $start_time) / $steps;
+		$average_step_duration = round(1. * ($last_step_time - $start_time) / $steps, 3);
 	}
 
 	$report['step_count'] = $steps;
