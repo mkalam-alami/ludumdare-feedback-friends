@@ -229,8 +229,8 @@ function page_browse($db) {
 		$context['page'] = $page;
 		$context['entries'] = $entries;
 		$context['entry_count'] = $entry_count;
-		$context['entries_found'] = count($entries) > 0;
-		$context['several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
+		$context['are_entries_found'] = count($entries) > 0;
+		$context['are_several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
