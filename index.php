@@ -173,7 +173,13 @@ function page_browse($db) {
 			&& (!isset($_GET['sorting']) || $_GET['sorting'] != 'random')) { // Don't cache text query-based searches
 		$cache_key = $event_id.'__browse';
 		if (LDFF_EMERGENCY_MODE) $cache_key .= '-emergency';
-		if (isset($_GET['platforms'])) $cache_key .= '-platforms:'.util_sanitize_query_param('platforms');
+		if (isset($_GET['platforms'])) {
+			$platforms = '';
+			foreach ($_GET['platforms'] as $raw_platform) {
+				$platforms .= util_sanitize($raw_platform).' ';
+			}
+			$cache_key .= '-platforms:'.$platforms;
+		}
 		if (isset($_GET['page'])) $cache_key .= '-page:'.util_sanitize_query_param('page');
 		if (isset($_GET['ajax'])) $cache_key .= '-ajax:'.util_sanitize_query_param('ajax');
 		if (isset($_GET['sorting'])) $cache_key .= '-sorting:'.util_sanitize_query_param('sorting');
@@ -196,8 +202,11 @@ function page_browse($db) {
 			}
 			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 				$sql .= " AND MATCH(platforms) AGAINST('";
-				foreach ($_GET['platforms'] as $raw_platform) {
-					$sql .= util_sanitize($raw_platform).' ';
+				foreach ($_GET['platforms'] as $index => $raw_platform) {
+					if ($index > 0) {
+						$sql .= ' ';
+					}
+					$sql .= util_sanitize($raw_platform);
 				}
 				$sql .= "')";
 			}
@@ -216,6 +225,7 @@ function page_browse($db) {
 			$page = intval(util_sanitize_query_param('page'));
 			$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 		}
+		echo $sql;
 
 		// Fetch entries
 		$entries = array();
