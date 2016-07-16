@@ -5,11 +5,21 @@ function _escape($string) {
 	return addslashes($string);
 }
 
+function _scraping_is_uid_blacklisted($uid) {
+	static $blacklist = null;
+	if (!$blacklist) {
+		$blacklist = explode(',', LDFF_UID_BLACKLIST);
+	}
+
+	return array_search($uid, $blacklist) !== false;
+}
+
+
 function _scraping_run_step_uids($db) {
 	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
 
-	$uids = http_fetch_uids();
-
+	// Find all entry UIDs
+	$uids = ld_fetch_uids();
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
@@ -25,7 +35,14 @@ function _scraping_run_step_uids($db) {
 }
 
 function _scraping_run_step_entry($db, $uid) {
-	$entry = ld_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
+	$entry = null;
+
+	if (!_scraping_is_uid_blacklisted($uid)) {
+		$entry = ld_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
+	}
+	else {
+		mysqli_query($db, "DELETE FROM entry WHERE uid = '$uid");
+	}
 
 	if ($entry) {
 
@@ -173,119 +190,117 @@ function _scraping_log_report($report) {
 		3. Back to 1
 
 */
-		function scraping_run($db) {
-			static $SETTING_EVENT_ID = 'scraping_event_id';
-			static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
-			static $SETTING_LAST_READ_ENTRY = 'scraping_last_read_entry';
+function scraping_run($db) {
+	static $SETTING_EVENT_ID = 'scraping_event_id';
+	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
+	static $SETTING_LAST_READ_ENTRY = 'scraping_last_read_entry';
 
 	// Init
-			$report = array();
-			$report['steps'] = array();
-			$start_time = microtime(true);
-			$last_step_time = $start_time;
-			$steps = 0;
-			$average_step_duration = 0;
-			$over = false;
+	$report = array();
+	$report['steps'] = array();
+	$start_time = microtime(true);
+	$last_step_time = $start_time;
+	$steps = 0;
+	$average_step_duration = 0;
+	$over = false;
 
 	// Reset scraping on event ID change
-			$event_id_cache = setting_read($db, $SETTING_EVENT_ID, -1);
-			if ($event_id_cache != LDFF_ACTIVE_EVENT_ID) {
-				setting_write($db, $SETTING_MISSING_UIDS, '');
-				setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
-				setting_write($db, $SETTING_EVENT_ID, LDFF_ACTIVE_EVENT_ID);
-			}
+	$event_id_cache = setting_read($db, $SETTING_EVENT_ID, -1);
+	if ($event_id_cache != LDFF_ACTIVE_EVENT_ID) {
+		setting_write($db, $SETTING_MISSING_UIDS, '');
+		setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+		setting_write($db, $SETTING_EVENT_ID, LDFF_ACTIVE_EVENT_ID);
+	}
 
 	// Loop until we're about to reach the timeout
-			while (!$over) {
-				$over = $last_step_time - $start_time + $average_step_duration > LDFF_SCRAPING_TIMEOUT;
+	while (!$over) {
+		$over = $last_step_time - $start_time + $average_step_duration > LDFF_SCRAPING_TIMEOUT;
 
-				$report_entry = array();
+		$report_entry = array();
 
 		// Read UIDs page
-				$last_read_entry = setting_read($db, $SETTING_LAST_READ_ENTRY, -1);
-				if ($last_read_entry == -1) {
-					$uids = _scraping_run_step_uids($db);
-					$report_entry['type'] = 'uids';
-					$report_entry['result'] = $uids;
-					$report_entry['error'] = mysqli_error($db);
-					setting_write($db, $SETTING_LAST_READ_ENTRY, 0);
-				}
+		$last_read_entry = setting_read($db, $SETTING_LAST_READ_ENTRY, -1);
+		if ($last_read_entry == -1) {
+			$uids = _scraping_run_step_uids($db);
+			$report_entry['type'] = 'uids';
+			$report_entry['result'] = $uids;
+			$report_entry['error'] = mysqli_error($db);
+			setting_write($db, $SETTING_LAST_READ_ENTRY, 0);
+		}
 
 		// Fetch entry info
-				else {
-					$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
-					$next_uid = null;
+		else {
+			$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
+			$next_uid = null;
 
 			// Go through missing UIDs, OR through all existing entries
-					$fetching_missing_uid = false;
-					if (strlen($missing_uids) > 0) {
-						$missing_uids_array = explode(',', $missing_uids, 2);
-						$uid = $missing_uids_array[0];
-						if ($uid != '') {
-							$fetching_missing_uid = true;
-							$missing_uids = $missing_uids_array[1];
-						}
-					}
-					if (!$fetching_missing_uid) {
-						$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
-							AND event_id = '".LDFF_ACTIVE_EVENT_ID."' LIMIT 2");
-						if (mysqli_num_rows($results) > 0) {
-							$data = mysqli_fetch_array($results);
-							$uid = $data['uid'];
-							$data = mysqli_fetch_array($results);
-							$next_uid = $data['uid'];
-						}
-					}
+			$fetching_missing_uid = false;
+			if (strlen($missing_uids) > 0) {
+				$missing_uids_array = explode(',', $missing_uids, 2);
+				$uid = $missing_uids_array[0];
+				if ($uid != '') {
+					$fetching_missing_uid = true;
+					$missing_uids = $missing_uids_array[1];
+				}
+			}
+			if (!$fetching_missing_uid) {
+				$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
+					AND event_id = '".LDFF_ACTIVE_EVENT_ID."' LIMIT 2");
+				if (mysqli_num_rows($results) > 0) {
+					$data = mysqli_fetch_array($results);
+					$uid = $data['uid'];
+					$data = mysqli_fetch_array($results);
+					$next_uid = $data['uid'];
+				}
+			}
 
-					if ($uid != null) {
-						$entry = _scraping_run_step_entry($db, $uid);
-						$report_entry['type'] = 'entry';
-						$report_entry['params'] = $uid . ',' . ($fetching_missing_uid?'insert':'update');
-						$report_entry['result'] = $entry;
-						$report_entry['error'] = mysqli_error($db);
+			if ($uid != null) {
+				$entry = _scraping_run_step_entry($db, $uid);
+				$report_entry['type'] = 'entry';
+				$report_entry['params'] = $uid . ',' . ($fetching_missing_uid?'insert':'update');
+				$report_entry['result'] = $entry;
+				$report_entry['error'] = mysqli_error($db);
 
-						if ($fetching_missing_uid) {
-							setting_write($db, $SETTING_MISSING_UIDS, $missing_uids);
-							if ($missing_uids == '') {
-								setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
-							}
-						}
-						else {
-							setting_write($db, $SETTING_LAST_READ_ENTRY, $uid);
-							if ($next_uid == null) {
-								setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
-							}
-						}
-					}
-					else {
-						log_warning("No UID to scrape found, forcing scraping reset");
+				if ($fetching_missing_uid) {
+					setting_write($db, $SETTING_MISSING_UIDS, $missing_uids);
+					if ($missing_uids == '') {
 						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 					}
 				}
-
-				if (!$over && !LDFF_SCRAPING_PSEUDO_CRON) {
-					usleep(LDFF_SCRAPING_SLEEP * 1000000);
+				else {
+					setting_write($db, $SETTING_LAST_READ_ENTRY, $uid);
+					if ($next_uid == null) {
+						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+					}
 				}
-
-				$time = microtime(true);
-				$report_entry['duration'] = round($time - $last_step_time, 3);
-				$report['steps'][] = $report_entry;
-				_scraping_log_step($report_entry);
-				$last_step_time = $time;
-				$steps++;
-				$average_step_duration = ($last_step_time - $start_time) / $steps;
 			}
-
-			$report['step_count'] = $steps;
-			$report['average_step_duration'] = round($average_step_duration);
-			$report['total_duration'] = round($last_step_time - $start_time, 3);
-			$report['slept_per_step'] = LDFF_SCRAPING_SLEEP;
-			$report['timeout'] = LDFF_SCRAPING_TIMEOUT;
-			_scraping_log_report($report);
-
-	// TODO Format and log report in file
-			return $report;
+			else {
+				log_warning("No UID to scrape found, forcing scraping reset");
+				setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+			}
 		}
 
+		if (!$over && !LDFF_SCRAPING_PSEUDO_CRON) {
+			usleep(LDFF_SCRAPING_SLEEP * 1000000);
+		}
 
-		?>
+		$time = microtime(true);
+		$report_entry['duration'] = round($time - $last_step_time, 3);
+		$report['steps'][] = $report_entry;
+		_scraping_log_step($report_entry);
+		$last_step_time = $time;
+		$steps++;
+		$average_step_duration = ($last_step_time - $start_time) / $steps;
+	}
+
+	$report['step_count'] = $steps;
+	$report['average_step_duration'] = round($average_step_duration);
+	$report['total_duration'] = round($last_step_time - $start_time, 3);
+	$report['slept_per_step'] = LDFF_SCRAPING_SLEEP;
+	$report['timeout'] = LDFF_SCRAPING_TIMEOUT;
+	_scraping_log_report($report);
+
+	return $report;
+}
+
+?>

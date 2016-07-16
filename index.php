@@ -115,10 +115,10 @@ function page_details($db) {
 		$entry = mysqli_fetch_array($results);
 		if (isset($entry['type'])) {
 			$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
-			$entry['received'] = page_details_list_comments($db,
-				"uid_entry = $uid AND uid_author != $uid");
 			$entry['given'] = page_details_list_comments($db,
 				"uid_author = $uid AND uid_entry != $uid");
+			$entry['received'] = page_details_list_comments($db,
+				"uid_entry = $uid AND uid_author != $uid AND uid_author NOT IN(".(LDFF_UID_BLACKLIST or "\'\'").")");
 			$entry['given_average'] = score_average($entry['given']);
 
 			$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
