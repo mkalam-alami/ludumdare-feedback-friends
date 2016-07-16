@@ -1,9 +1,5 @@
 <?php 
 
-function _escape($string) {
-	return mysqli_real_escape_string($string);
-}
-
 function _scraping_is_uid_blacklisted($uid) {
 	static $blacklist = null;
 	if (!$blacklist) {
@@ -61,7 +57,7 @@ function _scraping_run_step_entry($db, $uid) {
 		$score_per_author = array();
 		foreach ($entry['comments'] as $comment) {
 			if ($order++ > $max_order) {
-				$uid_author = _escape($comment['uid_author']);
+				$uid_author = mysqli_real_escape_string($db, $comment['uid_author']);
 				if (!isset($score_per_author[$uid_author])) {
 					$score_per_author[$uid_author] = 0;
 				}
@@ -79,9 +75,9 @@ function _scraping_run_step_entry($db, $uid) {
 				$new_comments_sql .= "('".LDFF_ACTIVE_EVENT_ID."',
 					'$uid',
 					'".$comment['order']."',
-					'"._escape($comment['uid_author'])."',
-					'"._escape($comment['author'])."',
-					'"._escape($comment['comment'])."',
+					'".mysqli_real_escape_string($db, $comment['uid_author'])."',
+					'".mysqli_real_escape_string($db, $comment['author'])."',
+					'".mysqli_real_escape_string($db, $comment['comment'])."',
 					'".date_format($comment['date'], 'Y-m-d H:i')."',
 					'".$score."'
 					)";
@@ -98,11 +94,11 @@ function _scraping_run_step_entry($db, $uid) {
 
 			// Update entry table
 		mysqli_query($db, "UPDATE entry SET 
-			author = '" . _escape($entry['author']) . "',
-			title = '" . _escape($entry['title']) . "',
-			type = '" . _escape($entry['type']) . "',
-			description = '" . _escape($entry['description']) . "',
-			platforms = '" . _escape($entry['platforms']) . "',
+			author = '" . mysqli_real_escape_string($db, $entry['author']) . "',
+			title = '" . mysqli_real_escape_string($db, $entry['title']) . "',
+			type = '" . mysqli_real_escape_string($db, $entry['type']) . "',
+			description = '" . mysqli_real_escape_string($db, $entry['description']) . "',
+			platforms = '" . mysqli_real_escape_string($db, $entry['platforms']) . "',
 			comments_given = '$comments_given',
 			comments_received = '$comments_received',
 			coolness = '$coolness',
@@ -113,11 +109,11 @@ function _scraping_run_step_entry($db, $uid) {
 				entry(uid,event_id,author,title,type,description,platforms,comments_given,comments_received,coolness,last_updated) 
 				VALUES('$uid',
 					'" . LDFF_ACTIVE_EVENT_ID . "',
-					'" . _escape($entry['author']). "',
-					'" . _escape($entry['title']). "',
-					'" . _escape($entry['type']). "',
-					'" . _escape($entry['description']). "',
-					'" . _escape($entry['platforms']). "',
+					'" . mysqli_real_escape_string($db, $entry['author']). "',
+					'" . mysqli_real_escape_string($db, $entry['title']). "',
+					'" . mysqli_real_escape_string($db, $entry['type']). "',
+					'" . mysqli_real_escape_string($db, $entry['description']). "',
+					'" . mysqli_real_escape_string($db, $entry['platforms']). "',
 					'$comments_given',
 					'$comments_received',
 					'$coolness',

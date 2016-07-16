@@ -84,9 +84,9 @@ function ld_fetch_entry($uid) {
 		foreach (pq('.comment') as $comment) {
 			$comments[] = array(
 				'uid_author' => intval(str_replace('?action=preview&uid=', '', pq('a', $comment)->attr('href'))),
-				'author' => pq('a', $comment)->text(),
+				'author' => utf8_decode(pq('a', $comment)->text()),
 				'order' => $order++,
-				'comment' => pq('p', $comment)->html(),
+				'comment' => utf8_decode(pq('p', $comment)->html()),
 				'date' => date_create_from_format('M d, Y @ g:ia', pq('small', $comment)->text())
 			);
 		}
@@ -94,10 +94,10 @@ function ld_fetch_entry($uid) {
 		// Build entry array
 		$entry = array(
 			'uid' => $uid,
-			'author' => pq('#compo2 a strong')->text(),
-			'title' => pq('#compo2 h2')->eq(0)->text(),
+			'author' => utf8_decode(pq('#compo2 a strong')->text()),
+			'title' => utf8_decode(pq('#compo2 h2')->eq(0)->text()),
 			'type' => (pq('#compo2 > div > i')->text() == 'Compo Entry') ? 'compo' : 'jam',
-			'description' => pq(pq('#compo2 h2')->eq(1))->prev()->html(),
+			'description' => utf8_decode(pq(pq('#compo2 h2')->eq(1))->prev()->html()),
 			'platforms' => $platforms,
 			'picture' => pq('.shot-nav img')->attr('src'),
 			'comments' => $comments

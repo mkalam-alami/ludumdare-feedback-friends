@@ -13,6 +13,10 @@ function cache_write($key, $value) {
 	apcu_store($key, $value, LDFF_CACHING_TTL);
 }
 
+function cache_delete($key) {
+	apcu_delete($key);
+}
+
 // Caching: mock APCu functions if missing
 
 if (!function_exists('apcu_fetch')) {

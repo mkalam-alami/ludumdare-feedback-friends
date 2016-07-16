@@ -103,11 +103,14 @@ function page_details($db) {
 	$cache_key = $event_id.'__uid-'.$uid;
 	$output = cache_read($cache_key);
 
+	// Force refresh
+	if (isset($_GET['refresh'])) {
+		util_require_admin();
+		scraping_refresh_entry($db, $uid);
+		$output = null;
+	}
+
 	if (!$output) {
-		// Force refresh
-		if (isset($_GET['refresh'])) { // TODO Prevent abuse
-			scraping_refresh_entry($db, $uid);
-		}
 
 		// Gather entry info
 		$results = mysqli_query($db, "SELECT * FROM entry WHERE event_id = '$event_id' AND uid = ".$uid)
