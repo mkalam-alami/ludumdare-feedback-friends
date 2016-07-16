@@ -44,7 +44,7 @@ function _log($level, $message) {
 }
 
 function _log_format($level, $message) {
-	$date = date('Y-m-d H:m:s');
+	$date = date('Y-m-d H:i:s');
 	return "$level [$date] $message";
 }
 
