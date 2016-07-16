@@ -225,7 +225,6 @@ function page_browse($db) {
 			$page = intval(util_sanitize_query_param('page'));
 			$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 		}
-		echo $sql;
 
 		// Fetch entries
 		$entries = array();
