@@ -1,5 +1,5 @@
 vendor/
-composer.lock
+composer*
 config.php
 data/*
 *~

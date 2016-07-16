@@ -21,9 +21,6 @@ define('LDFF_SCRAPING_TIMEOUT', 1); // max execution duration, in seconds
 define('LDFF_SCRAPING_SLEEP', 0); // time to sleep betwen requests, in seconds
 define('LDFF_SCRAPING_FRONTPAGE_MAX_AGE', 300); // max age after which scraping is forced for the 9 frontpage entries, in seconds.
 
-// Caching
-define('LDFF_CACHING_ENABLED', true);
-
 // Logging
 define('LDFF_LOG_ENABLED', true);
 define('LDFF_LOG_PATH', __DIR__ . '/ldff.log');
