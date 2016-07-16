@@ -49,11 +49,15 @@ h1, h2, h3 {
 	padding-top: 5px;
 	-webkit-padding-start: 20px;
 }
-
 /* Results */
 
 #results-container {
 	postition: relative;
+}
+
+#results-count {
+	font-style: italic;
+	font-size: 2.5rem;
 }
 
 #loader {

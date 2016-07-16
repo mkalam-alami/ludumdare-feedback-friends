@@ -228,9 +228,7 @@ function page_browse($db) {
 		$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $not_coolness_search) ? 'Search results' : 'These entries need feedback!';
 		$context['page'] = $page;
 		$context['entries'] = $entries;
-		if ($not_coolness_search) {
-			$context['entry_count'] = $entry_count;
-		}
+		$context['entry_count'] = $entry_count;
 		$context['entries_found'] = count($entries) > 0;
 		$context['several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
 		$context['search_query'] = util_sanitize_query_param('query');

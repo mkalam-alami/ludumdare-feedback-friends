@@ -1,12 +1,6 @@
 {{^entries_only}}
 	<h1>{{event_title}}</h1>
-	<h2>{{title}}</h2>
-
-	{{#entry_count}}
-		<div class="col-xs-12">
-			<h3>Found: {{entry_count}}</h3>
-		</div>
-	{{/entry_count}}
+	<h2>{{title}} <span id="results-count">({{entry_count}} entries)</span></h2>
 {{/entries_only}}
 
 {{#entries}}
@@ -25,12 +19,12 @@
 {{/entries}}
 
 <div id="more-container" class="col-xs-12">
-	{{#entries_found}}
-		{{#several_pages_found}}
+	{{#are_entries_found}}
+		{{#are_several_pages_found}}
 		<button id="more" class="btn btn-default" data-page="{{page}}">Load more...</button>
-		{{/several_pages_found}}
-	{{/entries_found}}
-	{{^entries_found}}
+		{{/are_several_pages_found}}
+	{{/are_entries_found}}
+	{{^are_entries_found}}
 		Nothing found.
-	{{/entries_found}}
+	{{/are_entries_found}}
 </div>
