@@ -1,8 +1,7 @@
 <?php 
 
-// TODO Sanitize inputs better
 function _escape($string) {
-	return addslashes($string);
+	return mysqli_real_escape_string($string);
 }
 
 function _scraping_is_uid_blacklisted($uid) {
