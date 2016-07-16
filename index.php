@@ -73,11 +73,9 @@ function prepare_entry_context($entry) {
 
 // PAGE : Entry details
 
-function page_details_list_comments($db, $where_clause) {
+function page_details_list_comments($db, $sql) {
 	global $event_id;
-	$results = mysqli_query($db, "SELECT * FROM comment 
-			WHERE event_id = '$event_id' AND $where_clause 
-			ORDER BY `date` DESC, `order` DESC")
+	$results = mysqli_query($db, "$sql ORDER BY `date` DESC, `order` DESC")
 		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
@@ -119,9 +117,14 @@ function page_details($db) {
 		if (isset($entry['type'])) {
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
 			$entry['given'] = page_details_list_comments($db,
-				"uid_author = $uid AND uid_entry != $uid");
+				"SELECT comment.*, entry.author FROM comment, entry 
+				WHERE comment.event_id = '$event_id' AND entry.event_id = '$event_id'
+				AND comment.uid_entry = entry.uid
+				AND comment.uid_author = $uid AND comment.uid_entry != $uid");
 			$entry['received'] = page_details_list_comments($db,
-				"uid_entry = $uid AND uid_author != $uid AND uid_author NOT IN(".(LDFF_UID_BLACKLIST or "\'\'").")");
+				"SELECT * FROM comment WHERE event_id = '$event_id' 
+				AND uid_entry = $uid AND uid_author != $uid 
+				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"\'\'").")");
 			$entry['given_average'] = score_average($entry['given']);
 
 			$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
