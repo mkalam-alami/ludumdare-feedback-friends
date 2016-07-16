@@ -178,10 +178,12 @@ function _scraping_log_report($report) {
 		- Scraping is cut in small "steps" to better control execution time.
 		  Every step, we either:
 			- Read the UIDs page
-			- Fetch info for a entry
+			- Fetch info for an entry
 
 		1. Read the UIDs page and store all the UIDs missing from the DB in the "setting" table
-		2. If we found missing UIDs, then run through them to scrape them. Otherwise, run through all existing UIDs.
+		2. If we found missing UIDs, then run through them to scrape them.
+		   Otherwise, run through all existing UIDs, while at the same time 
+		   making sure the 9 front page entries were updated during the last X minutes.
 		3. Back to 1
 
 */
@@ -198,6 +200,7 @@ function scraping_run($db) {
 	$steps = 0;
 	$average_step_duration = 0;
 	$over = false;
+	$front_page_max_age = ceil(LDFF_SCRAPING_FRONTPAGE_MAX_AGE / 60);
 
 	// Reset scraping on event ID change
 	$event_id_cache = setting_read($db, $SETTING_EVENT_ID, -1);
@@ -228,8 +231,10 @@ function scraping_run($db) {
 			$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 			$next_uid = null;
 
-			// Go through missing UIDs, OR through all existing entries
+			// Choose what entry we need to scrape...
+			// ...do we go through missing UIDs?
 			$fetching_missing_uid = false;
+			$refresh_font_page_uid = false;
 			if (strlen($missing_uids) > 0) {
 				$missing_uids_array = explode(',', $missing_uids, 2);
 				$uid = $missing_uids_array[0];
@@ -239,20 +244,38 @@ function scraping_run($db) {
 				}
 			}
 			if (!$fetching_missing_uid) {
-				$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
-					AND event_id = '".LDFF_ACTIVE_EVENT_ID."' LIMIT 2");
+				// ...or do we update a front page entry?
+				$results = mysqli_query($db, "SELECT uid FROM entry WHERE event_id = '".LDFF_ACTIVE_EVENT_ID."' 
+					AND last_updated < DATE_SUB(NOW(), INTERVAL ".$front_page_max_age." MINUTE) 
+					ORDER BY coolness DESC, last_updated DESC LIMIT 1");
 				if (mysqli_num_rows($results) > 0) {
 					$data = mysqli_fetch_array($results);
 					$uid = $data['uid'];
-					$data = mysqli_fetch_array($results);
-					$next_uid = $data['uid'];
+					$refresh_font_page_uid = true;
+				}
+
+				if (!$refresh_font_page_uid) {
+					// ...or just go through all existing entries?
+					$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
+						AND event_id = '".LDFF_ACTIVE_EVENT_ID."' LIMIT 2");
+					if (mysqli_num_rows($results) > 0) {
+						$data = mysqli_fetch_array($results);
+						$uid = $data['uid'];
+						$data = mysqli_fetch_array($results);
+						$next_uid = $data['uid'];
+					}
 				}
 			}
 
 			if ($uid != null) {
+				$params = $uid . ',' . (($fetching_missing_uid)?'insert':'update');
+				if ($refresh_font_page_uid) {
+					$params .= ',frontpage';
+				}
+
 				$entry = _scraping_run_step_entry($db, $uid);
 				$report_entry['type'] = 'entry';
-				$report_entry['params'] = $uid . ',' . ($fetching_missing_uid?'insert':'update');
+				$report_entry['params'] = $params;
 				$report_entry['result'] = $entry;
 				$report_entry['error'] = mysqli_error($db);
 
@@ -262,7 +285,7 @@ function scraping_run($db) {
 						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 					}
 				}
-				else {
+				else if (!$refresh_font_page_uid) {
 					setting_write($db, $SETTING_LAST_READ_ENTRY, $uid);
 					if ($next_uid == null) {
 						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
