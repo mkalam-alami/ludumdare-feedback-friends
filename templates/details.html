@@ -6,10 +6,12 @@
 			{{> cartridge}}
 			{{#is_active_event}}
 			<br /><br />
-			<p class="bg-warning">
-				<b>N.B.</b> Comments take a while to appear (up to ~30mn), so don't worry if some comments are missing and the score is off.<br />
-				<a href="?event={{search_event}}&amp;uid={{uid}}&amp;refresh" class="btn btn-default ">Force refresh* <span style="font-size: 1.1rem"><br />(last updated {{last_updated}})</span></a><br />
-				<span style="font-size: 1.1rem">*This button will refresh everything except your "Given comments".</span>
+			<p class="alert alert-warning">
+				<b>N.B.</b> Comments take a while to appear (up to about <i>{{oldest_entry_age}}mn</i>), so don't worry if some comments are missing and the score is off.
+			</p>
+			<p>
+				<b>Last entry update</b><br />
+				{{last_updated}}</b>
 			</p>
 			{{/is_active_event}}
 		</div>

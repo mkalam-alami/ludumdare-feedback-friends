@@ -10,8 +10,20 @@ $db = db_connect();
 
 set_time_limit(999);
 
+// Show cache status
+if (isset($_GET['cache'])) {
+	echo '<pre>';
+	print_r(apcu_cache_info());
+	echo '</pre>';
+
+	if (isset($_GET['clear'])) {
+		apcu_clear_cache();
+		echo '<h1>CACHE CLEARED.</h1>';
+	}
+}
+
 // Recompute coolness
-if (isset($_GET['coolness'])) {
+else if (isset($_GET['coolness'])) {
 
 	$first_uid = 0;
 	if (isset($_GET['uid'])) {
@@ -47,7 +59,7 @@ else if (isset($_GET['reset']) && $_GET['reset'] == LDFF_ACTIVE_EVENT_ID) {
 }
 
 else {
-	echo '?coolness, ?reset=[event]';
+	echo '?cache[&clear], ?coolness, ?reset=[event]';
 }
 
 mysqli_close($db);

@@ -50,6 +50,7 @@ function util_format_platforms($value) {
 		else {
 			$result .= ucfirst($platform);
 		}
+		$result .= ' ';
 	}
 	return $result;
 }

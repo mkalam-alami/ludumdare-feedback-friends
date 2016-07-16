@@ -5,6 +5,7 @@
 define('LDFF_VERSION', 1);
 define('LDFF_PAGE_SIZE', 9);
 define('LDFF_SCRAPING_ROOT', 'http://ludumdare.com/compo/');
+define('LDFF_CACHING_TTL', 120);
 
 // Includes
 
@@ -13,6 +14,7 @@ require_once(__DIR__ . '/../vendor/autoload.php'); // TODO Optimize imports
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/log.php');
 require_once(__DIR__ . '/db.php');
+require_once(__DIR__ . '/cache.php');
 require_once(__DIR__ . '/setting.php');
 require_once(__DIR__ . '/ludumdare.php');
 require_once(__DIR__ . '/score.php');

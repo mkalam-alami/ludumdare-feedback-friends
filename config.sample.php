@@ -20,6 +20,9 @@ define('LDFF_SCRAPING_PSEUDO_CRON_DELAY', 60); // delay between executions, in s
 define('LDFF_SCRAPING_TIMEOUT', 1); // max execution duration, in seconds
 define('LDFF_SCRAPING_SLEEP', 0); // time to sleep betwen requests, in seconds
 
+// Caching
+define('LDFF_CACHING_ENABLED', true);
+
 // Logging
 define('LDFF_LOG_ENABLED', true);
 define('LDFF_LOG_PATH', __DIR__ . '/ldff.log');
