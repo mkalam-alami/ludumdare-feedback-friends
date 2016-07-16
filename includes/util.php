@@ -62,7 +62,11 @@ function util_check_picture_folder($event_id) {
 	}
 }
 
-function util_get_picture_path($event_id, $uid) {
+function util_get_picture_file_path($event_id, $uid) {
+	return __DIR__ . "/../data/$event_id/$uid.jpg";
+}
+
+function util_get_picture_url($event_id, $uid) {
 	return "data/$event_id/$uid.jpg";
 }
 

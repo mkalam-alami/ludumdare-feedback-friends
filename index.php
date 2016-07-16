@@ -63,7 +63,7 @@ function prepare_entry_context($entry) {
 	global $event_id;
 
 	if (isset($entry['type'])) {
-		$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
+		$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
 		$entry['type'] = util_format_type($entry['type']);
 		$entry['platforms'] = util_format_platforms($entry['platforms']);
 	}
@@ -117,7 +117,7 @@ function page_details($db) {
 			or log_error_and_die('Failed to fetch entry', mysqli_error($db)); 
 		$entry = mysqli_fetch_array($results);
 		if (isset($entry['type'])) {
-			$entry['picture'] = util_get_picture_path($event_id, $entry['uid']);
+			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
 			$entry['given'] = page_details_list_comments($db,
 				"uid_author = $uid AND uid_entry != $uid");
 			$entry['received'] = page_details_list_comments($db,

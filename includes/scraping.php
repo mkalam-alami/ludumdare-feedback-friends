@@ -45,7 +45,7 @@ function _scraping_run_step_entry($db, $uid) {
 		if ($entry['picture']) {
 			util_check_picture_folder(LDFF_ACTIVE_EVENT_ID);
 			$picture_data = file_get_contents($entry['picture']);
-			file_put_contents(util_get_picture_path(LDFF_ACTIVE_EVENT_ID, $uid), $picture_data)
+			file_put_contents(util_get_picture_file_path(LDFF_ACTIVE_EVENT_ID, $uid), $picture_data)
 			or die('Cannot write in data/ folder');
 		}
 
