@@ -245,9 +245,10 @@ function scraping_run($db) {
 			}
 			if (!$fetching_missing_uid) {
 				// ...or do we update a front page entry?
-				$results = mysqli_query($db, "SELECT uid FROM entry WHERE event_id = '".LDFF_ACTIVE_EVENT_ID."' 
-					AND last_updated < DATE_SUB(NOW(), INTERVAL ".$front_page_max_age." MINUTE) 
-					ORDER BY coolness DESC, last_updated DESC LIMIT 1");
+				$results = mysqli_query($db, "SELECT entry.uid FROM entry 
+						INNER JOIN(SELECT uid FROM entry WHERE event_id = '".LDFF_ACTIVE_EVENT_ID."'
+						ORDER BY coolness DESC, last_updated DESC LIMIT 9) AS entry2 ON entry.uid = entry2.uid
+					AND entry.last_updated < DATE_SUB(NOW(), INTERVAL ".$front_page_max_age." MINUTE) LIMIT 1");
 				if (mysqli_num_rows($results) > 0) {
 					$data = mysqli_fetch_array($results);
 					$uid = $data['uid'];
