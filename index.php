@@ -196,19 +196,16 @@ function page_browse($db) {
 			if (isset($_GET['query']) && $_GET['query']) {
 				$query = util_sanitize_query_param('query');
 				$sql .= " AND (MATCH(author,title,platforms,type) 
-					AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')"; // WITH QUERY EXPANSION
+					AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')";
 				$empty_where = false;
 				$not_coolness_search = true;
 			}
 			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 				$sql .= " AND MATCH(platforms) AGAINST('";
 				foreach ($_GET['platforms'] as $index => $raw_platform) {
-					if ($index > 0) {
-						$sql .= ' ';
-					}
-					$sql .= util_sanitize($raw_platform);
+					$sql .= util_sanitize($raw_platform).' ';
 				}
-				$sql .= "')";
+				$sql .= "' IN BOOLEAN MODE)";
 			}
 			if (isset($_GET['sorting'])) {
 				$sorting = util_sanitize_query_param('sorting');
