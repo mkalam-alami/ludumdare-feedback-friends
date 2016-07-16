@@ -56,7 +56,7 @@ function util_format_platforms($value) {
 }
 
 function util_check_picture_folder($event_id) {
-	$folder_path = "data/$event_id";
+	$folder_path = __DIR__ . "/../data/$event_id";
 	if (!file_exists($folder_path)) {
 		mkdir($folder_path, 0770, true) or die("Failed to create $folder_path directory");
 	}
