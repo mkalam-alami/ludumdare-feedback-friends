@@ -23,7 +23,6 @@ function ld_fetch_uids() {
 
 /*
 	Retrieves the full info for an entry
-	TODO Comments
 */
 function ld_fetch_entry($uid) {
 	static $PLATFORM_KEYWORDS = array(

@@ -18,7 +18,7 @@ function _scraping_run_step_uids($db) {
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
-			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid");
+			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid AND event = '".LDFF_ACTIVE_EVENT_ID."'");
 			if ($found < 1 && strpos($missing_uids, $uid.',') === false) {
 				$missing_uids .= $uid.',';
 			}
