@@ -18,14 +18,14 @@ function score_evaluate_comment($author_uid, $entry_uid, $comment, $previous_com
 	return $score;
 }
 
-function score_comments_given($db, $uid) { 
+function score_comments_given($db, $event_id, $uid) { 
 	return db_select_single_value($db, "SELECT SUM(score) FROM comment 
-		WHERE uid_author = '$uid' AND uid_entry != '$uid'");
+		WHERE event_id = '$event_id' AND uid_author = '$uid' AND uid_entry != '$uid'");
 }
 
-function score_comments_received($db, $uid) { 
+function score_comments_received($db, $event_id, $uid) { 
 	return db_select_single_value($db, "SELECT SUM(score) FROM comment 
-		WHERE uid_entry = '$uid' AND uid_author != '$uid'
+		WHERE event_id = '$event_id' AND uid_entry = '$uid' AND uid_author != '$uid'
 		AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"\'\'").")");
 }
 

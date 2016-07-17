@@ -18,7 +18,7 @@ function _scraping_run_step_uids($db) {
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
-			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid AND event = '".LDFF_ACTIVE_EVENT_ID."'");
+			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
 			if ($found < 1 && strpos($missing_uids, $uid.',') === false) {
 				$missing_uids .= $uid.',';
 			}
@@ -50,7 +50,7 @@ function _scraping_run_step_entry($db, $uid) {
 		}
 
 		// Save comments
-		$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid'");
+		$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid' AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
 		$order = 1;
 		$new_comments = false;
 		$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,`uid_author`,`author`,`comment`,`date`,`score`) VALUES";
@@ -87,12 +87,12 @@ function _scraping_run_step_entry($db, $uid) {
 			mysqli_query($db, $new_comments_sql) or log_error(mysqli_error($db));
 		}
 
-			// Coolness
-		$comments_given = score_comments_given($db, $uid);
-		$comments_received = score_comments_received($db, $uid);
+		// Coolness
+		$comments_given = score_comments_given($db, LDFF_ACTIVE_EVENT_ID, $uid);
+		$comments_received = score_comments_received($db, LDFF_ACTIVE_EVENT_ID, $uid);
 		$coolness = score_coolness($comments_given, $comments_received);
 
-			// Update entry table
+		// Update entry table
 		mysqli_query($db, "UPDATE entry SET 
 			author = '" . mysqli_real_escape_string($db, $entry['author']) . "',
 			title = '" . mysqli_real_escape_string($db, $entry['title']) . "',
