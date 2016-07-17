@@ -127,7 +127,7 @@ function page_details($db) {
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"\'\'").")");
 			$entry['given_average'] = score_average($entry['given']);
 
-			$results = mysqli_query($db, "SELECT comment2.uid_author, entry.author FROM comment comment1, comment comment2, entry 
+			$results = mysqli_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry 
 					WHERE comment1.event_id = '$event_id' 
 					AND comment2.event_id = '$event_id' 
 					AND comment1.uid_author = $uid
