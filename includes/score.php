@@ -14,7 +14,7 @@ function score_evaluate_comment($author_uid, $entry_uid, $comment, $previous_com
 			$score = 1;
 		}
 	}
-	$score = max($score - $previous_comments_score, 0);
+	$score = max(0, min($score - $previous_comments_score, 3 - $previous_comments_score));
 	return $score;
 }
 
