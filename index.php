@@ -124,7 +124,7 @@ function page_details($db) {
 			$entry['received'] = page_details_list_comments($db,
 				"SELECT * FROM comment WHERE event_id = '$event_id' 
 				AND uid_entry = $uid AND uid_author != $uid 
-				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"\'\'").")");
+				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")");
 			$entry['given_average'] = score_average($entry['given']);
 
 			$results = mysqli_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry 
