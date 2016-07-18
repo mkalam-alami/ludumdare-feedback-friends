@@ -245,6 +245,7 @@ h1, h2, h3 {
 }
 
 .entry-caption {
+	text-align: center;
 	height: 100px;
 	overflow: hidden;
 	padding-top: 10px;
@@ -290,7 +291,7 @@ h1, h2, h3 {
 
 /* Medium devices */
 @media (min-width: 992px) {
-	#details-entry .entry {
+	#details-entry {
 		text-align: right;
 	}
 }
