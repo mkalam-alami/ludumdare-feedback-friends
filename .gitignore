@@ -3,4 +3,4 @@ composer*
 config.php
 data/*
 *~
-ldff.log
+*.log
