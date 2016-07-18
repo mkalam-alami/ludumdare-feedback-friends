@@ -125,7 +125,10 @@ function page_details($db) {
 				"SELECT * FROM comment WHERE event_id = '$event_id' 
 				AND uid_entry = $uid AND uid_author != $uid 
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")");
+			
 			$entry['given_average'] = score_average($entry['given']);
+			$entry['given_count'] = count($entry['given']);
+			$entry['received_count'] = count($entry['received']);
 
 			$results = mysqli_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry 
 					WHERE comment1.event_id = '$event_id' 
@@ -279,7 +282,7 @@ function page_static($db, $main_template) {
 		$output = render('header', $context)
 			.render($main_template, $context)
 			.render('footer', $context);
-		cache_write($cache_key, $output);
+		cache_write($main_template, $output);
 	}
 	echo $output;
 }

@@ -4,7 +4,7 @@
 {{/entries_only}}
 
 {{#entries}}
-	<div class="col-xs-6 col-sm-4">
+	<div class="col-xs-12 col-sm-4">
 		{{> cartridge}}
 		<div class="row">
 			<div class="entry-coolness text-left">
@@ -12,7 +12,7 @@
 				({{comments_given}}p given - {{comments_received}}p rec.)
 			</div>
 			<a href="?event={{search_event}}&amp;uid={{uid}}" class="btn btn-default entry-button {{#emergency_mode}}disabled{{/emergency_mode}}">
-				Entry details...
+				Details...
 			</a>
 		</div>
 	</div>
@@ -21,7 +21,9 @@
 <div id="more-container" class="col-xs-12">
 	{{#are_entries_found}}
 		{{#are_several_pages_found}}
-		<button id="more" class="btn btn-default" data-page="{{page}}">Load more...</button>
+		<button id="more" class="btn btn-primary" data-page="{{page}}">Load more...</button>
+		<br />
+		<br />
 		{{/are_several_pages_found}}
 	{{/are_entries_found}}
 	{{^are_entries_found}}

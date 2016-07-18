@@ -1,84 +1,89 @@
-<div class="container">
-	<div class="row text-center">
-		{{#entry}}
-
-		<div class="col-md-4">
+<div id="contents" class="container">
+	{{#entry}}
+	<div class="row padded">
+		<div class="col-md-4 text-right">
 			{{> cartridge}}
 			{{#is_active_event}}
 			<br /><br />
-			<p class="alert alert-warning">
-				<b>N.B.</b> Comments may take a while to appear<!-- (estimated: up to about <i>{{oldest_entry_age}}mn</i>)-->, so don't worry if some comments are missing and the score is off.
-			</p>
-			<p>
-				<b>Last time scraped</b><br />
-				{{last_updated}}</b>
-			</p>
 			{{/is_active_event}}
 		</div>
 		<div class="col-md-8">
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-8">
-						<h1>{{event_title}}</h1>
-						<h2><a href="{{ld_root}}uid={{uid}}">{{title}}</a> <i>(Balance: {{coolness}})</i></h2>
+						<h1><a href="{{ld_root}}uid={{uid}}">{{title}}</a><br /><span class="note">by {{author}}, for <a href="?event={{search_event}}">{{event_title}}</a></span></h1>
 					</div>
 				</div>
 
 				<div class="row">
 					<div class="col-xs-8">
-						<h3><b>{{author}}</b>'s feedback friends ({{friends_count}})</h3>
+						<h3>Balance: {{coolness}} - Feedback friends: {{friends_count}}</h3>
 
 						{{#friends_rows}}
+						<div style="padding: 1px">
 						<div class="btn-group">
 							{{#friends}}
 								<a href="?event={{search_event}}&amp;uid={{uid_author}}" class="btn btn-primary">{{author}}</a>&nbsp;
 							{{/friends}}
 						</div>
+						</div>
 						{{/friends_rows}}
 
-						<br />
-						<br />
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-md-4">
-						<h3>Comments given<br />({{comments_given}}p, average {{given_average}}p/c)</h3>
-						<table class="table text-left">
-						{{#given}}
-							<tr><td>
-								<h4>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
-								{{{comment}}}
-							</td></tr>
-						{{/given}}
-						</table>
-					</div>
-					<div class="col-md-4">
-						<h3>Comments received<br />({{comments_received}}p)</h3>
-						<table class="table text-left">
-						{{#received}}
-							<tr><td>
-								{{#uid_author}}
-									<h4><a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> <i>
-								{{/uid_author}}
-								{{^uid_author}}
-									<h4><span style="color: grey">{{author}}</span> <i>
-								{{/uid_author}}
-								({{score}}p)</i></h4>
-								{{{comment}}}
-							</td></tr>
-						{{/received}}
-						</table>
+						<p class="padded">
+							<b>Last time scraped</b><br />
+							{{last_updated}}</b>
+						</p>
 					</div>
 				</div>
 			</div>
 		</div>
-		{{/entry}}
-
-		{{^entry}}
-			<h3>This user does not have an entry.</h3>
-		{{/entry}}
 	</div>
+
+	<div class="row text-center padded">
+		<div class="col-md-12">
+			<p class="alert alert-warning">
+				<b>N.B.</b> Comments may take a while to appear<!-- (estimated: up to about <i>{{oldest_entry_age}}mn</i>)-->, so don't worry if some are missing and the score is off.
+			</p>
+		</div>
+	</div>
+	<div id="details-comments" class="row padded">
+		<div class="col-md-6">
+			<h3>Comments given<br /><span class="note">{{given_count}} comments, {{comments_given}} points (average {{given_average}}p/c)</span></h3>
+			<table class="table text-left">
+			{{#given}}
+				<tr><td>
+					<h4>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
+					{{{comment}}}
+				</td></tr>
+			{{/given}}
+			</table>
+		</div>
+		<div class="col-md-6">
+			<h3>Comments received<br /><span class="note">{{received_count}} comments, {{comments_received}} points</span></h3>
+			<table class="table text-left">
+			{{#received}}
+				<tr><td>
+					{{#uid_author}}
+						<h4><a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> <i>
+					{{/uid_author}}
+					{{^uid_author}}
+						<h4><span style="color: grey">{{author}}</span> <i>
+					{{/uid_author}}
+					({{score}}p)</i></h4>
+					{{{comment}}}
+				</td></tr>
+			{{/received}}
+			</table>
+		</div>
+	</div>
+	{{/entry}}
+
+	{{^entry}}
+	<div class="row">
+		<h3>This user does not have an entry.</h3>
+	</div>
+	{{/entry}}
+</div>
 </div>
 
 <script type="text/javascript" src="{{root}}static/js/jquery.min.js"></script>
