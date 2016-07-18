@@ -1,7 +1,7 @@
 <div id="contents" class="container">
 	{{#entry}}
 	<div class="row padded">
-		<div class="col-md-4 text-right">
+		<div id="details-entry" class="col-md-4">
 			{{> cartridge}}
 			{{#is_active_event}}
 			<br /><br />
@@ -10,13 +10,13 @@
 		<div class="col-md-8">
 			<div class="container">
 				<div class="row">
-					<div class="col-xs-8">
+					<div class="col-md-8">
 						<h1><a href="{{ld_root}}uid={{uid}}">{{title}}</a> <a class="back" href="?event={{search_event}}">Back</a><br /><span class="note">by {{author}}, for {{event_title}}</span></h1>
 					</div>
 				</div>
 
 				<div class="row">
-					<div class="col-xs-8">
+					<div class="col-md-8">
 						<h3>Balance: {{coolness}} - Feedback friends: {{friends_count}}</h3>
 
 						{{#friends_rows}}

@@ -64,6 +64,7 @@ h1, h2, h3 {
 
 #contents {
 	background-color: white;
+	box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
 .padded {
@@ -117,6 +118,7 @@ h1, h2, h3 {
 	background-position: top center;
 	padding: 20px;
 	border-bottom: 10px solid #45545e;
+	box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
 #header:before, #header:after {
@@ -205,7 +207,7 @@ h1, h2, h3 {
 @media (min-width: 992px) {
 	#results-container {
 		border-top: none;
-		border-left: 10px solid #d3bf9a;
+		border-left: 10px solid #baa989;
 		margin-top: 0px;
 	}
 }
@@ -278,6 +280,17 @@ h1, h2, h3 {
 
 /* Details page */
 
-#comments-header {
-	border-top: 10px solid #d3bf9a;
+#details-entry .entry {
+	margin-left: 20px;
+}
+
+#details-comments {
+	border-top: 10px solid #baa989;
+}
+
+/* Medium devices */
+@media (min-width: 992px) {
+	#details-entry .entry {
+		text-align: right;
+	}
 }
