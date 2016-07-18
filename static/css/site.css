@@ -52,6 +52,12 @@ a:hover {
 	text-decoration: underline;
 }
 
+a.back {
+	margin-left: 10px;
+	color: #68A;
+	font-size: 70%;
+}
+
 h1, h2, h3 {
 	margin: 0 0 20px 0;
 }

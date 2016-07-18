@@ -11,7 +11,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-8">
-						<h1><a href="{{ld_root}}uid={{uid}}">{{title}}</a><br /><span class="note">by {{author}}, for <a href="?event={{search_event}}">{{event_title}}</a></span></h1>
+						<h1><a href="{{ld_root}}uid={{uid}}">{{title}}</a> <a class="back" href="?event={{search_event}}">Back</a><br /><span class="note">by {{author}}, for {{event_title}}</span></h1>
 					</div>
 				</div>
 
@@ -79,8 +79,10 @@
 	{{/entry}}
 
 	{{^entry}}
-	<div class="row">
-		<h3>This user does not have an entry.</h3>
+	<div class="row padded">
+		<div class="col-md-12">
+			<h3>This user does not have an entry. <a href="?event={{search_event}}" class="back">Back</a></h3>
+		</div>
 	</div>
 	{{/entry}}
 </div>
