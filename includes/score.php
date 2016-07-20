@@ -42,7 +42,7 @@ function score_average($comments) {
 	}
 
 	if ($count > 0) {
-		return round(1. * $total / $count, 2);
+		return round(1. * $total / $count, 1);
 	}
 	else {
 		return 0;

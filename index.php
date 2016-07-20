@@ -82,9 +82,6 @@ function page_details_list_comments($db, $sql) {
 		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
 	$comments = array();
 	while ($comment = mysqli_fetch_array($results)) {
-		/*if (!$comment['author']) { // Not an entry author for this event
-			$comment['uid_author'] = null;
-		}*/
 		$comments[] = $comment;
 	}
 	return $comments;
@@ -128,6 +125,9 @@ function page_details($db) {
 				"SELECT * FROM comment WHERE event_id = '$event_id' 
 				AND uid_entry = $uid AND uid_author != $uid 
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")");
+			$entry['mentions'] = page_details_list_comments($db,
+				"SELECT * FROM comment WHERE event_id = '$event_id' 
+				AND comment LIKE '%@".$entry['author']."%'");
 			
 			$entry['given_average'] = score_average($entry['given']);
 			$entry['given_count'] = count($entry['given']);

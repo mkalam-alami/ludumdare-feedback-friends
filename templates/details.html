@@ -49,18 +49,19 @@
 		</div>
 	</div>
 	<div id="details-comments" class="row padded">
-		<div class="col-md-6">
-			<h3>Comments given<br /><span class="note">{{given_count}} comments, {{comments_given}} points (average {{given_average}}p/c)</span></h3>
+		<div class="col-md-4">
+			<h3>Comments given<br /><span class="note">{{given_count}} comments, {{comments_given}} points ({{given_average}}p/c)</span></h3>
 			<table class="table text-left">
 			{{#given}}
 				<tr><td>
 					<h4><span class="note pull-right">{{date}}</span>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
-					{{{comment}}}
+					{{{comment}}}<br />
+					<a class="note pull-right" href="{{event_url}}&amp;uid={{uid_entry}}">Entry page</a>
 				</td></tr>
 			{{/given}}
 			</table>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-5">
 			<h3>Comments received<br /><span class="note">{{received_count}} comments, {{comments_received}} points</span></h3>
 			<table class="table text-left">
 			{{#received}}
@@ -76,6 +77,29 @@
 					{{{comment}}}
 				</td></tr>
 			{{/received}}
+			</table>
+		</div>
+		<div class="col-md-3">
+			<h3>Mentions<br /><span class="note"><b>@{{author}}</b></span></h3>
+			<table class="table text-left">
+			{{#mentions}}
+				<tr><td>
+					<h4><span class="note pull-right text-right">{{date}}</span>
+					{{#uid_author}}
+						<a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a>
+					{{/uid_author}}
+					{{^uid_author}}
+						<span style="color: grey">{{author}}</span>
+					{{/uid_author}}</h4>
+					{{{comment}}}<br />
+					<a class="note pull-right" href="{{event_url}}&amp;uid={{uid_entry}}">Entry page</a>
+				</td></tr>
+			{{/mentions}}
+			{{^mentions}}
+				<p class="alert alert-info">
+					If anyone mentions this user by using "<b>@{{author}}</b>" in a comment, it will appear here.
+				</p>
+			{{/mentions}}
 			</table>
 		</div>
 	</div>
