@@ -50,10 +50,12 @@ function _scraping_run_step_entry($db, $uid) {
 		}
 
 		// Save comments
-		$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = '$uid' AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
+		$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` 
+			WHERE uid_entry = '$uid' AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
 		$order = 1;
 		$new_comments = false;
-		$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,`uid_author`,`author`,`comment`,`date`,`score`) VALUES";
+		$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,
+			`uid_author`,`author`,`comment`,`date`,`score`) VALUES";
 		$score_per_author = array();
 		foreach ($entry['comments'] as $comment) {
 			if ($order++ > $max_order) {
@@ -95,6 +97,7 @@ function _scraping_run_step_entry($db, $uid) {
 		// Update entry table
 		mysqli_query($db, "UPDATE entry SET 
 			author = '" . mysqli_real_escape_string($db, $entry['author']) . "',
+			author_page = '" . mysqli_real_escape_string($db, $entry['author_page']) . "',
 			title = '" . mysqli_real_escape_string($db, $entry['title']) . "',
 			type = '" . mysqli_real_escape_string($db, $entry['type']) . "',
 			description = '" . mysqli_real_escape_string($db, $entry['description']) . "',
@@ -106,10 +109,12 @@ function _scraping_run_step_entry($db, $uid) {
 			WHERE uid = '$uid' AND event_id = '" . LDFF_ACTIVE_EVENT_ID . "'");
 		if (mysqli_affected_rows($db) == 0) {
 			mysqli_query($db, "INSERT INTO 
-				entry(uid,event_id,author,title,type,description,platforms,comments_given,comments_received,coolness,last_updated) 
+				entry(uid,event_id,author,author_page,title,type,description,platforms,
+					comments_given,comments_received,coolness,last_updated) 
 				VALUES('$uid',
 					'" . LDFF_ACTIVE_EVENT_ID . "',
 					'" . mysqli_real_escape_string($db, $entry['author']). "',
+					'" . mysqli_real_escape_string($db, $entry['author_page']). "',
 					'" . mysqli_real_escape_string($db, $entry['title']). "',
 					'" . mysqli_real_escape_string($db, $entry['type']). "',
 					'" . mysqli_real_escape_string($db, $entry['description']). "',

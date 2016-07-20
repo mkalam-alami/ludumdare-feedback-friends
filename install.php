@@ -64,6 +64,21 @@ if ($current_version < LDFF_VERSION) {
 		
 		$current_version = write_version($db, $target_version);
 	}
+
+	$target_version = 2;
+	if ($current_version < $target_version) {
+		mysqli_query($db, "ALTER TABLE `entry` ADD `author_page` VARCHAR(255) NOT NULL AFTER `author`");
+
+		$current_version = write_version($db, $target_version);
+	}
+
+	/*
+	$target_version = X;
+	if ($current_version < $target_version) {
+
+		$current_version = write_version($db, $target_version);
+	}
+	*/
 }
 else {
 	echo 'Nothing to upgrade.';
