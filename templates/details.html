@@ -54,7 +54,7 @@
 			<table class="table text-left">
 			{{#given}}
 				<tr><td>
-					<h4>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
+					<h4><span class="note pull-right">{{date}}</span>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
 					{{{comment}}}
 				</td></tr>
 			{{/given}}
@@ -65,13 +65,14 @@
 			<table class="table text-left">
 			{{#received}}
 				<tr><td>
+					<h4><span class="note pull-right">{{date}}</span>
 					{{#uid_author}}
-						<h4><a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> <i>
+						<a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> 
 					{{/uid_author}}
 					{{^uid_author}}
-						<h4><span style="color: grey">{{author}}</span> <i>
+						<span style="color: grey">{{author}}</span> 
 					{{/uid_author}}
-					({{score}}p)</i></h4>
+					<i>({{score}}p)</i></h4>
 					{{{comment}}}
 				</td></tr>
 			{{/received}}
