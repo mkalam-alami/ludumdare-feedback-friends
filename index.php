@@ -49,6 +49,8 @@ function init_context($db) {
 	$context['search_event'] = $event_id;
 	$context['is_active_event'] = LDFF_ACTIVE_EVENT_ID == $event_id;
 	$context['oldest_entry_age'] = $oldest_entry_age;
+	$context['google_analytics_id'] = LDFF_GOOLE_ANALYTICS_ID;
+	
 	return $context;
 }
 
