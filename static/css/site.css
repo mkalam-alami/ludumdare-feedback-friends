@@ -156,6 +156,13 @@ h1, h2, h3 {
 
 /* Search block */
 
+.username-description {
+	clear: both;
+	color: #555;
+	margin-bottom: 0;
+	padding-top: 5px;
+}
+
 #search {
 	padding-top: 20px;
 	margin-bottom: 30px;
