@@ -185,6 +185,17 @@ function page_browse($db) {
 		setcookie('userid', '', time() - 60*60);
 	}
 
+	// Fetch corresponding username
+	$username = null;
+	if ($userid) {
+		$sql = "SELECT author FROM entry WHERE uid = $userid;";
+		$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
+		// This may give multiple results (for different events). Assuming that they are all identical.
+		if ($row = mysqli_fetch_array($results)) {
+			$username = $row[0];
+		}
+	}
+
 	// Caching
 	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
@@ -261,7 +272,7 @@ function page_browse($db) {
 		$context['entry_count'] = $entry_count;
 		$context['are_entries_found'] = count($entries) > 0;
 		$context['are_several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
-		$context['username'] = $userid; // TODO
+		$context['username'] = $username;
 		$context['userid'] = $userid;
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
