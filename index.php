@@ -171,6 +171,20 @@ function page_details($db) {
 function page_browse($db) {
 	global $event_id;
 
+	// Determine user ID and store in the cookie; GET param overrides any old cookie
+	$userid = null;
+	if (isset($_GET['userid'])) {
+		$userid = $_GET['userid'];
+	} else if ($_COOKIE['userid']) {
+		$userid = $_COOKIE['userid'];
+	}
+	if ($userid) {
+		setcookie('userid', $userid, time() + 31*24*60*60);
+	} else {
+		// Clear the cookie by setting an expiry time in the past
+		setcookie('userid', '', time() - 60*60);
+	}
+
 	// Caching
 	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
@@ -189,6 +203,7 @@ function page_browse($db) {
 		if (isset($_GET['page'])) $cache_key .= '-page:'.util_sanitize_query_param('page');
 		if (isset($_GET['ajax'])) $cache_key .= '-ajax:'.util_sanitize_query_param('ajax');
 		if (isset($_GET['sorting'])) $cache_key .= '-sorting:'.util_sanitize_query_param('sorting');
+		if (isset($_GET['userid'])) $cache_key .= '-userid:'.util_sanitize_query_param('userid');
 	}
 	$output = cache_read($cache_key);
 
@@ -246,6 +261,8 @@ function page_browse($db) {
 		$context['entry_count'] = $entry_count;
 		$context['are_entries_found'] = count($entries) > 0;
 		$context['are_several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
+		$context['username'] = $userid; // TODO
+		$context['userid'] = $userid;
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
