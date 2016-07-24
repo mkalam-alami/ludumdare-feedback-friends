@@ -178,6 +178,9 @@ function page_browse($db) {
 	} else if ($_COOKIE['userid']) {
 		$userid = $_COOKIE['userid'];
 	}
+	if (!preg_match('/^\d+$/', $userid)) {
+		$userid = null;
+	}
 	if ($userid) {
 		setcookie('userid', $userid, time() + 31*24*60*60);
 	} else {
