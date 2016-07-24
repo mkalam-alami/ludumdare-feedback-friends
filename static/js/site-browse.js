@@ -89,6 +89,12 @@ function bindSearch() {
 		$('#userid').val(selection.userid);
 		runSearch();
 	});
+	$('#username').bind('typeahead:change', function(e, value) {
+		if (!value) {
+			$('#userid').val('');
+			runSearch();
+		}
+	});
 
 	// Sorting
 	refreshSorting();
