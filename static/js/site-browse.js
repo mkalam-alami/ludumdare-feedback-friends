@@ -72,14 +72,22 @@ function bindSearch() {
 		highlight: true,
 	}, {
 		source: function(query, syncResults, asyncResults) {
-			searchUsernames(query, asyncResults);
+			var eventId = $('#search-event').val();
+			searchUsernames(eventId, query, asyncResults);
 		},
 		async: true,
-		limit: 10,
-		templates: {
-			notFound: 'No matching usernames found',
-			pending: '<div class="username-loader" />',
+		limit: 1e99, // Limiting happens server-side
+		display: function(suggestion) {
+			return suggestion.username;
 		},
+		templates: {
+			pending: '<div class="username-loader" />',
+			notFound: '<div class="username-not-found">Not found</div>',
+		},
+	});
+	$('#username').bind('typeahead:select', function(e, selection) {
+		$('#userid').val(selection.userid);
+		runSearch();
 	});
 
 	// Sorting
@@ -119,9 +127,9 @@ function bindSearch() {
 	});
 }
 
-function searchUsernames(query, callback) {
+function searchUsernames(eventId, query, callback) {
 	$.get(
-		'../../userid.php?username=' + encodeURIComponent(query),
+		'../../userid.php?event=' + encodeURIComponent(eventId) + '&query=' + encodeURIComponent(query),
 		function(data, textStatus, jqXHR) {
 			callback(data);
 		}

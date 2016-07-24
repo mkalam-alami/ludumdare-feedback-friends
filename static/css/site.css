@@ -101,7 +101,7 @@ h1, h2, h3 {
     color: white;
 }
 
-.input-group span.twitter-typeahead .tt-menu {
+span.twitter-typeahead .tt-menu {
 	width: 100%;
 }
 
@@ -170,6 +170,10 @@ h1, h2, h3 {
 .username-loader {
 	background: url('../img/ajax-loader.gif') no-repeat;
 	height: 24px;
+  margin: 3px 20px;
+}
+
+.username-not-found {
   margin: 3px 20px;
 }
 
