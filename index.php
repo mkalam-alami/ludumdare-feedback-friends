@@ -191,9 +191,8 @@ function page_browse($db) {
 	// Fetch corresponding username
 	$username = null;
 	if ($userid) {
-		$sql = "SELECT author FROM entry WHERE uid = $userid;";
+		$sql = "SELECT author FROM entry WHERE event_id = '$eventid' AND uid = $userid;";
 		$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
-		// This may give multiple results (for different events). Assuming that they are all identical.
 		if ($row = mysqli_fetch_array($results)) {
 			$username = $row[0];
 		}
