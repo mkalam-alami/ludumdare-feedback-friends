@@ -178,7 +178,7 @@ function page_browse($db) {
 	} else if ($_COOKIE['userid']) {
 		$userid = $_COOKIE['userid'];
 	}
-	if (!is_int($userid)) {
+	if (!is_numeric($userid)) {
 		$userid = null;
 	}
 	if ($userid) {
