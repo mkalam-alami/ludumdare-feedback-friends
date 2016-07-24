@@ -72,6 +72,17 @@ if ($current_version < LDFF_VERSION) {
 		$current_version = write_version($db, $target_version);
 	}
 
+	$target_version = 3;
+	if ($current_version < $target_version) {
+		// This index helps to filter entries down to the current event.
+		// Without it, we get an 'ALL' join type (i.e. full table scan). With it,
+		// we get 'ref' type.
+		mysqli_query($db, "ALTER TABLE `entry` ADD INDEX `event_id_index`
+(`event_id`)");
+
+		$current_version = write_version($db, $target_version);
+	}
+
 	/*
 	$target_version = X;
 	if ($current_version < $target_version) {

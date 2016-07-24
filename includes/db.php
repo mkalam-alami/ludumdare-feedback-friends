@@ -25,4 +25,17 @@ function db_select_single_value($db, $query) {
 	return $row[0];
 }
 
+function db_explain_query($db, $query) {
+	$results = mysqli_query($db, "EXPLAIN $query") or log_error_and_die('Failed to get query explanation', mysqli_error($db)); 
+	echo '<pre>';
+	echo "$query;\n\n";
+	while ($row = mysqli_fetch_assoc($results)) {
+		foreach ($row as $key => $value) {
+			echo "$key: $value, ";
+		}
+		echo "\n";
+	}
+	echo '</pre>';
+}
+
 ?>
