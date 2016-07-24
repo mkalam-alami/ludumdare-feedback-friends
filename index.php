@@ -223,19 +223,39 @@ function page_browse($db) {
 		}
 
 		// Build query according to search params
+		// For the structure of the join, see http://sqlfiddle.com/#!9/26ae79/8.
 		$not_coolness_search = false;
-		$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM entry WHERE event_id = '$event_id'";
+		$have_search_query = isset($_GET['query']) && !!$_GET['query'];
+		$filter_by_user = !LDFF_EMERGENCY_MODE && !!$userid && !$have_search_query;
+		$sql = "SELECT SQL_CALC_FOUND_ROWS entry.*";
+		if ($filter_by_user) {
+			// Count comments by entry (see also the GROUP BY later on)
+			$sql .= ", COUNT(comment.uid_entry) AS comments_by_current_user";
+		}
+		$sql .= " FROM entry";
+		if ($filter_by_user) {
+			// Join on the comments table, selecting only the comments authored by the current user
+			$sql .= " LEFT JOIN comment";
+			$sql .= "    ON entry.uid = comment.uid_entry";
+			$sql .= "   AND entry.event_id = comment.event_id";
+		 	$sql .= "   AND comment.uid_author = $userid";
+		}
+		$sql .= " WHERE entry.event_id = '$event_id'";
+		if ($filter_by_user) {
+			// Omit the current user's own game
+			$sql .= " AND entry.uid != $userid";
+		}
 		$sorting = 'coolness';
 		if (!LDFF_EMERGENCY_MODE) {
-			if (isset($_GET['query']) && $_GET['query']) {
+			if ($have_search_query) {
 				$query = util_sanitize_query_param('query');
-				$sql .= " AND (MATCH(author,title,platforms,type) 
-					AGAINST ('$query' IN BOOLEAN MODE) OR uid = '$query')";
+				$sql .= " AND (MATCH(entry.author,entry.title,entry.platforms,entry.type) 
+					AGAINST ('$query' IN BOOLEAN MODE) OR entry.uid = '$query')";
 				$empty_where = false;
 				$not_coolness_search = true;
 			}
 			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-				$sql .= " AND MATCH(platforms) AGAINST('";
+				$sql .= " AND MATCH(entry.platforms) AGAINST('";
 				foreach ($_GET['platforms'] as $index => $raw_platform) {
 					$sql .= util_sanitize($raw_platform).' ';
 				}
@@ -245,10 +265,15 @@ function page_browse($db) {
 				$sorting = util_sanitize_query_param('sorting');
 			}
 		}
+		if ($filter_by_user) {
+			// Group by entry, then select only those entries that received 0 comments from the current user
+			$sql .= " GROUP BY entry.uid, entry.event_id";
+			$sql .= " HAVING comments_by_current_user = 0";
+		}
 		switch ($sorting) {
 			case 'random': $sql .= " ORDER BY RAND()"; break;
-			case 'comments': $sql .= " ORDER BY comments_received, last_updated DESC"; break;
-			default: $sql .= " ORDER BY coolness DESC, last_updated DESC";
+			case 'comments': $sql .= " ORDER BY entry.comments_received, entry.last_updated DESC"; break;
+			default: $sql .= " ORDER BY entry.coolness DESC, entry.last_updated DESC";
 		}
 		$sql .= " LIMIT ".LDFF_PAGE_SIZE;
 		$page = 1;
@@ -256,6 +281,9 @@ function page_browse($db) {
 			$page = intval(util_sanitize_query_param('page'));
 			$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 		}
+
+		// Uncomment to explain query plan
+		// db_explain_query($db, $sql);
 
 		// Fetch entries
 		$entries = array();
