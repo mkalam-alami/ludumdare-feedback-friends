@@ -188,16 +188,6 @@ function page_browse($db) {
 		setcookie('userid', '', time() - 60*60);
 	}
 
-	// Fetch corresponding username
-	$username = null;
-	if ($userid) {
-		$sql = "SELECT author FROM entry WHERE event_id = '$eventid' AND uid = $userid;";
-		$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
-		if ($row = mysqli_fetch_array($results)) {
-			$username = $row[0];
-		}
-	}
-
 	// Caching
 	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
@@ -221,6 +211,16 @@ function page_browse($db) {
 	$output = cache_read($cache_key);
 
 	if (!$output) {
+
+		// Fetch corresponding username
+		$username = null;
+		if ($userid) {
+			$sql = "SELECT author FROM entry WHERE event_id = '$eventid' AND uid = $userid;";
+			$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
+			if ($row = mysqli_fetch_array($results)) {
+				$username = $row[0];
+			}
+		}
 
 		// Build query according to search params
 		$not_coolness_search = false;
