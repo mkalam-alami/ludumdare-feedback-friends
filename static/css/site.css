@@ -101,6 +101,10 @@ h1, h2, h3 {
     color: white;
 }
 
+.input-group span.twitter-typeahead .tt-menu {
+	width: 100%;
+}
+
 /* Same height columns http://stackoverflow.com/a/19695851 */
 .row {
   overflow: hidden; 
@@ -161,6 +165,12 @@ h1, h2, h3 {
 	color: #555;
 	margin-bottom: 0;
 	padding-top: 5px;
+}
+
+.username-loader {
+	background: url('../img/ajax-loader.gif') no-repeat;
+	height: 24px;
+  margin: 3px 20px;
 }
 
 #search {

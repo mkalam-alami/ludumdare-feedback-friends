@@ -66,6 +66,22 @@ function bindSearch() {
 		runSearch();
 	});
 
+	// Username
+	$('#username').typeahead({
+		minLength: 2,
+		highlight: true,
+	}, {
+		source: function(query, syncResults, asyncResults) {
+			searchUsernames(query, asyncResults);
+		},
+		async: true,
+		limit: 10,
+		templates: {
+			notFound: 'No matching usernames found',
+			pending: '<div class="username-loader" />',
+		},
+	});
+
 	// Sorting
 	refreshSorting();
 	$('.search-sorting-button').click(function () {
@@ -101,6 +117,15 @@ function bindSearch() {
 	$('#search').submit(function(e) {
 		e.preventDefault();
 	});
+}
+
+function searchUsernames(query, callback) {
+	$.get(
+		'../../userid.php?username=' + encodeURIComponent(query),
+		function(data, textStatus, jqXHR) {
+			callback(data);
+		}
+	);
 }
 
 function runSearch() {
