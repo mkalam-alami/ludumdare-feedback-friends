@@ -192,8 +192,8 @@ function page_browse($db) {
 	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
 	$cache_key = null;
-	if ((!isset($_GET['query']) || $_GET['query'] == '')
-			&& (!isset($_GET['sorting']) || $_GET['sorting'] != 'random')) { // Don't cache text query-based searches
+	if ((!isset($_GET['query']) || $_GET['query'] == '') // Don't cache text searches
+			&& (!isset($_GET['sorting']) || $_GET['sorting'] != 'random')) { // Don't cache randomized pages
 		$cache_key = $event_id.'__browse';
 		if (LDFF_EMERGENCY_MODE) $cache_key .= '-emergency';
 		if (isset($_GET['platforms'])) {
