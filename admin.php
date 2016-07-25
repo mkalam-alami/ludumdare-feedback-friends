@@ -27,7 +27,7 @@ else if (isset($_GET['coolness'])) {
 
 	$first_uid = 0;
 	if (isset($_GET['uid'])) {
-		$first_uid = $_GET['uid'];
+		$first_uid = util_sanitize_query_param('uid');
 	}
 
 	echo 'Refreshing coolness... ';

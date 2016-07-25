@@ -4,6 +4,15 @@
 		<div class="col-md-3">
 			{{^emergency_mode}}
 			<form id="search" action="." method="get">
+				<label for="username">View games as</label>
+				<div class="input-group">
+					<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
+					<input id="userid" type="hidden" name="userid" value="{{userid}}" />
+					<p class="username-description">Hide games that you've already commented on (except when searching)</p>
+				</div>
+
+				<div class="search-separator"></div>
+
 				<label for="platforms">Event</label>
 				<div class="input-group dropdown">
 					<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -17,13 +26,6 @@
 					</ul>
 				</div>
 				<input id="search-event" type="hidden" name="event" value="{{search_event}}" data-active-event="{{active_event}}" />
-
-				<label for="username">Username</label>
-				<div class="input-group">
-					<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
-					<input id="userid" type="hidden" name="userid" value="{{userid}}" />
-					<p class="username-description">Hide games that you've already commented on (except when searching)</p>
-				</div>
 
 				<label for="platforms">Entries sorting</label>
 				<div class="list-group">
@@ -60,7 +62,7 @@
 
 				<label for="query">Search</label>
 				<div class="input-group">
-					<input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" />
+					<input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" placeholder="Keyword or user ID" />
 					<ul class="search-syntax-tips">
 						<li><i>Wildcard:</i> ludum*</li>
 						<li><i>OR:</i> ludum dare</li>
@@ -79,6 +81,8 @@
 						<p>Due to high traffic, most features are temporarily disabled :-P</p>
 					</div>
 				{{/emergency_mode}}
+
+				<div class="search-separator"></div>
 
 				<h3><a href="?p=faq">FAQ</a></h3>
 			</form>

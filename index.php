@@ -174,9 +174,9 @@ function page_browse($db) {
 	// Determine user ID and store in the cookie; GET param overrides any old cookie
 	$userid = null;
 	if (isset($_GET['userid'])) {
-		$userid = $_GET['userid'];
-	} else if ($_COOKIE['userid']) {
-		$userid = $_COOKIE['userid'];
+		$userid = util_sanitize_query_param('userid');
+	} else if (isset($_COOKIE['userid'])) {
+		$userid = util_sanitize($_COOKIE['userid']);
 	}
 	if (!is_numeric($userid)) {
 		$userid = null;
@@ -215,7 +215,7 @@ function page_browse($db) {
 		// Fetch corresponding username
 		$username = null;
 		if ($userid) {
-			$sql = "SELECT author FROM entry WHERE event_id = '$event_id' AND uid = $userid;";
+			$sql = "SELECT author FROM entry WHERE uid = $userid LIMIT 1;";
 			$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
 			if ($row = mysqli_fetch_array($results)) {
 				$username = $row[0];
@@ -307,7 +307,7 @@ function page_browse($db) {
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-			$context['search_platforms'] = implode(', ', $_GET['platforms']);
+			$context['search_platforms'] = implode(', ', array_map('util_sanitize', $_GET['platforms']));
 		}
 		if (isset($_GET['page'])) {
 			$context['entries_only'] = true;
