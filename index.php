@@ -281,9 +281,9 @@ function page_browse($db) {
 		}
 		switch ($sorting) {
 			case 'random': $sql .= " ORDER BY RAND()"; break;
-			case 'given': $sql .= " ORDER BY entry.comments_given DESC, entry.last_updated DESC"; break;
 			case 'received': $sql .= " ORDER BY entry.comments_received, entry.comments_given DESC, entry.last_updated DESC"; break;
 			case 'received_desc': $sql .= " ORDER BY entry.comments_received DESC, entry.last_updated DESC"; break; // Hidden
+			case 'given': $sql .= " ORDER BY entry.comments_given DESC, entry.last_updated DESC"; break; // Hidden
 			case 'laziest': $sql .= " ORDER BY entry.coolness, entry.comments_given, entry.comments_received, entry.last_updated DESC"; break; // Hidden
 			default: $sql .= " ORDER BY entry.coolness DESC, entry.last_updated DESC";
 		}
