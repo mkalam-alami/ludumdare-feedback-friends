@@ -116,6 +116,8 @@ function page_details($db) {
 		$entry = mysqli_fetch_array($results);
 		if (isset($entry['type'])) {
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
+
+			// Comments
 			$entry['given'] = page_details_list_comments($db,
 				"SELECT comment.*, entry.author FROM comment, entry 
 				WHERE comment.event_id = '$event_id' AND entry.event_id = '$event_id'
@@ -128,11 +130,13 @@ function page_details($db) {
 			$entry['mentions'] = page_details_list_comments($db,
 				"SELECT * FROM comment WHERE event_id = '$event_id' 
 				AND comment LIKE '%@".$entry['author']."%'");
-			
-			$entry['given_average'] = score_average($entry['given']);
-			$entry['given_count'] = count($entry['given']);
-			$entry['received_count'] = count($entry['received']);
 
+			// Highlight mentions in bold
+			foreach ($entry['mentions'] as &$mention) {
+				$mention['comment'] = str_replace('@'.$entry['author'], '<b>@'.$entry['author'].'</b>', $mention['comment']);
+			};
+
+			// Friends
 			$results = mysqli_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry 
 					WHERE comment1.event_id = '$event_id' 
 					AND comment2.event_id = '$event_id' 
@@ -146,7 +150,12 @@ function page_details($db) {
 			while ($friend = mysqli_fetch_array($results)) {
 				$friends[] = $friend;
 			}
-			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // split for rendering
+			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
+			
+			// Misc numbers
+			$entry['given_average'] = score_average($entry['given']);
+			$entry['given_count'] = count($entry['given']);
+			$entry['received_count'] = count($entry['received']);
 			$entry['friends_count'] = count($friends);
 		}
 
