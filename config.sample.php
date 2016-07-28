@@ -26,7 +26,7 @@ define('LDFF_LOG_ENABLED', true);
 define('LDFF_LOG_PATH', __DIR__ . '/ldff.log');
 
 // Production
-define('LDFF_PRODUCTION', false); // PHP logs errors only, require admin password to run things
+define('LDFF_PRODUCTION', false); // Caching enabled, require admin password to run things, hide some technical errors
 define('LDFF_EMERGENCY_MODE', false); // No search, no entry details
 define('LDFF_ADMIN_PASSWORD', 'changeme'); // Add a "?p=..." param to admin requests in production
 define('LDFF_UID_BLACKLIST', ''); // Example: '234567,876543'. Comments are worth 0p, entry scraping is disabled

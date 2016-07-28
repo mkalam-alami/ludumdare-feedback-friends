@@ -1,21 +1,11 @@
 <?php
 
 function log_info($message) {
-	if (!LDFF_PRODUCTION) {
-		return _log('INFO', $message);
-	}
-	else {
-		return null;
-	}
+	return _log('INFO', $message);
 }
 
 function log_warning($message) {
-	if (!LDFF_PRODUCTION) {
-		return _log('WARN', $message);
-	}
-	else {
-		return null;
-	}
+	return _log('WARN', $message);
 }
 
 function log_error($message) {
