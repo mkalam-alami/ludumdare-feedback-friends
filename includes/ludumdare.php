@@ -26,10 +26,10 @@ function ld_fetch_uids() {
 */
 function ld_fetch_entry($uid) {
 	static $PLATFORM_KEYWORDS = array(
-		'windows' => ['windows', 'win32', 'win64', 'java'],
-		'linux' => ['linux', 'debian', 'ubuntu', 'java'],
-		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java'],
-		'android' => ['android'],
+		'windows' => ['windows', 'win32', 'win64', 'exe', 'java', 'jar'],
+		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
+		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
+		'android' => ['android', 'apk'],
 
 		'web flash' => ['flash', 'swf'],
 		'web html5' => ['html', 'webgl'],
@@ -74,7 +74,7 @@ function ld_fetch_entry($uid) {
 			}
 		}
 		if ($platforms == '') {
-			$platforms = 'Unknown';
+			$platforms = 'unknown';
 		}
 
 		// Gather comments
