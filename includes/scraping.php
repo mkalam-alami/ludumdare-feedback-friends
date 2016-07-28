@@ -264,7 +264,7 @@ function scraping_run($db) {
 				if (!$refresh_font_page_uid) {
 					// ...or just go through all existing entries?
 					$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
-						AND event_id = '".LDFF_ACTIVE_EVENT_ID."' LIMIT 2");
+						AND event_id = '".LDFF_ACTIVE_EVENT_ID."' ORDER BY uid LIMIT 2");
 					if (mysqli_num_rows($results) > 0) {
 						$data = mysqli_fetch_array($results);
 						$uid = $data['uid'];
