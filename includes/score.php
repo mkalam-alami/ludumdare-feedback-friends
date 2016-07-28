@@ -30,7 +30,12 @@ function score_comments_received($db, $event_id, $uid) {
 }
 
 function score_coolness($given, $received) {
-	return 100 + $given - $received; // Don't use zero as the origin because negative scores are not cool
+	// This formula boosts a little bit low scores (< 30) to ensure everybody gets at least some comments, 
+	// and to reward people for posting their first comments. It also nerfs & caps very active commenters to prevent
+	// them from trusting the front page. Finally, negative scores are not cool so we use 100 as the origin.
+	// NB. It is inspired by the actual LD sorting equation: D = 50 + R - 5*sqrt(min(C,100))
+	// (except that here, higher is better)
+	return floor( max(0, 74 + 8.5 * sqrt(10 + min($given, 100)) - $received) ); 
 }
 
 function score_average($comments) {
