@@ -1,7 +1,7 @@
 <?php
 
 function cache_read($key) {
-	if (LDFF_PRODUCTION) {
+	if (LDFF_PRODUCTION && LDFF_CACHING_TTL > 0) {
 		return apcu_fetch($key);
 	}
 	else {
@@ -10,11 +10,9 @@ function cache_read($key) {
 }
 
 function cache_write($key, $value) {
-	apcu_store($key, $value, LDFF_CACHING_TTL);
-}
-
-function cache_delete($key) {
-	apcu_delete($key);
+	if (LDFF_CACHING_TTL > 0) {
+		apcu_store($key, $value, LDFF_CACHING_TTL);
+	}
 }
 
 // Caching: mock APCu functions if missing
