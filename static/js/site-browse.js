@@ -117,7 +117,7 @@ function bindSearch() {
 
 	// Query
 	var lastKeyDown = 0;
-	$('#search-query').keydown(function() { // Trigger search after .5s without a keypress
+	$('#search-query').keydown(function() { // Trigger search after .2s without a keypress
 		var currentDate = new Date().getTime();
 		lastKeyDown = currentDate;
 
@@ -125,7 +125,7 @@ function bindSearch() {
 			if (lastKeyDown == currentDate) {
 				runSearch();
 			}
-		}, 500);
+		}, 200);
 	});
 
 	// Reset
@@ -183,9 +183,6 @@ function hasUserCommented(userId, entry) {
 }
 
 function matchesPlatforms(platforms, entry) {
-	if (!platforms) {
-		return true;
-	}
 	for (var j = 0; j < platforms.length; j++) {
 		if (entry.platforms.indexOf(platforms[j]) >= 0) {
 			return true;
@@ -194,8 +191,55 @@ function matchesPlatforms(platforms, entry) {
 	return false;
 }
 
-function matchesSearchQuery(query, entry) {
-	return true; // TODO
+// Returns a function that matches its argument against the given query.
+function parseQuery(query) {
+	var parts = query.toLowerCase().split(/\s+/);
+	var allOf = [];
+	var noneOf = [];
+	var someOf = [];
+	for (var i = 0; i < parts.length; i++) {
+		var part = parts[i];
+		if (!part) continue;
+		var category;
+		if (part[0] == '+') {
+			part = part.substring(1);
+			category = allOf;
+		} else if (part[0] == '-') {
+			part = part.substring(1);
+			category = noneOf;
+		} else {
+			category = someOf;
+		}
+		var escaped = '\\b' + part.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&").replace(/\*/g, '\\S*') + '\\b';
+		category.push(new RegExp(escaped, 'i'));
+	}
+	console.log('allOf:', allOf, 'noneOf:', noneOf, 'someOf:', someOf);
+	return function matches(input) {
+		for (var i = 0; i < allOf.length; i++) {
+			if (!allOf[i].test(input)) {
+				return false;
+			}
+		}
+		for (var i = 0; i < noneOf.length; i++) {
+			if (noneOf[i].test(input)) {
+				return false;
+			}
+		}
+		if (someOf.length > 0) {
+			for (var i = 0; i < someOf.length; i++) {
+				if (someOf[i].test(input)) {
+					return true;
+				}
+			}
+			return false;
+		} else {
+			return true;
+		}
+	};
+}
+
+function matchesSearchQuery(queryMatcher, entry) {
+	return queryMatcher(entry.author) || queryMatcher(entry.title);
 }
 
 var comparators = {
@@ -272,14 +316,15 @@ function refreshResults() {
 	var sorting = $('#search-sorting').val();
 	var platforms = $('#search-platforms').val();
 	var query = $('#search-query').val();
+	var queryMatcher = query ? parseQuery(query) : null;
 
 	console.log('userId:', userId, 'sorting:', sorting, 'platforms:', platforms, 'query:', query);
 
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i];
-		if (matchesPlatforms(platforms, entry)) {
-			if (query) {
-				if (matchesSearchQuery(query, entry)) {
+		if (!platforms || matchesPlatforms(platforms, entry)) {
+			if (queryMatcher) {
+				if (matchesSearchQuery(queryMatcher, entry)) {
 					results.push(entry);
 				}
 			} else {
