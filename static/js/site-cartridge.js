@@ -4,7 +4,7 @@ cartridgesStyling = (function() {
 		$('.entry').each(function(index, entry) {
 			var entryImg = $('img', entry).get(0);
 			if (entryImg) {
-				if (entryImg.complete) {
+				if (entryImg.complete && entryImg.naturalWidth > 0) {
 					_configureImageColor(entry, entryImg);
 				}
 				else {
