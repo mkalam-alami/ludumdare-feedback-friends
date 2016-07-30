@@ -458,8 +458,13 @@ function createPictureUrl(eventId, uid) {
 }
 
 function renderEntry(eventId, entry) {
-	// TODO fix Details button
-	var elt = $(Mustache.render(templates.result, entry, templates));
+	var context = {
+		entry: entry,
+		event_id: eventId,
+		event_url: createEventUrl(eventId),
+		root: LDFF_ROOT_URL,
+	};
+	var elt = $(Mustache.render(templates.result, context, templates));
 	cartridgesStyling(elt.find('.entry'));
 	return elt;
 }

@@ -4,10 +4,10 @@
 	{{> cartridge}}
 	<div class="row">
 		<div class="entry-coolness text-left">
-			<b>Balance: {{coolness}}</b><br />
-			({{comments_given}}p given - {{comments_received}}p rec.)
+			<b>Balance: {{entry.coolness}}</b><br />
+			({{entry.comments_given}}p given - {{entry.comments_received}}p rec.)
 		</div>
-		<a href="?event={{search_event}}&amp;uid={{uid}}" class="btn btn-default entry-button {{#emergency_mode}}disabled{{/emergency_mode}}">
+		<a href="?event={{event_id}}&amp;uid={{entry.uid}}" class="btn btn-default entry-button">
 			Details...
 		</a>
 	</div>
