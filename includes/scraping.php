@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 function _scraping_is_uid_blacklisted($uid) {
 	static $blacklist = null;
@@ -12,19 +12,28 @@ function _scraping_is_uid_blacklisted($uid) {
 
 function _scraping_run_step_uids($db) {
 	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
+	global $db;
+
+	$event_id = LDFF_ACTIVE_EVENT_ID;
+	$stmt = mysqli_prepare($db, "SELECT COUNT(*) FROM entry WHERE uid = ? AND event_id = ?");
 
 	// Find all entry UIDs
 	$uids = ld_fetch_uids();
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
-			$found = db_select_single_value($db, "SELECT COUNT(*) FROM entry WHERE uid = $uid AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
+			mysqli_stmt_bind_param($stmt, 'is', $uid, $event_id);
+			mysqli_stmt_execute($stmt);
+			$result = mysqli_stmt_get_result($stmt);
+			$row = mysqli_fetch_array($result);
+			$found = $row[0];
 			if ($found < 1 && strpos($missing_uids, $uid.',') === false) {
 				$missing_uids .= $uid.',';
 			}
 		}
 		setting_write($db, $SETTING_MISSING_UIDS, $missing_uids);
 	}
+	mysqli_stmt_close($stmt);
 
 	return $uids;
 }
@@ -32,11 +41,16 @@ function _scraping_run_step_uids($db) {
 function _scraping_run_step_entry($db, $uid) {
 	$entry = null;
 
+	$event_id = LDFF_ACTIVE_EVENT_ID;
+
 	if (!_scraping_is_uid_blacklisted($uid)) {
 		$entry = ld_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
 	}
 	else {
-		mysqli_query($db, "DELETE FROM entry WHERE uid = '$uid");
+		$stmt = mysqli_prepare($db, "DELETE FROM entry WHERE uid = ?");
+		mysqli_stmt_bind_param($stmt, 'i', $uid);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_close($stmt);
 	}
 
 	if ($entry) {
@@ -50,12 +64,19 @@ function _scraping_run_step_entry($db, $uid) {
 		}
 
 		// Save comments
-		$max_order = db_select_single_value($db, "SELECT MAX(`order`) FROM `comment` 
-			WHERE uid_entry = '$uid' AND event_id = '".LDFF_ACTIVE_EVENT_ID."'");
+		$stmt = mysqli_prepare($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = ? AND event_id = ?");
+		mysqli_stmt_bind_param($stmt, 'is', $uid, $event_id);
+		mysqli_stmt_execute($stmt);
+		$result = mysqli_stmt_get_result($stmt);
+		$row = mysqli_fetch_array($result);
+		$max_order = $row[0];
+		mysqli_stmt_close($stmt);
+
 		$order = 1;
 		$new_comments = false;
-		$new_comments_sql = "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`,
-			`uid_author`,`author`,`comment`,`date`,`score`) VALUES";
+
+		$stmt = mysqli_prepare($db, "INSERT IGNORE INTO `comment`(`event_id`,`uid_entry`,`order`, `uid_author`,`author`,`comment`,`date`,`score`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
 		$score_per_author = array();
 		foreach ($entry['comments'] as $comment) {
 			if ($order++ > $max_order) {
@@ -70,62 +91,79 @@ function _scraping_run_step_entry($db, $uid) {
 					$score_per_author[$uid_author]);
 				$score_per_author[$uid_author] += $score;
 
-				if ($new_comments) {
-					$new_comments_sql .= ", ";
-				}
-				$new_comments = true;
-				$new_comments_sql .= "('".LDFF_ACTIVE_EVENT_ID."',
-					'$uid',
-					'".$comment['order']."',
-					'".mysqli_real_escape_string($db, $comment['uid_author'])."',
-					'".mysqli_real_escape_string($db, $comment['author'])."',
-					'".mysqli_real_escape_string($db, $comment['comment'])."',
-					'".date_format($comment['date'], 'Y-m-d H:i')."',
-					'".$score."'
-					)";
+				mysqli_stmt_bind_param($stmt,
+				 'siissssi',
+				  $event_id,
+					$uid,
+					$comment['order'],
+					mysqli_real_escape_string($db, $comment['uid_author']),
+					mysqli_real_escape_string($db, $comment['author']),
+					mysqli_real_escape_string($db, $comment['comment']),
+					date_format($comment['date'], 'Y-m-d H:i'),
+					date_format($comment['date'], 'Y-m-d H:i')
+				);
+				mysqli_stmt_execute($stmt) or log_error(mysqli_error($db));
 			}
 		}
-		if ($new_comments) {
-			mysqli_query($db, $new_comments_sql) or log_error(mysqli_error($db));
-		}
+
+		mysqli_stmt_close($stmt);
 
 		// Coolness
 		$comments_given = score_comments_given($db, LDFF_ACTIVE_EVENT_ID, $uid);
 		$comments_received = score_comments_received($db, LDFF_ACTIVE_EVENT_ID, $uid);
 		$coolness = score_coolness($comments_given, $comments_received);
 
-		// Update entry table
-		mysqli_query($db, "UPDATE entry SET 
-			author = '" . mysqli_real_escape_string($db, $entry['author']) . "',
-			author_page = '" . mysqli_real_escape_string($db, $entry['author_page']) . "',
-			title = '" . mysqli_real_escape_string($db, $entry['title']) . "',
-			type = '" . mysqli_real_escape_string($db, $entry['type']) . "',
-			description = '" . mysqli_real_escape_string($db, $entry['description']) . "',
-			platforms = '" . mysqli_real_escape_string($db, $entry['platforms']) . "',
-			comments_given = '$comments_given',
-			comments_received = '$comments_received',
-			coolness = '$coolness',
-			last_updated = CURRENT_TIMESTAMP()
-			WHERE uid = '$uid' AND event_id = '" . LDFF_ACTIVE_EVENT_ID . "'");
-		if (mysqli_affected_rows($db) == 0) {
-			mysqli_query($db, "INSERT INTO 
-				entry(uid,event_id,author,author_page,title,type,description,platforms,
-					comments_given,comments_received,coolness,last_updated) 
-				VALUES('$uid',
-					'" . LDFF_ACTIVE_EVENT_ID . "',
-					'" . mysqli_real_escape_string($db, $entry['author']). "',
-					'" . mysqli_real_escape_string($db, $entry['author_page']). "',
-					'" . mysqli_real_escape_string($db, $entry['title']). "',
-					'" . mysqli_real_escape_string($db, $entry['type']). "',
-					'" . mysqli_real_escape_string($db, $entry['description']). "',
-					'" . mysqli_real_escape_string($db, $entry['platforms']). "',
-					'$comments_given',
-					'$comments_received',
-					'$coolness',
-					CURRENT_TIMESTAMP()
-					)");
+		if(empty($comments_given)){
+			$comments_given = 0;
 		}
+		if(empty($comments_received)){
+			$comments_received = 0;
+		}
+		if(empty($coolness)){
+			$coolness = 0;
+		}
+		
+		// Update entry table
+		$update_stmt = mysqli_prepare($db, "UPDATE entry SET author=?, author_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
+		mysqli_stmt_bind_param($update_stmt,
+			'ssssssiiiis',
+			mysqli_real_escape_string($db, $entry['author']),
+			mysqli_real_escape_string($db, $entry['author_page']),
+			mysqli_real_escape_string($db, $entry['title']),
+			mysqli_real_escape_string($db, $entry['type']),
+			mysqli_real_escape_string($db, $entry['description']),
+			mysqli_real_escape_string($db, $entry['platforms']),
+			$comments_given,
+			$comments_received,
+			$coolness,
+			$uid,
+			$event_id
+		);
+		mysqli_stmt_execute($update_stmt);
 
+		if (mysqli_stmt_affected_rows($update_stmt) == 0) {
+			$insert_stmt = mysqli_prepare($db, "INSERT INTO
+				entry(uid,event_id,author,author_page,title,type,description,platforms,
+					comments_given,comments_received,coolness,last_updated)
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())");
+				mysqli_stmt_bind_param($insert_stmt,
+					'isssssssiii',
+					$uid,
+					$event_id,
+					mysqli_real_escape_string($db, $entry['author']),
+					mysqli_real_escape_string($db, $entry['author_page']),
+					mysqli_real_escape_string($db, $entry['title']),
+					mysqli_real_escape_string($db, $entry['type']),
+					mysqli_real_escape_string($db, $entry['description']),
+					mysqli_real_escape_string($db, $entry['platforms']),
+					$comments_given,
+					$comments_received,
+					$coolness
+				);
+				mysqli_stmt_execute($insert_stmt);
+				mysqli_stmt_close($insert_stmt);
+		}
+		mysqli_stmt_close($update_stmt);
 	}
 
 	return $entry;
@@ -142,7 +180,7 @@ function _scraping_log_step($report_entry) {
 
 	if ($report_entry['type'] == 'uids') {
 		$log_entry .= " uids = " . count($report_entry['result']);
-	}	
+	}
 	else if ($report_entry['type'] == 'entry') {
 		$result = $report_entry['result'];
 		$log_entry .= ' params = '.$report_entry['params'].
@@ -187,7 +225,7 @@ function _scraping_log_report($report) {
 
 		1. Read the UIDs page and store all the UIDs missing from the DB in the "setting" table
 		2. If we found missing UIDs, then run through them to scrape them.
-		   Otherwise, run through all existing UIDs, while at the same time 
+		   Otherwise, run through all existing UIDs, while at the same time
 		   making sure the 9 front page entries were updated during the last X minutes.
 		3. Back to 1
 
@@ -214,6 +252,18 @@ function scraping_run($db) {
 		setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 		setting_write($db, $SETTING_EVENT_ID, LDFF_ACTIVE_EVENT_ID);
 	}
+
+	$event_id = LDFF_ACTIVE_EVENT_ID;
+
+	$fp_stmt = mysqli_prepare($db, "SELECT entry.uid FROM entry
+		INNER JOIN(SELECT uid FROM entry WHERE event_id = ?
+		ORDER BY coolness DESC, last_updated DESC LIMIT 9) AS entry2 ON entry.uid = entry2.uid
+		AND entry.event_id  = ?
+		AND entry.last_updated < DATE_SUB(NOW(), INTERVAL ".$front_page_max_age." MINUTE) LIMIT 1");
+	mysqli_stmt_bind_param($fp_stmt, 'ss', $event_id, $event_id);
+
+
+	$stmt = mysqli_prepare($db, "SELECT uid FROM entry WHERE uid > ? AND event_id = ? ORDER BY uid LIMIT 2");
 
 	// Loop until we're about to reach the timeout
 	while (!$over) {
@@ -250,11 +300,8 @@ function scraping_run($db) {
 			}
 			if (!$fetching_missing_uid) {
 				// ...or do we update a front page entry?
-				$results = mysqli_query($db, "SELECT entry.uid FROM entry 
-						INNER JOIN(SELECT uid FROM entry WHERE event_id = '".LDFF_ACTIVE_EVENT_ID."'
-						ORDER BY coolness DESC, last_updated DESC LIMIT 9) AS entry2 ON entry.uid = entry2.uid
-					AND entry.event_id  = '".LDFF_ACTIVE_EVENT_ID."'
-					AND entry.last_updated < DATE_SUB(NOW(), INTERVAL ".$front_page_max_age." MINUTE) LIMIT 1");
+				mysqli_stmt_execute($fp_stmt);
+				$results = mysqli_stmt_get_result($fp_stmt);
 				if (mysqli_num_rows($results) > 0) {
 					$data = mysqli_fetch_array($results);
 					$uid = $data['uid'];
@@ -263,8 +310,9 @@ function scraping_run($db) {
 
 				if (!$refresh_font_page_uid) {
 					// ...or just go through all existing entries?
-					$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > '$last_read_entry' 
-						AND event_id = '".LDFF_ACTIVE_EVENT_ID."' ORDER BY uid LIMIT 2");
+					mysqli_stmt_bind_param($stmt, 'is', $last_read_entry, $event_id);
+					mysqli_stmt_execute($stmt);
+					$results = mysqli_stmt_get_result($stmt);
 					if (mysqli_num_rows($results) > 0) {
 						$data = mysqli_fetch_array($results);
 						$uid = $data['uid'];
@@ -317,6 +365,9 @@ function scraping_run($db) {
 		$steps++;
 		$average_step_duration = round(1. * ($last_step_time - $start_time) / $steps, 3);
 	}
+
+	mysqli_stmt_close($fp_stmt);
+	mysqli_stmt_close($stmt);
 
 	$report['step_count'] = $steps;
 	$report['average_step_duration'] = round($average_step_duration);

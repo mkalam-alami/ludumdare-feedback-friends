@@ -1,23 +1,39 @@
 <?php
 
 function setting_read($db, $id, $default_value = null) {
-	if ($results = mysqli_query($db, "SELECT value FROM setting WHERE id = '$id'")) {
+	$ret_val = $default_value;
+	$stmt = mysqli_prepare($db, "SELECT value FROM setting WHERE id = ?");
+	mysqli_stmt_bind_param($stmt, 's', $id);
+	mysqli_stmt_execute($stmt);
+	if ($results = mysqli_stmt_get_result($stmt)) {
 		if (mysqli_num_rows($results) > 0) {
 			$setting = mysqli_fetch_array($results);
-			return $setting['value'];
+			$ret_val = $setting['value'];
 		}
 	}
-	return $default_value;
+	mysqli_stmt_close($stmt);
+	return $ret_val;
 }
 
 function setting_write($db, $id, $value) {
 	if (setting_read($db, $id, null) === null) {
-		mysqli_query($db, "INSERT INTO setting(id,value) VALUES('$id', '$value')")
-			or die("Failed to insert setting '$id' with value '$value'");
+		$stmt = mysqli_prepare($db, "INSERT INTO setting(id,value) VALUES(?, ?)");
+		mysqli_stmt_bind_param($stmt, 'ss', $id, $value);
+		if(!mysqli_stmt_execute($stmt)){
+			mysqli_stmt_close($stmt);
+			die("Failed to insert setting '$id' with value '$value'");
+		}
+		mysqli_stmt_close($stmt);
 	}
 	else {
-		mysqli_query($db, "UPDATE setting SET value = '$value' WHERE id = '$id'")
-			or die("Failed to update setting '$id' with value '$value'");
+
+		$stmt = mysqli_prepare($db, "UPDATE setting SET value = ? WHERE id = ?");
+		mysqli_stmt_bind_param($stmt, 'ss', $value, $id);
+		if(!mysqli_stmt_execute($stmt)){
+			mysqli_stmt_close($stmt);
+			die("Failed to update setting '$id' with value '$value'");
+		}
+		mysqli_stmt_close($stmt);
 	}
 }
 
