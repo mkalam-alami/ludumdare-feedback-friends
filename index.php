@@ -37,7 +37,13 @@ function init_context($db) {
 			);
 	}
 
-	$oldest_entry_updated = db_select_single_value($db, "SELECT last_updated FROM entry WHERE event_id = '$event_id' ORDER BY last_updated LIMIT 1");
+	$stmt = mysqli_prepare($db, "SELECT last_updated FROM entry WHERE event_id = ? ORDER BY last_updated LIMIT 1");
+	mysqli_stmt_bind_param($stmt, 's', $event_id);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_get_result($stmt);
+	$row = mysqli_fetch_array($result);
+	$oldest_entry_updated = $row[0];
+	mysqli_stmt_close($stmt);
 	$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
 
 	$context = array();
@@ -70,26 +76,15 @@ function prepare_entry_context($entry) {
 		$entry['type'] = util_format_type($entry['type']);
 		$entry['platforms'] = util_format_platforms($entry['platforms']);
 	}
-	
+
 	return $entry;
 }
 
 // PAGE : Entry details
 
-function page_details_list_comments($db, $sql) {
-	global $event_id;
-	$results = mysqli_query($db, "$sql ORDER BY `date` DESC, `order` DESC")
-		or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
-	$comments = array();
-	while ($comment = mysqli_fetch_array($results)) {
-		$comments[] = $comment;
-	}
-	return $comments;
-}
-
 function page_details($db) {
 	global $event_id;
-	
+
 	// Disable in emergency mode
 	if (LDFF_EMERGENCY_MODE) {
 		page_static($db, 'emergency');
@@ -111,25 +106,75 @@ function page_details($db) {
 	if (!$output) {
 
 		// Gather entry info
-		$results = mysqli_query($db, "SELECT * FROM entry WHERE event_id = '$event_id' AND uid = ".$uid)
-			or log_error_and_die('Failed to fetch entry', mysqli_error($db)); 
+		$entry_stmt = mysqli_prepare($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ?");
+		mysqli_stmt_bind_param($entry_stmt, 'si', $event_id, $uid);
+		if(!mysqli_stmt_execute($entry_stmt)){
+			mysqli_stmt_close($entry_stmt);
+			log_error_and_die('Failed to fetch entry', mysqli_error($db));
+		}
+		$results = mysqli_stmt_get_result($entry_stmt);
 		$entry = mysqli_fetch_array($results);
+		mysqli_stmt_close($entry_stmt);
+
 		if (isset($entry['type'])) {
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
 
 			// Comments
-			$entry['given'] = page_details_list_comments($db,
-				"SELECT comment.*, entry.author FROM comment, entry 
-				WHERE comment.event_id = '$event_id' AND entry.event_id = '$event_id'
+			$comments_given_stmt = mysqli_prepare($db, "SELECT comment.*, entry.author FROM comment, entry
+				WHERE comment.event_id = ? AND entry.event_id = ?
 				AND comment.uid_entry = entry.uid
-				AND comment.uid_author = $uid AND comment.uid_entry != $uid");
-			$entry['received'] = page_details_list_comments($db,
-				"SELECT * FROM comment WHERE event_id = '$event_id' 
-				AND uid_entry = $uid AND uid_author != $uid 
-				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")");
-			$entry['mentions'] = page_details_list_comments($db,
-				"SELECT * FROM comment WHERE event_id = '$event_id' 
-				AND comment LIKE '%@".$entry['author']."%'");
+				AND comment.uid_author = ? AND comment.uid_entry != ?
+				ORDER BY `date` DESC, `order` DESC");
+
+			mysqli_stmt_bind_param($comments_given_stmt, 'ssii', $event_id, $event_id, $uid, $uid);
+			if(!mysqli_stmt_execute($comments_given_stmt)){
+				mysqli_stmt_close($comments_given_stmt);
+				log_error_and_die('Failed to fetch entry', mysqli_error($db));
+			}
+			$results = mysqli_stmt_get_result($comments_given_stmt);
+			$comments = array();
+			while ($comment = mysqli_fetch_array($results)) {
+				$comments[] = $comment;
+			}
+			$entry['given'] = $comments;
+			mysqli_stmt_close($comments_given_stmt);
+
+			$comments_received_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
+				AND uid_entry = ? AND uid_author != ?
+				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")
+				ORDER BY `date` DESC, `order` DESC");
+
+			mysqli_stmt_bind_param($comments_received_stmt, 'sii', $event_id, $uid, $uid);
+			if(!mysqli_stmt_execute($comments_received_stmt)){
+				mysqli_stmt_close($comments_received_stmt);
+				log_error_and_die('Failed to fetch entry', mysqli_error($db));
+			}
+			$results = mysqli_stmt_get_result($comments_received_stmt);
+			$comments = array();
+			while ($comment = mysqli_fetch_array($results)) {
+				$comments[] = $comment;
+			}
+			$entry['received'] = $comments;
+			mysqli_stmt_close($comments_received_stmt);
+
+			$mentions_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
+				AND comment LIKE ?
+				ORDER BY `date` DESC, `order` DESC");
+			$entry_author = "%@{$entry['author']}%";
+			mysqli_stmt_bind_param($mentions_stmt, 'ss', $event_id, $entry_author);
+			if(!mysqli_stmt_execute($mentions_stmt)){
+				mysqli_stmt_close($mentions_stmt);
+				log_error_and_die('Failed to fetch entry', mysqli_error($db));
+			}
+			$results = mysqli_stmt_get_result($mentions_stmt);
+			$comments = array();
+			while ($comment = mysqli_fetch_array($results)) {
+				$comments[] = $comment;
+			}
+
+
+			$entry['mentions'] = $comments;
+			mysqli_stmt_close($mentions_stmt);
 
 			// Highlight mentions in bold
 			foreach ($entry['mentions'] as &$mention) {
@@ -137,21 +182,37 @@ function page_details($db) {
 			};
 
 			// Friends
-			$results = mysqli_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry 
-					WHERE comment1.event_id = '$event_id' 
-					AND comment2.event_id = '$event_id' 
-					AND comment1.uid_author = $uid
-					AND comment2.uid_author != $uid
+			$friends_stmt = mysqli_prepare($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry
+					WHERE comment1.event_id = ?
+					AND comment2.event_id = ?
+					AND comment1.uid_author = ?
+					AND comment2.uid_author != ?
 					AND comment1.uid_entry = comment2.uid_author
-					AND comment2.uid_entry = $uid
-					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC")
-				or log_error_and_die('Failed to fetch comments', mysqli_error($db)); 
+					AND comment2.uid_entry = ?
+					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC");
+
+			mysqli_stmt_bind_param($friends_stmt, 'ssiii',
+				$event_id,
+				$event_id,
+				$uid,
+				$uid,
+				$uid
+			);
+
+			if(!mysqli_stmt_execute($friends_stmt)){
+				mysqli_stmt_close($friends_stmt);
+				log_error_and_die('Failed to fetch comments', mysqli_error($db));
+			}
+			$results = mysqli_stmt_get_result($friends_stmt);
+
 			$friends = array();
 			while ($friend = mysqli_fetch_array($results)) {
 				$friends[] = $friend;
 			}
 			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
-			
+
+			mysqli_stmt_close($friends_stmt);
+
 			// Misc numbers
 			$entry['given_average'] = score_average($entry['given']);
 			$entry['given_count'] = count($entry['given']);
@@ -169,6 +230,8 @@ function page_details($db) {
 			.render('footer', $context);
 
 		cache_write($cache_key, $output);
+
+
 	}
 
 	echo $output;
@@ -224,11 +287,17 @@ function page_browse($db) {
 		// Fetch corresponding username
 		$username = null;
 		if ($userid) {
-			$sql = "SELECT author FROM entry WHERE uid = $userid LIMIT 1;";
-			$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch username', mysqli_error($db)); 
+			$stmt = mysqli_prepare($db, "SELECT author FROM entry WHERE uid = ? LIMIT 1");
+			mysqli_stmt_bind_param($stmt, 'i', $userid);
+			if(!mysqli_stmt_execute($stmt)){
+				mysqli_stmt_close($stmt);
+				log_error_and_die('Failed to fetch username', mysqli_error($db));
+			}
+			$results = mysqli_stmt_get_result($stmt);
 			if ($row = mysqli_fetch_array($results)) {
 				$username = $row[0];
 			}
+			mysqli_stmt_close($stmt);
 		}
 
 		// Build query according to search params
@@ -236,6 +305,8 @@ function page_browse($db) {
 		$not_coolness_search = false;
 		$have_search_query = isset($_GET['query']) && !!$_GET['query'];
 		$filter_by_user = !LDFF_EMERGENCY_MODE && !!$userid && !$have_search_query;
+		$bind_params_str = '';
+		$bind_params = array();
 		$sql = "SELECT SQL_CALC_FOUND_ROWS entry.*";
 		if ($filter_by_user) {
 			// Count comments by entry (see also the GROUP BY later on)
@@ -247,28 +318,41 @@ function page_browse($db) {
 			$sql .= " LEFT JOIN comment";
 			$sql .= "    ON entry.uid = comment.uid_entry";
 			$sql .= "   AND entry.event_id = comment.event_id";
-		 	$sql .= "   AND comment.uid_author = $userid";
+			$sql .= "   AND comment.uid_author = ?";
+			$bind_params_str .= 'i';
+			$bind_params[] = $userid;
 		}
-		$sql .= " WHERE entry.event_id = '$event_id'";
+		$sql .= " WHERE entry.event_id = ?";
+		$bind_params_str .= 'i';
+		$bind_params[] = $event_id;
+
 		if ($filter_by_user) {
 			// Omit the current user's own game
-			$sql .= " AND entry.uid != $userid";
+			$sql .= " AND entry.uid != ?";
+			$bind_params_str .= 'i';
+			$bind_params[] = $userid;
 		}
 		$sorting = 'coolness';
 		if (!LDFF_EMERGENCY_MODE) {
 			if ($have_search_query) {
 				$query = util_sanitize_query_param('query');
-				$sql .= " AND (MATCH(entry.author,entry.title,entry.platforms,entry.type) 
-					AGAINST ('$query' IN BOOLEAN MODE) OR entry.uid = '$query')";
+				$sql .= " AND (MATCH(entry.author,entry.title,entry.platforms,entry.type)
+					AGAINST (? IN BOOLEAN MODE) OR entry.uid = ?)";
+				$bind_params_str .= 'si';
+				$bind_params[] = $query;
+				$bind_params[] = $query;
+
 				$empty_where = false;
 				$not_coolness_search = true;
 			}
 			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-				$sql .= " AND MATCH(entry.platforms) AGAINST('";
+				$platforms_match = '';
 				foreach ($_GET['platforms'] as $index => $raw_platform) {
-					$sql .= util_sanitize($raw_platform).' ';
+					$platforms_match .= util_sanitize($raw_platform).' ';
 				}
-				$sql .= "' IN BOOLEAN MODE)";
+				$sql .= " AND MATCH(entry.platforms) AGAINST(? IN BOOLEAN MODE)";
+				$bind_params_str .= 's';
+				$bind_params[] = $platforms_match;
 			}
 			if (isset($_GET['sorting'])) {
 				$sorting = util_sanitize_query_param('sorting');
@@ -295,14 +379,30 @@ function page_browse($db) {
 		}
 
 		// Uncomment to explain query plan
-		// db_explain_query($db, $sql);
+		//db_explain_query($db, $sql);
 
 		// Fetch entries
+
+		$stmt = mysqli_prepare($db, $sql);
+		$params = array();
+		$n = count($bind_params);
+		for($i=0; $i < $n; ++$i){
+			$id = "param$i";
+			$$id = $bind_params[$i];
+			$params[] = &$$id;
+		}
+		mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
 		$entries = array();
-		$results = mysqli_query($db, $sql) or log_error_and_die('Failed to fetch entries', mysqli_error($db)); 
+		if(!mysqli_stmt_execute($stmt)){
+			mysqli_stmt_close($stmt);
+			log_error_and_die('Failed to fetch entries', mysqli_error($db));
+		}
+		$results = mysqli_stmt_get_result($stmt);
 		while ($row = mysqli_fetch_array($results)) {
 			$entries[] = prepare_entry_context($row);
 		}
+		mysqli_stmt_close($stmt);
+
 		$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
 
 		// Build context

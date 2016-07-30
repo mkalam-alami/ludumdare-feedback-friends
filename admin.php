@@ -36,7 +36,22 @@ else if (isset($_GET['coolness'])) {
 
 	echo 'Refreshing coolness... ';
 
-	$results = mysqli_query($db, "SELECT uid FROM entry WHERE uid > $first_uid AND event_id = '$event_id' ORDER BY uid") or die(mysqli_error($db)); 
+	$update_stmt = mysqli_prepare($db, "UPDATE entry SET
+			comments_given = ?,
+			comments_received = ?,
+			coolness = ?
+			WHERE uid = ? AND event_id = ?");
+
+
+	$stmt = mysqli_prepare($db, "SELECT uid FROM entry WHERE uid > ? AND event_id = ? ORDER BY uid");
+	mysqli_stmt_bind_param($stmt, 'is', $first_uid, $event_id);
+	mysqli_stmt_execute($stmt);
+	if(!mysqli_stmt_execute($stmt)){
+		mysqli_stmt_close($stmt);
+		die(mysqli_error($db));
+	}
+
+	$results = mysqli_stmt_get_result($stmt);
 	while ($row = mysqli_fetch_array($results)) {
 		$uid = $row['uid'];
 
@@ -45,22 +60,45 @@ else if (isset($_GET['coolness'])) {
 		$coolness = score_coolness($comments_given, $comments_received);
 
 		// Update entry table
-		mysqli_query($db, "UPDATE entry SET 
-				comments_given = '$comments_given',
-				comments_received = '$comments_received',
-				coolness = '$coolness'
-				WHERE uid = '$uid' AND event_id = '$event_id'") or die(mysqli_error($db));
+		mysqli_stmt_bind_param($update_stmt, 'iiiis', $comments_given, $comments_received, $coolness, $uid, $event_id);
+		if(!mysqli_stmt_execute($update_stmt)){
+			mysqli_stmt_close($update_stmt);
+			die(mysqli_error($db));
+		}
 		echo "<a href='?coolness&uid=$uid'>$uid</a> ";
 	}
-
+	mysqli_stmt_close($stmt);
+	mysqli_stmt_close($update_stmt);
 }
 
 // (!!!) Reset whole event (!!!)
 else if (isset($_GET['reset']) && isset($_GET['event_id']) && $_GET['areyousure'] == 'yes') {
 	$event_id = util_sanitize_query_param('event_id');
-	mysqli_query($db, "DELETE FROM entry WHERE event_id = '$event_id'") or die(mysqli_error($db)); 
-	mysqli_query($db, "DELETE FROM comment WHERE event_id = '$event_id'") or die(mysqli_error($db)); 
-	mysqli_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'") or die(mysqli_error($db)); 
+
+	$stmt = mysqli_prepare($db, "DELETE FROM entry WHERE event_id = ?");
+	mysqli_stmt_bind_param($stmt, 's', $event_id);
+	if(!mysqli_stmt_execute($stmt)){
+		mysqli_stmt_close($stmt);
+		die(mysqli_error($db));
+	}
+	mysqli_stmt_close($stmt);
+
+	$stmt = mysqli_prepare($db, "DELETE FROM comment WHERE event_id = ?");
+	mysqli_stmt_bind_param($stmt, 's', $event_id);
+	if(!mysqli_stmt_execute($stmt)){
+		mysqli_stmt_close($stmt);
+		die(mysqli_error($db));
+	}
+	mysqli_stmt_close($stmt);
+
+	$id = 'scraping_event_id';
+	$stmt = mysqli_prepare($db, "DELETE FROM setting WHERE id = ?");
+	mysqli_stmt_bind_param($stmt, 's', $id);
+	if(!mysqli_stmt_execute($stmt)){
+		mysqli_stmt_close($stmt);
+		die(mysqli_error($db));
+	}
+	mysqli_stmt_close($stmt);
 }
 
 else {
