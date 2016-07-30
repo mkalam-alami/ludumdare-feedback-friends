@@ -14,7 +14,8 @@ var OFFSCREEN_ROWS = 3;
 
 var templates = {};
 var eventCache = {};
-var results = [];
+
+var resultsVirtualScroll = null;
 
 $(window).load(function() {
 	loadTemplates();
@@ -325,7 +326,7 @@ function sortEntries(sorting, entries) {
 function refreshResults() {
 	var eventId = getEventId();
 	var entries = eventCache[eventId];
-	results = [];
+	var results = [];
 
 	var userId = parseInt($('#userid').val()) || null;
 	var sorting = $('#search-sorting').val();
@@ -352,10 +353,15 @@ function refreshResults() {
 
 	sortEntries(sorting, results);
 
-	renderResults();
+	renderResults(results);
 }
 
-function renderResults() {
+function renderResults(results) {
+	if (resultsVirtualScroll) {
+		resultsVirtualScroll.unbind();
+		resultsVirtualScroll = null;
+	}
+
 	var eventId = getEventId();
 
 	var context = {};
@@ -363,12 +369,16 @@ function renderResults() {
 	context.event_title = $('#search-event-option-' + eventId).text();
 	context.event_url = createEventUrl(eventId);
 	context.entry_count = results.length;
-	context.entries = results.slice(0, 9);
 	$('#results').html(Mustache.render(templates.results, context, templates));
 
-	var container = $('#results-virtual-scroll');
+	resultsVirtualScroll = createVirtualScroll($('#results-virtual-scroll'), results, renderEntry.bind(null, eventId), 'result-');
+}
+
+function createVirtualScroll(container, items, renderFunction, idPrefix) {
+	container.css({'position': 'relative'});
+
 	var width = container.innerWidth();
-	var numEntries = results.length;
+	var numEntries = items.length;
 	var numColumns = Math.max(1, Math.floor(width / ENTRY_WIDTH));
 	var numRows = Math.ceil(numEntries / numColumns);
 	var columnWidth = width / numColumns;
@@ -385,7 +395,7 @@ function renderResults() {
 		var startRow = Math.floor(topVisible / ENTRY_HEIGHT) - OFFSCREEN_ROWS;
 		var endRow = Math.ceil(bottomVisible / ENTRY_HEIGHT) + OFFSCREEN_ROWS;
 		var newStartIndex = Math.max(0, numColumns * startRow);
-		var newEndIndex = Math.min(results.length, numColumns * endRow);
+		var newEndIndex = Math.min(items.length, numColumns * endRow);
 
 		// Remove old entries.
 		for (var index = startIndex; index < endIndex; index++) {
@@ -394,21 +404,21 @@ function renderResults() {
 				$('#result-' + index).remove();
 			}
 		}
+
 		// Add new entries.
 		startIndex = newStartIndex;
 		endIndex = newEndIndex;
 		for (var index = startIndex; index < endIndex; index++) {
-			if ($('#result-' + index).length > 0) {
+			if ($('#' + idPrefix + index).length > 0) {
 				continue;
 			}
-			// console.log('+' + index);
-			var child = $(renderEntry(eventId, results[index]));
+			var child = renderFunction(items[index]);
 			var row = Math.floor(index / numColumns);
 			var column = index % numColumns;
 			child.css({left: xOffset + column * columnWidth, top: row * ENTRY_HEIGHT});
-			child.attr('id', 'result-' + index);
+			child.attr('id', idPrefix + index);
+			// console.log('+' + index);
 			container.append(child);
-			cartridgesStyling(child.find('.entry'));
 		}
 	}
 
@@ -422,10 +432,15 @@ function renderResults() {
 		}
 	}
 
-	$(window).bind('scroll', renderVisibleResultsDebounced);
-	$(window).bind('resize', renderVisibleResultsDebounced);
+	$(window).bind('scroll resize', renderVisibleResultsDebounced);
 
 	renderVisibleResults();
+
+	return {
+		unbind: function() {
+			$(window).unbind('scroll resize', renderVisibleResultsDebounced);
+		},
+	};
 }
 
 function createEventUrl(eventId) {
@@ -438,7 +453,9 @@ function createPictureUrl(eventId, uid) {
 
 function renderEntry(eventId, entry) {
 	// TODO fix Details button
-	return Mustache.render(templates.result, entry, templates);
+	var elt = $(Mustache.render(templates.result, entry, templates));
+	cartridgesStyling(elt.find('.entry'));
+	return elt;
 }
 
 })();

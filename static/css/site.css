@@ -243,10 +243,6 @@ span.twitter-typeahead .tt-menu {
 
 /* Entry block */
 
-.virtual-scroll-container {
-	position: relative;
-}
-
 .entry-outer {
 	/* These must match the JS! Otherwise scrolling will have weird effects. */
 	width: 249px;
