@@ -34,7 +34,14 @@ function db_explain_query($db, $query, $bind_params_str, $params) {
 	}
 	$results = mysqli_stmt_get_result($stmt);
 	echo '<pre>';
-	echo "$query;\n\n";
+	echo "$query;\n(params: ";
+	foreach ($params as $key => $param) {
+		if ($key != 0) {
+			echo ", ";
+		}
+		echo $param;
+	}
+	echo ")\n\n";
 	while ($row = mysqli_fetch_assoc($results)) {
 		foreach ($row as $key => $value) {
 			echo "$key: $value, ";
