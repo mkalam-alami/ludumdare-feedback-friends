@@ -22,7 +22,7 @@ RUN apt-get -qy upgrade
 
 RUN echo "mysql-server mysql-server/root_password select neijUsItAgvosht" | debconf-set-selections
 RUN echo "mysql-server mysql-server/root_password_again select neijUsItAgvosht" | debconf-set-selections
-RUN apt-get -qy install apache2 mysql-server php5 php5-mysqlnd supervisor
+RUN apt-get -qy install apache2 mysql-server php5 php5-mysqlnd php5-apcu supervisor
 
 RUN systemctl disable apache2
 RUN systemctl disable mysql
