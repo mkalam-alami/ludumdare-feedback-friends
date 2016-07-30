@@ -373,37 +373,55 @@ function renderResults() {
 	var numRows = Math.ceil(numEntries / numColumns);
 	container.innerHeight(numRows * ENTRY_HEIGHT);
 
-	var debounceTimer = null;
+	var startIndex = 0;
+	var endIndex = 0;
 
 	function renderVisibleResults() {
-		//$('#results').html(formatResults(eventId, results));
-		container.empty();
 		var topVisible = window.scrollY - container.offset().top;
 		// innerHeight includes any horizontal scrollbar, but that doesn't really matter.
 		var bottomVisible = topVisible + window.innerHeight;
-		console.log('Visible range of container: ' + topVisible + '...' + bottomVisible);
 		var startRow = Math.floor(topVisible / ENTRY_HEIGHT) - OFFSCREEN_ROWS;
 		var endRow = Math.ceil(bottomVisible / ENTRY_HEIGHT) + OFFSCREEN_ROWS;
-		var startIndex = Math.max(0, numColumns * startRow);
-		var endIndex = Math.min(results.length, numColumns * endRow);
-		console.log('Rendering ' + startIndex + '...' + endIndex);
-		for (var i = startIndex; i < endIndex; i++) {
-			var entry = $(renderEntry(eventId, results[i]));
-			var row = Math.floor(i / numColumns);
-			var column = i % numColumns;
-			entry.css({left: column * ENTRY_WIDTH, top: row * ENTRY_HEIGHT});
-			container.append(entry);
-			cartridgesStyling(entry.find('.entry'));
-		}
+		var newStartIndex = Math.max(0, numColumns * startRow);
+		var newEndIndex = Math.min(results.length, numColumns * endRow);
 
-		debounceTimer = null;
+		// Remove old entries.
+		for (var index = startIndex; index < endIndex; index++) {
+			if (index < newStartIndex || index >= newEndIndex) {
+				// console.log('-' + index);
+				$('#result-' + index).remove();
+			}
+		}
+		// Add new entries.
+		startIndex = newStartIndex;
+		endIndex = newEndIndex;
+		for (var index = startIndex; index < endIndex; index++) {
+			if ($('#result-' + index).length > 0) {
+				continue;
+			}
+			// console.log('+' + index);
+			var child = $(renderEntry(eventId, results[index]));
+			var row = Math.floor(index / numColumns);
+			var column = index % numColumns;
+			child.css({left: column * ENTRY_WIDTH, top: row * ENTRY_HEIGHT});
+			child.attr('id', 'result-' + index);
+			container.append(child);
+			cartridgesStyling(child.find('.entry'));
+		}
 	}
 
-	$(window).bind('scroll', function() {
+	var debounceTimer = null;
+	function renderVisibleResultsDebounced() {
 		if (!debounceTimer) {
-			debounceTimer = window.setTimeout(renderVisibleResults, 200);
+			debounceTimer = window.setTimeout(function() {
+				renderVisibleResults();
+				debounceTimer = null;
+			}, 200);
 		}
-	});
+	}
+
+	$(window).bind('scroll', renderVisibleResultsDebounced);
+	$(window).bind('resize', renderVisibleResultsDebounced);
 
 	renderVisibleResults();
 }
