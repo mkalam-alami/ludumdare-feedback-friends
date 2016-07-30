@@ -1,21 +1,6 @@
 {{=(% %)=}}
 
-{{^entries_only}}
-	<h1><a href="{{event_url}}">{{event_title}}</a></h1>
-	<h2>{{title}} <span id="results-count">({{entry_count}} entries)</span></h2>
-{{/entries_only}}
-
-{{#entries}}
-	<div class="col-xs-12 col-sm-4">
-		{{> cartridge}}
-		<div class="row">
-			<div class="entry-coolness text-left">
-				<b>Balance: {{coolness}}</b><br />
-				({{comments_given}}p given - {{comments_received}}p rec.)
-			</div>
-			<a href="?event={{search_event}}&amp;uid={{uid}}" class="btn btn-default entry-button {{#emergency_mode}}disabled{{/emergency_mode}}">
-				Details...
-			</a>
-		</div>
-	</div>
-{{/entries}}
+<h1><a href="{{event_url}}">{{event_title}}</a></h1>
+<h2>{{title}} <span id="results-count">({{entry_count}} entries)</span></h2>
+<div id="results-virtual-scroll" class="virtual-scroll-container">
+</div>

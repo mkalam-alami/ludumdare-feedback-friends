@@ -1,10 +1,20 @@
+'use strict';
+
 (function() {
 
 var LDFF_SCRAPING_ROOT = 'http://ludumdare.com/compo/';
 var LDFF_ROOT_URL = '/';
 
+// These must match the CSS! Otherwise scrolling will have weird effects.
+var ENTRY_WIDTH = 249;
+var ENTRY_HEIGHT = 339;
+
+// Number of offscreen rows to render, to make small scrolls feel more fluid.
+var OFFSCREEN_ROWS = 3;
+
 var templates = {};
 var eventCache = {};
+var results = [];
 
 $(window).load(function() {
 	loadTemplates();
@@ -15,6 +25,7 @@ $(window).load(function() {
 
 function loadTemplates() {
 	templates.results = $('#results-template').html();
+	templates.result = $('#result-template').html();
 	templates.cartridge = $('#cartridge-template').html();
 }
 
@@ -39,8 +50,12 @@ window.onpopstate = function (e) {
 
 // Search form
 
+function getEventId() {
+	return $('#search-event').val();
+}
+
 function refreshEvent() {
-	var value = $('#search-event').val();
+	var value = getEventId();
 	var label = $('#search-event-option-' + value).html();
 	$('#search-event-label').html(label);
 }
@@ -78,7 +93,7 @@ function bindSearch() {
 		highlight: true,
 	}, {
 		source: function(query, syncResults, asyncResults) {
-			var eventId = $('#search-event').val();
+			var eventId = getEventId();
 			searchUsernames(eventId, query, asyncResults);
 		},
 		async: true,
@@ -149,7 +164,7 @@ function searchUsernames(eventId, query, callback) {
 }
 
 function runSearch() {
-	var eventId = $('#search-event').val();
+	var eventId = getEventId();
 	if (eventCache[eventId]) {
 		refreshResults();
 	} else {
@@ -213,7 +228,7 @@ function parseQuery(query) {
 		var escaped = '\\b' + part.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&").replace(/\*/g, '\\S*') + '\\b';
 		category.push(new RegExp(escaped, 'i'));
 	}
-	console.log('allOf:', allOf, 'noneOf:', noneOf, 'someOf:', someOf);
+	// console.log('allOf:', allOf, 'noneOf:', noneOf, 'someOf:', someOf);
 	return function matches(input) {
 		for (var i = 0; i < allOf.length; i++) {
 			if (!allOf[i].test(input)) {
@@ -308,9 +323,9 @@ function sortEntries(sorting, entries) {
 }
 
 function refreshResults() {
-	var eventId = $('#search-event').val();
+	var eventId = getEventId();
 	var entries = eventCache[eventId];
-	var results = [];
+	results = [];
 
 	var userId = parseInt($('#userid').val()) || null;
 	var sorting = $('#search-sorting').val();
@@ -318,7 +333,7 @@ function refreshResults() {
 	var query = $('#search-query').val();
 	var queryMatcher = query ? parseQuery(query) : null;
 
-	console.log('userId:', userId, 'sorting:', sorting, 'platforms:', platforms, 'query:', query);
+	// console.log('userId:', userId, 'sorting:', sorting, 'platforms:', platforms, 'query:', query);
 
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i];
@@ -337,8 +352,60 @@ function refreshResults() {
 
 	sortEntries(sorting, results);
 
-	$('#results').html(formatResults(eventId, results));
-	cartridgesStyling();
+	renderResults();
+}
+
+function renderResults() {
+	var eventId = getEventId();
+
+	var context = {};
+	context.root = LDFF_ROOT_URL;
+	context.event_title = $('#search-event-option-' + eventId).text();
+	context.event_url = createEventUrl(eventId);
+	context.entry_count = results.length;
+	context.entries = results.slice(0, 9);
+	$('#results').html(Mustache.render(templates.results, context, templates));
+
+	var container = $('#results-virtual-scroll');
+	var width = container.innerWidth();
+	var numEntries = results.length;
+	var numColumns = Math.max(1, Math.floor(width / ENTRY_WIDTH));
+	var numRows = Math.ceil(numEntries / numColumns);
+	container.innerHeight(numRows * ENTRY_HEIGHT);
+
+	var debounceTimer = null;
+
+	function renderVisibleResults() {
+		//$('#results').html(formatResults(eventId, results));
+		container.empty();
+		var topVisible = window.scrollY - container.offset().top;
+		// innerHeight includes any horizontal scrollbar, but that doesn't really matter.
+		var bottomVisible = topVisible + window.innerHeight;
+		console.log('Visible range of container: ' + topVisible + '...' + bottomVisible);
+		var startRow = Math.floor(topVisible / ENTRY_HEIGHT) - OFFSCREEN_ROWS;
+		var endRow = Math.ceil(bottomVisible / ENTRY_HEIGHT) + OFFSCREEN_ROWS;
+		var startIndex = Math.max(0, numColumns * startRow);
+		var endIndex = Math.min(results.length, numColumns * endRow);
+		console.log('Rendering ' + startIndex + '...' + endIndex);
+		for (var i = startIndex; i < endIndex; i++) {
+			var entry = $(renderEntry(eventId, results[i]));
+			var row = Math.floor(i / numColumns);
+			var column = i % numColumns;
+			entry.css({left: column * ENTRY_WIDTH, top: row * ENTRY_HEIGHT});
+			container.append(entry);
+			cartridgesStyling(entry.find('.entry'));
+		}
+
+		debounceTimer = null;
+	}
+
+	$(window).bind('scroll', function() {
+		if (!debounceTimer) {
+			debounceTimer = window.setTimeout(renderVisibleResults, 200);
+		}
+	});
+
+	renderVisibleResults();
 }
 
 function createEventUrl(eventId) {
@@ -349,17 +416,9 @@ function createPictureUrl(eventId, uid) {
 	return 'data/' + encodeURIComponent(eventId) + '/' + encodeURIComponent(uid) + '.jpg';
 }
 
-function formatResults(eventId, entries) {
-	var context = {};
-	context.root = LDFF_ROOT_URL;
-	context.event_title = $('#search-event-option-' + eventId).text();
-	context.event_url = createEventUrl(eventId);
-	context.entries_only = false;
-	context.entry_count = entries.length;
-	context.are_entries_found = entries.length > 0;
-	context.are_several_pages_found = true;
-	context.entries = entries.slice(0, 9);
-	return Mustache.render(templates.results, context, templates);
+function renderEntry(eventId, entry) {
+	// TODO fix Details button
+	return Mustache.render(templates.result, entry, templates);
 }
 
 })();
