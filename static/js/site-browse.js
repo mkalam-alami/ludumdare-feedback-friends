@@ -1,10 +1,22 @@
 (function() {
 
+var LDFF_SCRAPING_ROOT = 'http://ludumdare.com/compo/';
+var LDFF_ROOT_URL = '/';
+
+var templates = {};
+
 $(window).load(function() {
+	loadTemplates();
 	bindSearch();
 	pushHistory(window.location.href, $('#results').html());
 	bindMore();
+	runSearch();
 });
+
+function loadTemplates() {
+	templates.results = $('#results-template').html();
+	templates.cartridge = $('#cartridge-template').html();
+}
 
 // AJAX/History support
 
@@ -144,12 +156,36 @@ function searchUsernames(eventId, query, callback) {
 
 function runSearch() {
 	$('#loader').show();
-	var url = '?' + $('#search').serialize();
-	$.get(url + '&ajax=results', function(html) {
-		refreshResults(html);
-		pushHistory(url);
+	var eventId = $('#search-event').val();
+	var url = 'eventsummary.php?event=' + encodeURIComponent(eventId);
+	$.get(url, function(entries) {
+		refreshResults(formatResults(eventId, entries));
 		$('#loader').hide();
 	})
+}
+
+function createEventUrl(eventId) {
+	return LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
+}
+
+function createPictureUrl(eventId, uid) {
+	return 'data/' + encodeURIComponent(eventId) + '/' + encodeURIComponent(uid) + '.jpg';
+}
+
+function formatResults(eventId, entries) {
+	var context = {};
+	for (var i = 0; i < entries.length; i++) {
+		entries[i].picture = createPictureUrl(eventId, entries[i].uid);
+	}
+	context.root = LDFF_ROOT_URL;
+	context.event_title = $('#search-event-option-' + eventId).text();
+	context.event_url = createEventUrl(eventId);
+	context.entries_only = false;
+	context.entry_count = entries.length;
+	context.are_entries_found = entries.length > 0;
+	context.are_several_pages_found = true;
+	context.entries = entries.slice(0, 50);
+	return Mustache.render(templates.results, context, templates);
 }
 
 // "Load more" button
