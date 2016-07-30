@@ -80,7 +80,7 @@ function _scraping_run_step_entry($db, $uid) {
 		$score_per_author = array();
 		foreach ($entry['comments'] as $comment) {
 			if ($order++ > $max_order) {
-				$uid_author = mysqli_real_escape_string($db, $comment['uid_author']);
+				$uid_author = $comment['uid_author'];
 				if (!isset($score_per_author[$uid_author])) {
 					$score_per_author[$uid_author] = 0;
 				}
@@ -96,9 +96,9 @@ function _scraping_run_step_entry($db, $uid) {
 				  $event_id,
 					$uid,
 					$comment['order'],
-					mysqli_real_escape_string($db, $comment['uid_author']),
-					mysqli_real_escape_string($db, $comment['author']),
-					mysqli_real_escape_string($db, $comment['comment']),
+					$comment['uid_author'],
+					$comment['author'],
+					$comment['comment'],
 					date_format($comment['date'], 'Y-m-d H:i'),
 					date_format($comment['date'], 'Y-m-d H:i')
 				);
@@ -127,12 +127,12 @@ function _scraping_run_step_entry($db, $uid) {
 		$update_stmt = mysqli_prepare($db, "UPDATE entry SET author=?, author_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
 		mysqli_stmt_bind_param($update_stmt,
 			'ssssssiiiis',
-			mysqli_real_escape_string($db, $entry['author']),
-			mysqli_real_escape_string($db, $entry['author_page']),
-			mysqli_real_escape_string($db, $entry['title']),
-			mysqli_real_escape_string($db, $entry['type']),
-			mysqli_real_escape_string($db, $entry['description']),
-			mysqli_real_escape_string($db, $entry['platforms']),
+			$entry['author'],
+			$entry['author_page'],
+			$entry['title'],
+			$entry['type'],
+			$entry['description'],
+			$entry['platforms'],
 			$comments_given,
 			$comments_received,
 			$coolness,
@@ -150,12 +150,12 @@ function _scraping_run_step_entry($db, $uid) {
 					'isssssssiii',
 					$uid,
 					$event_id,
-					mysqli_real_escape_string($db, $entry['author']),
-					mysqli_real_escape_string($db, $entry['author_page']),
-					mysqli_real_escape_string($db, $entry['title']),
-					mysqli_real_escape_string($db, $entry['type']),
-					mysqli_real_escape_string($db, $entry['description']),
-					mysqli_real_escape_string($db, $entry['platforms']),
+					$entry['author'],
+					$entry['author_page'],
+					$entry['title'],
+					$entry['type'],
+					$entry['description'],
+					$entry['platforms'],
 					$comments_given,
 					$comments_received,
 					$coolness
