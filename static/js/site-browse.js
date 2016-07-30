@@ -371,6 +371,8 @@ function renderResults() {
 	var numEntries = results.length;
 	var numColumns = Math.max(1, Math.floor(width / ENTRY_WIDTH));
 	var numRows = Math.ceil(numEntries / numColumns);
+	var columnWidth = width / numColumns;
+	var xOffset = (columnWidth - ENTRY_WIDTH) / 2;
 	container.innerHeight(numRows * ENTRY_HEIGHT);
 
 	var startIndex = 0;
@@ -403,7 +405,7 @@ function renderResults() {
 			var child = $(renderEntry(eventId, results[index]));
 			var row = Math.floor(index / numColumns);
 			var column = index % numColumns;
-			child.css({left: column * ENTRY_WIDTH, top: row * ENTRY_HEIGHT});
+			child.css({left: xOffset + column * columnWidth, top: row * ENTRY_HEIGHT});
 			child.attr('id', 'result-' + index);
 			container.append(child);
 			cartridgesStyling(child.find('.entry'));
