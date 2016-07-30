@@ -377,18 +377,24 @@ function renderResults(results) {
 function createVirtualScroll(container, items, renderFunction, idPrefix) {
 	container.css({'position': 'relative'});
 
-	var width = container.innerWidth();
-	var numEntries = items.length;
-	var numColumns = Math.max(1, Math.floor(width / ENTRY_WIDTH));
-	var numRows = Math.ceil(numEntries / numColumns);
-	var columnWidth = width / numColumns;
-	var xOffset = (columnWidth - ENTRY_WIDTH) / 2;
-	container.innerHeight(numRows * ENTRY_HEIGHT);
-
+	var prevWidth = -1;
 	var startIndex = 0;
 	var endIndex = 0;
 
 	function renderVisibleResults() {
+		var width = container.innerWidth();
+		var numColumns = Math.max(1, Math.floor(width / ENTRY_WIDTH));
+		var numRows = Math.ceil(items.length / numColumns);
+		var columnWidth = width / numColumns;
+		var xOffset = (columnWidth - ENTRY_WIDTH) / 2;
+
+		if (width != prevWidth) {
+			// Column count may need to change. Just start afresh. It's simplest.
+			container.empty();
+			container.innerHeight(numRows * ENTRY_HEIGHT);
+			prevWidth = width;
+		}
+
 		var topVisible = window.scrollY - container.offset().top;
 		// innerHeight includes any horizontal scrollbar, but that doesn't really matter.
 		var bottomVisible = topVisible + window.innerHeight;
