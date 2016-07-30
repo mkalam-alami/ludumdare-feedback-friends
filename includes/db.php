@@ -38,7 +38,9 @@ function db_query($db, $sql, $bind_params_str, ...$params) {
 			if ($result = mysqli_stmt_execute($stmt)) {
 				if ($raw_result = mysqli_stmt_get_result($stmt)) {
 					$result = array();
-					while ($result[] = mysqli_fetch_array($raw_result));
+					while ($row = mysqli_fetch_array($raw_result)) {
+						$result[] = $row;
+					}
 				}
 			}
 		}
