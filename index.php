@@ -323,7 +323,7 @@ function page_browse($db) {
 			$bind_params[] = $userid;
 		}
 		$sql .= " WHERE entry.event_id = ?";
-		$bind_params_str .= 'i';
+		$bind_params_str .= 's';
 		$bind_params[] = $event_id;
 
 		if ($filter_by_user) {
@@ -380,7 +380,6 @@ function page_browse($db) {
 
 		// Fetch entries
 
-		$stmt = mysqli_prepare($db, $sql);
 		$params = array();
 		$n = count($bind_params);
 		for($i=0; $i < $n; ++$i){
@@ -390,18 +389,10 @@ function page_browse($db) {
 		}
 		// Uncomment to explain query plan
 		//db_explain_query($db, $sql, $bind_params_str, $params);
-		mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
-		$entries = array();
-		if(!mysqli_stmt_execute($stmt)){
-			mysqli_stmt_close($stmt);
+		if (($entries = db_query($db, $sql, $bind_params_str, $params)) === false) {
 			log_error_and_die('Failed to fetch entries', mysqli_error($db));
 		}
-		$results = mysqli_stmt_get_result($stmt);
-		while ($row = mysqli_fetch_array($results)) {
-			$entries[] = prepare_entry_context($row);
-		}
-		mysqli_stmt_close($stmt);
-
+		$entries = array_map('prepare_entry_context', $entries);
 		$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
 
 		// Build context
