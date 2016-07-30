@@ -302,7 +302,7 @@ function page_browse($db) {
 
 		// Build query according to search params
 		// For the structure of the join, see http://sqlfiddle.com/#!9/26ae79/8.
-		$not_coolness_search = false;
+		$coolness_search = true;
 		$have_search_query = isset($_GET['query']) && !!$_GET['query'];
 		$filter_by_user = !LDFF_EMERGENCY_MODE && !!$userid && !$have_search_query;
 		$bind_params_str = '';
@@ -343,7 +343,7 @@ function page_browse($db) {
 				$bind_params[] = $query;
 
 				$empty_where = false;
-				$not_coolness_search = true;
+				$coolness_search = false;
 			}
 			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 				$platforms_match = '';
@@ -407,7 +407,7 @@ function page_browse($db) {
 		// Build context
 		$context = init_context($db);
 		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
-		$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $not_coolness_search) ? 'Search results' : 'These entries need feedback!';
+		$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $coolness_search) ? 'These entries need feedback!' : 'Search results';
 		$context['page'] = $page;
 		$context['entries'] = $entries;
 		$context['entry_count'] = $entry_count;
