@@ -25,8 +25,14 @@ function db_select_single_value($db, $query) {
 	return $row[0];
 }
 
-function db_explain_query($db, $query) {
-	$results = mysqli_query($db, "EXPLAIN $query") or log_error_and_die('Failed to get query explanation', mysqli_error($db)); 
+function db_explain_query($db, $query, $bind_params_str, $params) {
+	$stmt = mysqli_prepare($db, "EXPLAIN $query");
+	mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
+	if (!mysqli_stmt_execute($stmt)) {
+		mysqli_stmt_close($stmt);
+		log_error_and_die('Failed to get query explanation', mysqli_error($db));
+	}
+	$results = mysqli_stmt_get_result($stmt);
 	echo '<pre>';
 	echo "$query;\n\n";
 	while ($row = mysqli_fetch_assoc($results)) {
@@ -36,6 +42,7 @@ function db_explain_query($db, $query) {
 		echo "\n";
 	}
 	echo '</pre>';
+	mysqli_stmt_close($stmt);
 }
 
 ?>

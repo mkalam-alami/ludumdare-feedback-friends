@@ -366,9 +366,9 @@ function page_browse($db) {
 		switch ($sorting) {
 			case 'random': $sql .= " ORDER BY RAND()"; break;
 			case 'received': $sql .= " ORDER BY entry.comments_received, entry.comments_given DESC, entry.last_updated DESC"; break;
-			case 'received_desc': $sql .= " ORDER BY entry.comments_received DESC, entry.last_updated DESC"; break; // Hidden
-			case 'given': $sql .= " ORDER BY entry.comments_given DESC, entry.last_updated DESC"; break; // Hidden
-			case 'laziest': $sql .= " ORDER BY entry.coolness, entry.comments_given, entry.comments_received, entry.last_updated DESC"; break; // Hidden
+			case 'received_desc': $sql .= " ORDER BY entry.comments_received DESC, entry.last_updated DESC"; break; // Hidden, not indexed
+			case 'given': $sql .= " ORDER BY entry.comments_given DESC, entry.last_updated DESC"; break; // Hidden, not indexed
+			case 'laziest': $sql .= " ORDER BY entry.coolness, entry.comments_given, entry.comments_received, entry.last_updated DESC"; break; // Hidden, not indexed
 			default: $sql .= " ORDER BY entry.coolness DESC, entry.last_updated DESC";
 		}
 		$sql .= " LIMIT ".LDFF_PAGE_SIZE;
@@ -377,9 +377,6 @@ function page_browse($db) {
 			$page = intval(util_sanitize_query_param('page'));
 			$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
 		}
-
-		// Uncomment to explain query plan
-		//db_explain_query($db, $sql);
 
 		// Fetch entries
 
@@ -391,6 +388,8 @@ function page_browse($db) {
 			$$id = $bind_params[$i];
 			$params[] = &$$id;
 		}
+		// Uncomment to explain query plan
+		//db_explain_query($db, $sql, $bind_params_str, $params);
 		mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
 		$entries = array();
 		if(!mysqli_stmt_execute($stmt)){
