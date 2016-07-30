@@ -4,12 +4,12 @@ var LDFF_SCRAPING_ROOT = 'http://ludumdare.com/compo/';
 var LDFF_ROOT_URL = '/';
 
 var templates = {};
+var eventCache = {};
 
 $(window).load(function() {
 	loadTemplates();
 	bindSearch();
 	pushHistory(window.location.href, $('#results').html());
-	bindMore();
 	runSearch();
 });
 
@@ -30,18 +30,12 @@ function pushHistory(url, html) {
 
 window.onpopstate = function (e) {
 	if (e.state) {
-		refreshResults(e.state['html']);
 		$('#search-platforms').val(e.state['search-platforms']);
 		$('#search-query').val(e.state['search-query']);
 		$('#search-platforms').multiselect('refresh');
+		refreshResults();
 	}
 };
-
-function refreshResults(html) {
-	$('#results').html(html);
-	bindMore();
-	cartridgesStyling();
-}
 
 // Search form
 
@@ -155,13 +149,151 @@ function searchUsernames(eventId, query, callback) {
 }
 
 function runSearch() {
-	$('#loader').show();
 	var eventId = $('#search-event').val();
-	var url = 'eventsummary.php?event=' + encodeURIComponent(eventId);
-	$.get(url, function(entries) {
-		refreshResults(formatResults(eventId, entries));
-		$('#loader').hide();
-	})
+	if (eventCache[eventId]) {
+		refreshResults();
+	} else {
+		$('#loader').show();
+		var url = 'eventsummary.php?event=' + encodeURIComponent(eventId);
+		$.get(url, function(entries) {
+			augmentEntries(eventId, entries);
+			eventCache[eventId] = entries;
+			refreshResults();
+			$('#loader').hide();
+		});
+	}
+}
+
+function augmentEntries(eventId, entries) {
+	for (var i = 0; i < entries.length; i++) {
+		var entry = entries[i];
+		// Picture URLs aren't sent from the server; that would be redundant and wasteful.
+		entry.picture = createPictureUrl(eventId, entry.uid);
+		// Platforms are sent in a single string to save on punctuation.
+		entry.platforms = entry.platforms.toLowerCase().split(' ');
+	}
+}
+
+function isUsersOwnEntry(userId, entry) {
+	return entry.uid == userId;
+}
+
+function hasUserCommented(userId, entry) {
+	return entry.commenter_ids.indexOf(userId) != -1;
+}
+
+function matchesPlatforms(platforms, entry) {
+	if (!platforms) {
+		return true;
+	}
+	for (var j = 0; j < platforms.length; j++) {
+		if (entry.platforms.indexOf(platforms[j]) >= 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function matchesSearchQuery(query, entry) {
+	return true; // TODO
+}
+
+var comparators = {
+	coolness: function(a, b) {
+		if (a.coolness < b.coolness) return 1;
+		if (a.coolness > b.coolness) return -1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
+	received: function(a, b) {
+		if (a.comments_received < b.comments_received) return -1;
+		if (a.comments_received > b.comments_received) return 1;
+		if (a.comments_given < b.comments_given) return 1;
+		if (a.comments_given > b.comments_given) return -1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
+	received_desc: function(a, b) {
+		if (a.comments_received < b.comments_received) return 1;
+		if (a.comments_received > b.comments_received) return -1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
+	given: function(a, b) {
+		if (a.comments_given < b.comments_given) return 1;
+		if (a.comments_given > b.comments_given) return -1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
+	laziest: function(a, b) {
+		if (a.coolness < b.coolness) return -1;
+		if (a.coolness > b.coolness) return 1;
+		if (a.comments_given < b.comments_given) return -1;
+		if (a.comments_given > b.comments_given) return 1;
+		if (a.comments_received < b.comments_received) return -1;
+		if (a.comments_received > b.comments_received) return 1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
+};
+
+function shuffle(array) {
+	var n = array.length;
+	for (var i = 0; i < n; i++) {
+		var j = i + Math.floor(Math.random() * (n - i));
+		var tmp = array[i];
+		array[i] = array[j];
+		array[j] = tmp;
+	}
+}
+
+function sortEntries(sorting, entries) {
+	if (sorting == 'random') {
+		// We can't simply return a random number from the comparator, because the
+		// ordering will be ill-defined and dependent on the sort implementation.
+		shuffle(entries);
+	} else {
+		var comparator = comparators[sorting] || comparators['coolness'];
+		entries.sort(comparator);
+	}
+}
+
+function refreshResults() {
+	var eventId = $('#search-event').val();
+	var entries = eventCache[eventId];
+	var results = [];
+
+	var userId = parseInt($('#userid').val()) || null;
+	var sorting = $('#search-sorting').val();
+	var platforms = $('#search-platforms').val();
+	var query = $('#search-query').val();
+
+	console.log('userId:', userId, 'sorting:', sorting, 'platforms:', platforms, 'query:', query);
+
+	for (var i = 0; i < entries.length; i++) {
+		var entry = entries[i];
+		if (matchesPlatforms(platforms, entry)) {
+			if (query) {
+				if (matchesSearchQuery(query, entry)) {
+					results.push(entry);
+				}
+			} else {
+				if (!userId || (!isUsersOwnEntry(userId, entry) && !hasUserCommented(userId, entry))) {
+					results.push(entry);
+				}
+			}
+		}
+	}
+
+	sortEntries(sorting, results);
+
+	$('#results').html(formatResults(eventId, results));
+	cartridgesStyling();
 }
 
 function createEventUrl(eventId) {
@@ -174,9 +306,6 @@ function createPictureUrl(eventId, uid) {
 
 function formatResults(eventId, entries) {
 	var context = {};
-	for (var i = 0; i < entries.length; i++) {
-		entries[i].picture = createPictureUrl(eventId, entries[i].uid);
-	}
 	context.root = LDFF_ROOT_URL;
 	context.event_title = $('#search-event-option-' + eventId).text();
 	context.event_url = createEventUrl(eventId);
@@ -184,24 +313,8 @@ function formatResults(eventId, entries) {
 	context.entry_count = entries.length;
 	context.are_entries_found = entries.length > 0;
 	context.are_several_pages_found = true;
-	context.entries = entries.slice(0, 50);
+	context.entries = entries.slice(0, 9);
 	return Mustache.render(templates.results, context, templates);
-}
-
-// "Load more" button
-
-function bindMore() {
-	$('#more').click(function() {
-		$('#more-container').remove();
-		$('#loader').show();
-		var nextPage = parseInt($(this).attr('data-page')) + 1;
-		var url = '?' + $('#search').serialize();
-		$.get(url + '&ajax=results&page=' + nextPage, function(html) {
-			var oldHtml = $('#results').html();
-			refreshResults(oldHtml + html);
-			$('#loader').hide();
-		})
-	});
 }
 
 })();

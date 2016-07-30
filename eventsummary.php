@@ -34,7 +34,7 @@ if (!$gzip_output) {
 			'comments_received' => $row[6],
 			'coolness' => $row[7],
 			'last_updated' => $row[8],
-			'commenter_ids' => $row[9],
+			'commenter_ids' => array_map(intval, explode(',', $row[9])),
 		));
 	}
 

@@ -19,16 +19,3 @@
 		</div>
 	</div>
 {{/entries}}
-
-<div id="more-container" class="col-xs-12">
-	{{#are_entries_found}}
-		{{#are_several_pages_found}}
-		<button id="more" class="btn btn-primary" data-page="{{page}}">Load more...</button>
-		<br />
-		<br />
-		{{/are_several_pages_found}}
-	{{/are_entries_found}}
-	{{^are_entries_found}}
-		Nothing found.
-	{{/are_entries_found}}
-</div>
