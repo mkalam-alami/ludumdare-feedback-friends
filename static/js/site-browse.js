@@ -30,8 +30,12 @@ function loadTemplates() {
 // AJAX/History support
 
 function pushHistory(url) {
+	if (window.location.search == '?' + $('#search').serialize()) {
+		return;
+	}
 	window.history.pushState({
 		"search-platforms": $('#search-platforms').val(),
+		"search-sorting": $('#search-sorting').val(),
 		"search-query": getSearchQuery(),
 	}, "", url);
 }
@@ -39,8 +43,10 @@ function pushHistory(url) {
 window.onpopstate = function (e) {
 	if (e.state) {
 		$('#search-platforms').val(e.state['search-platforms']);
+		$('#search-sorting').val(e.state['search-sorting']);
 		$('#search-query').val(e.state['search-query']);
 		$('#search-platforms').multiselect('refresh');
+		refreshSorting();
 		runSearch();
 	}
 };
