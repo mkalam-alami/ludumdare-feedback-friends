@@ -404,6 +404,8 @@ function page_browse($db) {
 
 		$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
 
+		$templates = util_load_templates(['results', 'result', 'cartridge']);
+
 		// Build context
 		$context = init_context($db);
 		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
@@ -417,6 +419,7 @@ function page_browse($db) {
 		$context['userid'] = $userid;
 		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
+		$context['templates'] = $templates;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 			$context['search_platforms'] = implode(', ', array_map('util_sanitize', $_GET['platforms']));
 		}

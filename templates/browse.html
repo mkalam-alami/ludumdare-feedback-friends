@@ -98,15 +98,11 @@
 		</div>
 	</div>
 
-	<script id="results-template" type="x-tmpl-mustache">
-		{{> results}}
+	{{#templates}}
+	<script id="{{name}}-template" type="x-tmpl-mustache">
+		{{{code}}}
 	</script>
-	<script id="result-template" type="x-tmpl-mustache">
-		{{> result}}
-	</script>
-	<script id="cartridge-template" type="x-tmpl-mustache">
-		{{> cartridge}}
-	</script>
+	{{/templates}}
 
 	<script type="text/javascript" src="{{root}}static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/typeahead.bundle.min.js"></script>
