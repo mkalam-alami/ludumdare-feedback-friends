@@ -404,10 +404,16 @@ function page_browse($db) {
 
 		$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
 
+		$config = array(
+			array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
+			array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
+			array('key' => 'LDFF_SCRAPING_URL', 'value' => LDFF_SCRAPING_URL),
+		);
 		$templates = util_load_templates(['results', 'result', 'cartridge']);
 
 		// Build context
 		$context = init_context($db);
+		$context['config'] = $config;
 		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
 		$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $not_coolness_search) ? 'Search results' : 'These entries need feedback!';
 		$context['page'] = $page;

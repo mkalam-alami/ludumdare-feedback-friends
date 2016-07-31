@@ -2,9 +2,6 @@
 
 (function() {
 
-var LDFF_SCRAPING_ROOT = 'http://ludumdare.com/compo/';
-var LDFF_ROOT_URL = '/';
-
 // These must match the CSS! Otherwise scrolling will have weird effects.
 var ENTRY_WIDTH = 249;
 var ENTRY_HEIGHT = 339;
@@ -36,7 +33,7 @@ function pushHistory(url, html) {
 	window.history.pushState({
 		"html": $('#results').html(),
 		"search-platforms": $('#search-platforms').val(),
-		"search-query": $('#search-query').val()
+		"search-query": getSearchQuery(),
 	}, "", url);
 }
 
@@ -53,6 +50,10 @@ window.onpopstate = function (e) {
 
 function getEventId() {
 	return $('#search-event').val();
+}
+
+function getSearchQuery() {
+	return $('#search-query').val();
 }
 
 function refreshEvent() {
@@ -331,7 +332,7 @@ function refreshResults() {
 	var userId = parseInt($('#userid').val()) || null;
 	var sorting = $('#search-sorting').val();
 	var platforms = $('#search-platforms').val();
-	var query = $('#search-query').val();
+	var query = getSearchQuery();
 	var queryMatcher = query ? parseQuery(query) : null;
 
 	// console.log('userId:', userId, 'sorting:', sorting, 'platforms:', platforms, 'query:', query);
@@ -365,9 +366,10 @@ function renderResults(results) {
 	var eventId = getEventId();
 
 	var context = {};
-	context.root = LDFF_ROOT_URL;
+	context.root = config.LDFF_ROOT_URL;
 	context.event_title = $('#search-event-option-' + eventId).text();
 	context.event_url = createEventUrl(eventId);
+	context.title = (eventId != config.LDFF_ACTIVE_EVENT_ID || getSearchQuery()) ? 'Search results' : 'These entries need feedback!';
 	context.entry_count = results.length;
 	$('#results').html(Mustache.render(templates.results, context, templates));
 
@@ -450,7 +452,7 @@ function createVirtualScroll(container, items, renderFunction, idPrefix) {
 }
 
 function createEventUrl(eventId) {
-	return LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
+	return config.LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
 }
 
 function createPictureUrl(eventId, uid) {
@@ -462,7 +464,7 @@ function renderEntry(eventId, entry) {
 		entry: entry,
 		event_id: eventId,
 		event_url: createEventUrl(eventId),
-		root: LDFF_ROOT_URL,
+		root: config.LDFF_ROOT_URL,
 	};
 	var elt = $(Mustache.render(templates.result, context, templates));
 	cartridgesStyling(elt.find('.entry'));
