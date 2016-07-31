@@ -22,9 +22,18 @@ $(window).load(function() {
 });
 
 function loadTemplates() {
-	templates.results = $('#results-template').html();
-	templates.result = $('#result-template').html();
-	templates.cartridge = $('#cartridge-template').html();
+	['results', 'result', 'cartridge'].forEach(function(key) {
+		var template = $('#' + key + '-template').html();
+		if (!template) {
+			throw new Error('Template "' + key + '" is missing');
+		}
+		try {
+			Mustache.parse(template);
+		} catch (ex) {
+			throw new Error('Parse error in template "' + key + '": ' + ex);
+		}
+		templates[key] = template;
+	});
 }
 
 // AJAX/History support
