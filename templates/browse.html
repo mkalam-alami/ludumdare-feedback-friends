@@ -97,7 +97,17 @@
 			</div>
 		</div>
 	</div>
-	
+
+	<script id="results-template" type="x-tmpl-mustache">
+		{{> results}}
+	</script>
+	<script id="result-template" type="x-tmpl-mustache">
+		{{> result}}
+	</script>
+	<script id="cartridge-template" type="x-tmpl-mustache">
+		{{> cartridge}}
+	</script>
+
 	<script type="text/javascript" src="{{root}}static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/typeahead.bundle.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/bootstrap.min.js"></script>

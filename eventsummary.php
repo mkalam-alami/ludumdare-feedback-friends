@@ -22,15 +22,9 @@ if (!$gzip_output) {
 	}
 	$results = mysqli_stmt_get_result($stmt);
 
-	$json = array(
-		'template-results' => file_get_contents('templates/results.html'),
-		'template-result' => file_get_contents('templates/result.html'),
-		'template-cartridge' => file_get_contents('templates/cartridge.html'),
-		'entries' => []
-	);
-
+	$json = [];
 	while ($row = mysqli_fetch_row($results)) {
-		$entry =  array(
+		array_push($json, array(
 			'uid' => (int)$row[0],
 			'author' => $row[1],
 			'title' => $row[2],
@@ -40,10 +34,8 @@ if (!$gzip_output) {
 			'comments_received' => $row[6],
 			'coolness' => $row[7],
 			'last_updated' => $row[8],
-			'commenter_ids' => array_map('intval', explode(',', $row[9])),
-		);
-		
-		array_push($json['entries'], view_prepare_entry($entry));
+			'commenter_ids' => array_map(intval, explode(',', $row[9])),
+		));
 	}
 
 	$gzip_output = gzencode(json_encode($json));
