@@ -68,18 +68,6 @@ function render($template_name, $context) {
 	return $template->render($context);
 }
 
-function prepare_entry_context($entry) {
-	global $event_id;
-
-	if (isset($entry['type'])) {
-		$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
-		$entry['type'] = util_format_type($entry['type']);
-		$entry['platforms'] = util_format_platforms($entry['platforms']);
-	}
-
-	return $entry;
-}
-
 // PAGE : Entry details
 
 function page_details($db) {
@@ -222,7 +210,7 @@ function page_details($db) {
 
 		// Build context
 		$context = init_context($db);
-		$context['entry'] = prepare_entry_context($entry);
+		$context['entry'] = view_prepare_entry($entry);
 
 		// Render
 		$output = render('header', $context)
@@ -398,7 +386,7 @@ function page_browse($db) {
 		}
 		$results = mysqli_stmt_get_result($stmt);
 		while ($row = mysqli_fetch_array($results)) {
-			$entries[] = prepare_entry_context($row);
+			$entries[] = view_prepare_entry($row);
 		}
 		mysqli_stmt_close($stmt);
 

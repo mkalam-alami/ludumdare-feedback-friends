@@ -18,6 +18,7 @@ require_once(__DIR__ . '/setting.php');
 require_once(__DIR__ . '/ludumdare.php');
 require_once(__DIR__ . '/score.php');
 require_once(__DIR__ . '/scraping.php');
+require_once(__DIR__ . '/view.php');
 
 // PHP Errors level
 

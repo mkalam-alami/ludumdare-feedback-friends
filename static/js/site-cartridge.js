@@ -1,4 +1,6 @@
-cartridgesStyling = (function() {
+'use strict';
+
+window.cartridgesStyling = (function() {
 
 	function cartridgesStyling(entries) {
 		entries.each(function(index, entry) {

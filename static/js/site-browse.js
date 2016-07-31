@@ -18,17 +18,10 @@ var eventCache = {};
 var resultsVirtualScroll = null;
 
 $(window).load(function() {
-	loadTemplates();
 	bindSearch();
 	pushHistory(window.location.href, $('#results').html());
 	runSearch();
 });
-
-function loadTemplates() {
-	templates.results = $('#results-template').html();
-	templates.result = $('#result-template').html();
-	templates.cartridge = $('#cartridge-template').html();
-}
 
 // AJAX/History support
 
@@ -171,22 +164,15 @@ function runSearch() {
 	} else {
 		$('#loader').show();
 		var url = 'eventsummary.php?event=' + encodeURIComponent(eventId);
-		$.get(url, function(entries) {
-			augmentEntries(eventId, entries);
-			eventCache[eventId] = entries;
+		$.get(url, function(data) {
+			templates.results = data['template-results'];
+			templates.result = data['template-result'];
+			templates.cartridge = data['template-cartridge'];
+
+			eventCache[eventId] = data.entries;
 			refreshResults();
 			$('#loader').hide();
 		});
-	}
-}
-
-function augmentEntries(eventId, entries) {
-	for (var i = 0; i < entries.length; i++) {
-		var entry = entries[i];
-		// Picture URLs aren't sent from the server; that would be redundant and wasteful.
-		entry.picture = createPictureUrl(eventId, entry.uid);
-		// Platforms are sent in a single string to save on punctuation.
-		entry.platforms = entry.platforms.toLowerCase().split(' ');
 	}
 }
 
@@ -451,10 +437,6 @@ function createVirtualScroll(container, items, renderFunction, idPrefix) {
 
 function createEventUrl(eventId) {
 	return LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
-}
-
-function createPictureUrl(eventId, uid) {
-	return 'data/' + encodeURIComponent(eventId) + '/' + encodeURIComponent(uid) + '.jpg';
 }
 
 function renderEntry(eventId, entry) {
