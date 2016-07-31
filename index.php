@@ -263,23 +263,17 @@ function page_browse($db) {
 	// Caching
 	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
-	$cache_key = null;
-	if ((!isset($_GET['query']) || $_GET['query'] == '') // Don't cache text searches
-			&& (!isset($_GET['sorting']) || $_GET['sorting'] != 'random')) { // Don't cache randomized pages
-		$cache_key = $event_id.'__browse';
-		if (LDFF_EMERGENCY_MODE) $cache_key .= '-emergency';
-		if (isset($_GET['platforms'])) {
-			$platforms = '';
-			foreach ($_GET['platforms'] as $raw_platform) {
-				$platforms .= util_sanitize($raw_platform).' ';
-			}
-			$cache_key .= '-platforms:'.$platforms;
+	$cache_key = $event_id.'__browse';
+	if (LDFF_EMERGENCY_MODE) $cache_key .= '-emergency';
+	if (isset($_GET['platforms'])) {
+		$platforms = '';
+		foreach ($_GET['platforms'] as $raw_platform) {
+			$platforms .= util_sanitize($raw_platform).' ';
 		}
-		if (isset($_GET['page'])) $cache_key .= '-page:'.util_sanitize_query_param('page');
-		if (isset($_GET['ajax'])) $cache_key .= '-ajax:'.util_sanitize_query_param('ajax');
-		if (isset($_GET['sorting'])) $cache_key .= '-sorting:'.util_sanitize_query_param('sorting');
-		if (isset($_GET['userid'])) $cache_key .= '-userid:'.util_sanitize_query_param('userid');
+		$cache_key .= '-platforms:'.$platforms;
 	}
+	if (isset($_GET['sorting'])) $cache_key .= '-sorting:'.util_sanitize_query_param('sorting');
+	if (isset($_GET['userid'])) $cache_key .= '-userid:'.util_sanitize_query_param('userid');
 	$output = cache_read($cache_key);
 
 	if (!$output) {
@@ -300,131 +294,30 @@ function page_browse($db) {
 			mysqli_stmt_close($stmt);
 		}
 
-		// Build query according to search params
-		// For the structure of the join, see http://sqlfiddle.com/#!9/26ae79/8.
-		$coolness_search = true;
-		$have_search_query = isset($_GET['query']) && !!$_GET['query'];
-		$filter_by_user = !LDFF_EMERGENCY_MODE && !!$userid && !$have_search_query;
-		$bind_params_str = '';
-		$bind_params = array();
-		$sql = "SELECT SQL_CALC_FOUND_ROWS entry.*";
-		if ($filter_by_user) {
-			// Count comments by entry (see also the GROUP BY later on)
-			$sql .= ", COUNT(comment.uid_entry) AS comments_by_current_user";
-		}
-		$sql .= " FROM entry";
-		if ($filter_by_user) {
-			// Join on the comments table, selecting only the comments authored by the current user
-			$sql .= " LEFT JOIN comment";
-			$sql .= "    ON entry.uid = comment.uid_entry";
-			$sql .= "   AND entry.event_id = comment.event_id";
-			$sql .= "   AND comment.uid_author = ?";
-			$bind_params_str .= 'i';
-			$bind_params[] = $userid;
-		}
-		$sql .= " WHERE entry.event_id = ?";
-		$bind_params_str .= 's';
-		$bind_params[] = $event_id;
-
-		if ($filter_by_user) {
-			// Omit the current user's own game
-			$sql .= " AND entry.uid != ?";
-			$bind_params_str .= 'i';
-			$bind_params[] = $userid;
-		}
-		$sorting = 'coolness';
-		if (!LDFF_EMERGENCY_MODE) {
-			if ($have_search_query) {
-				$query = util_sanitize_query_param('query');
-				$sql .= " AND (MATCH(entry.author,entry.title,entry.platforms,entry.type)
-					AGAINST (? IN BOOLEAN MODE) OR entry.uid = ?)";
-				$bind_params_str .= 'si';
-				$bind_params[] = $query;
-				$bind_params[] = $query;
-
-				$empty_where = false;
-				$coolness_search = false;
-			}
-			if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-				$platforms_match = '';
-				foreach ($_GET['platforms'] as $index => $raw_platform) {
-					$platforms_match .= util_sanitize($raw_platform).' ';
-				}
-				$sql .= " AND MATCH(entry.platforms) AGAINST(? IN BOOLEAN MODE)";
-				$bind_params_str .= 's';
-				$bind_params[] = $platforms_match;
-			}
-			if (isset($_GET['sorting'])) {
-				$sorting = util_sanitize_query_param('sorting');
-			}
-		}
-		if ($filter_by_user) {
-			// Group by entry, then select only those entries that received 0 comments from the current user
-			$sql .= " GROUP BY entry.uid, entry.event_id";
-			$sql .= " HAVING comments_by_current_user = 0";
-		}
-		switch ($sorting) {
-			case 'random': $sql .= " ORDER BY RAND()"; break;
-			case 'received': $sql .= " ORDER BY entry.comments_received, entry.comments_given DESC, entry.last_updated DESC"; break;
-			case 'received_desc': $sql .= " ORDER BY entry.comments_received DESC, entry.last_updated DESC"; break; // Hidden, not indexed
-			case 'given': $sql .= " ORDER BY entry.comments_given DESC, entry.last_updated DESC"; break; // Hidden, not indexed
-			case 'laziest': $sql .= " ORDER BY entry.coolness, entry.comments_given, entry.comments_received, entry.last_updated DESC"; break; // Hidden, not indexed
-			default: $sql .= " ORDER BY entry.coolness DESC, entry.last_updated DESC";
-		}
-		$sql .= " LIMIT ".LDFF_PAGE_SIZE;
-		$page = 1;
-		if (isset($_GET['page'])) {
-			$page = intval(util_sanitize_query_param('page'));
-			$sql .= " OFFSET " . (($page - 1) * LDFF_PAGE_SIZE);
-		}
-
-		// Fetch entries
-
-		$params = array();
-		$n = count($bind_params);
-		for($i=0; $i < $n; ++$i){
-			$id = "param$i";
-			$$id = $bind_params[$i];
-			$params[] = &$$id;
-		}
-		// Uncomment to explain query plan
-		//db_explain_query($db, $sql, $bind_params_str, $params);
-		if (($entries = db_query($db, $sql, $bind_params_str, $params)) === false) {
-			log_error_and_die('Failed to fetch entries', mysqli_error($db));
-		}
-		$entries = array_map('prepare_entry_context', $entries);
-		$entry_count = db_select_single_value($db, 'SELECT FOUND_ROWS()');
+		$config = array(
+			array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
+			array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
+			array('key' => 'LDFF_SCRAPING_ROOT', 'value' => LDFF_SCRAPING_ROOT),
+		);
+		$templates = util_load_templates(['results', 'result', 'cartridge']);
 
 		// Build context
 		$context = init_context($db);
+		$context['config'] = $config;
 		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
-		$context['title'] = ($event_id == LDFF_ACTIVE_EVENT_ID && $coolness_search) ? 'These entries need feedback!' : 'Search results';
-		$context['page'] = $page;
-		$context['entries'] = $entries;
-		$context['entry_count'] = $entry_count;
-		$context['are_entries_found'] = count($entries) > 0;
-		$context['are_several_pages_found'] = $entry_count > LDFF_PAGE_SIZE;
 		$context['username'] = $username;
 		$context['userid'] = $userid;
-		$context['search_query'] = util_sanitize_query_param('query');
+		$context['search_query'] = $_GET['query'];
 		$context['search_sorting'] = $sorting;
+		$context['templates'] = $templates;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
 			$context['search_platforms'] = implode(', ', array_map('util_sanitize', $_GET['platforms']));
 		}
-		if (isset($_GET['page'])) {
-			$context['entries_only'] = true;
-		}
 
 		// Render
-		if (isset($_GET['ajax'])) {
-			$template_name = util_sanitize_query_param('ajax');
-			$output = render($template_name, $context);
-		}
-		else {
-			$output = render('header', $context)
-				.render('browse', $context)
-				.render('footer', $context);
-		}
+		$output = render('header', $context)
+			.render('browse', $context)
+			.render('footer', $context);
 
 		if ($cache_key) {
 			cache_write($cache_key, $output);

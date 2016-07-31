@@ -243,6 +243,13 @@ span.twitter-typeahead .tt-menu {
 
 /* Entry block */
 
+.entry-outer {
+	/* These must match the JS! Otherwise scrolling will have weird effects. */
+	width: 249px;
+	height: 339px;
+	position: absolute;
+}
+
 .entry {
 	background-color: #CCC;
 	display: inline-block;

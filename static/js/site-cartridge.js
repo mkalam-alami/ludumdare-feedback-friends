@@ -1,7 +1,9 @@
-cartridgesStyling = (function() {
+'use strict';
 
-	function cartridgesStyling() {
-		$('.entry').each(function(index, entry) {
+window.cartridgesStyling = (function() {
+
+	function cartridgesStyling(entries) {
+		entries.each(function(index, entry) {
 			var entryImg = $('img', entry).get(0);
 			if (entryImg) {
 				if (entryImg.complete && entryImg.naturalWidth > 0) {
@@ -34,8 +36,6 @@ cartridgesStyling = (function() {
 		    }*/
 		}
 	}
-
-	cartridgesStyling();
 	
 	return cartridgesStyling;
 

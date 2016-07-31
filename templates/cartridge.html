@@ -1,11 +1,11 @@
-<a class="entry" href="{{event_url}}&amp;uid={{uid}}">
-	<img class="entry-picture" src="{{root}}{{picture}}" />
+{{! Note: this template is used both on the client and on the server. }}
+<a class="entry" href="{{event_url}}&amp;uid={{entry.uid}}">
+	<img class="entry-picture" src="{{root}}{{entry.picture}}" />
 	<img class="entry-overlay" src="{{root}}static/img/cartridge.png" />
 	<div class="entry-caption">
-		<div class="entry-title">{{title}}</div>
-		<div class="entry-author">by {{author}}</div>
-		<div class="entry-notes">{{type}} | {{platforms}}
-		<!--{{#score}} | score: {{score}}{{/score}}-->
+		<div class="entry-title">{{entry.title}}</div>
+		<div class="entry-author">by {{entry.author}}</div>
+		<div class="entry-notes">{{entry.type}} | {{entry.platforms}}
 		</div>
 	</div>
 </a>

@@ -1,3 +1,11 @@
+<script>
+	var config = {
+		{{#config}}
+		'{{{key}}}': '{{{value}}}',
+		{{/config}}
+	};
+</script>
+
 <div id="contents" class="container">
 
 	<div class="row row-eq-height">
@@ -91,7 +99,6 @@
 		</div>
 		<div id="results-container" class="col-md-9 text-center">
 			<div id="results">
-				{{> results}}
 			</div>
 			<div id="loader" style="display: none">
 				<img src="static/img/ajax-loader.gif" />
@@ -99,11 +106,18 @@
 		</div>
 	</div>
 
+	{{#templates}}
+	<script id="{{name}}-template" type="x-tmpl-mustache">
+		{{{code}}}
+	</script>
+	{{/templates}}
+
 	<script type="text/javascript" src="{{root}}static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/typeahead.bundle.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/bootstrap-multiselect.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/vibrant.min.js"></script>
+	<script type="text/javascript" src="{{root}}static/js/mustache.min.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/site-cartridge.js"></script>
 	<script type="text/javascript" src="{{root}}static/js/site-browse.js"></script>
 </div>

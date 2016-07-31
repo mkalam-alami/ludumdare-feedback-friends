@@ -1,0 +1,13 @@
+{{! This template is used only on the client. }}
+<div class="entry-outer">
+	{{> cartridge}}
+	<div class="row">
+		<div class="entry-coolness text-left">
+			<b>Balance: {{entry.coolness}}</b><br />
+			({{entry.comments_given}}p given - {{entry.comments_received}}p rec.)
+		</div>
+		<a href="?event={{event_id}}&amp;uid={{entry.uid}}" class="btn btn-default entry-button">
+			Details...
+		</a>
+	</div>
+</div>

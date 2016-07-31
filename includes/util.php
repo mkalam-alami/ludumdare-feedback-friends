@@ -80,4 +80,13 @@ function util_array_chuck_into_object($array, $size, $key) {
 	return $object;
 }
 
+function util_load_templates($names) {
+	$out = [];
+	foreach ($names as $name) {
+		$code = file_get_contents(__DIR__.'/../templates/'.$name.'.html');
+		array_push($out, array('name' => $name, 'code' => $code));
+	}
+	return $out;
+}
+
 ?>
