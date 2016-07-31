@@ -120,10 +120,11 @@ function bindSearch() {
 
 	// Sorting
 	refreshSorting();
-	$('.search-sorting-button').click(function () {
+	$('.search-sorting-button').click(function(e) {
 		$('#search-sorting').val($(this).attr('data-value'));
 		refreshSorting();
 		runSearch();
+		e.preventDefault();
 	});
 
 	// Platforms
