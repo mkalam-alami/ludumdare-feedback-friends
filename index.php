@@ -407,7 +407,7 @@ function page_browse($db) {
 		$config = array(
 			array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
 			array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
-			array('key' => 'LDFF_SCRAPING_URL', 'value' => LDFF_SCRAPING_URL),
+			array('key' => 'LDFF_SCRAPING_ROOT', 'value' => LDFF_SCRAPING_ROOT),
 		);
 		$templates = util_load_templates(['results', 'result', 'cartridge']);
 
