@@ -17,7 +17,7 @@ var resultsVirtualScroll = null;
 $(window).load(function() {
 	loadTemplates();
 	bindSearch();
-	pushHistory(window.location.href, $('#results').html());
+	pushHistory(window.location.href);
 	runSearch();
 });
 
@@ -29,9 +29,8 @@ function loadTemplates() {
 
 // AJAX/History support
 
-function pushHistory(url, html) {
+function pushHistory(url) {
 	window.history.pushState({
-		"html": $('#results').html(),
 		"search-platforms": $('#search-platforms').val(),
 		"search-query": getSearchQuery(),
 	}, "", url);
@@ -42,7 +41,7 @@ window.onpopstate = function (e) {
 		$('#search-platforms').val(e.state['search-platforms']);
 		$('#search-query').val(e.state['search-query']);
 		$('#search-platforms').multiselect('refresh');
-		refreshResults();
+		runSearch();
 	}
 };
 
@@ -166,6 +165,9 @@ function searchUsernames(eventId, query, callback) {
 }
 
 function runSearch() {
+	var url = '?' + $('#search').serialize();
+	pushHistory(url);
+
 	var eventId = getEventId();
 	if (eventCache[eventId]) {
 		refreshResults();
