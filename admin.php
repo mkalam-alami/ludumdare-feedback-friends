@@ -72,21 +72,25 @@ else if (isset($_GET['coolness'])) {
 }
 
 // (!!!) Reset whole event (!!!)
-else if (isset($_GET['reset']) && isset($_GET['event_id']) && $_GET['areyousure'] == 'yes') {
-	$event_id = util_sanitize_query_param('event_id');
+else if (isset($_GET['reset'])) {
+	$event_id = util_sanitize_query_param('reset');
+ 	if (isset($_POST['confirm'])) {
+		db_query($db, "DELETE FROM entry WHERE event_id = ?", 's', $event_id);
+		db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
+		db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
+		db_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'");
+		echo 'Done.';
+ 	}
+ 	else {
+ 		echo '<form method="post"><input name="confirm" type="submit" value="Reset event '.$event_id.'?" /></form>';
 
-	db_query($db, "DELETE FROM entry WHERE event_id = ?", 's', $event_id);
-	db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
-	db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
-	db_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'");
+ 	}
 }
 
 else {
-	echo '?cache[&clear], ?coolness, ?reset&event_id=[event]&areyousure=yes';
+	echo '?cache[&clear], ?coolness, ?reset=[event]';
 }
 
 mysqli_close($db);
-
-echo '<br />Done.';
 
 ?>
