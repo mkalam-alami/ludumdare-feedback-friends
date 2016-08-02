@@ -216,7 +216,7 @@ function page_details($db) {
 
 		// Build context
 		$context = init_context($db);
-		$context['entry'] = prepare_entry_context($entry);
+		$context['entry'] = $entry;
 
 		// Render
 		$output = render('header', $context)
