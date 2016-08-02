@@ -10,6 +10,13 @@
 	<link type="text/css" href="{{root}}static/css/site.css" rel="stylesheet" />
 </head>
 <body>
+	<script>
+		var config = {
+			{{#config}}
+			'{{{key}}}': '{{{value}}}',
+			{{/config}}
+		};
+	</script>
 	<div id="header">
 		<a href="{{root}}">
 			<img id="header-logo" src="{{root}}static/img/logo.png" />

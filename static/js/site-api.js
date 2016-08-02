@@ -4,13 +4,14 @@ window.api = (function() {
 
 	var eventCache = {};
 
-	function searchUsernames(eventId, query, callback) {
-		var url = 'api.php?action=userid&event=' + encodeURIComponent(eventId) + '&query=' + encodeURIComponent(query);
-		$.get(url,
-			function(data, textStatus, jqXHR) {
-				callback(data);
-			}
-		);
+	function fetchUsername(userid, callback) {
+		var url = 'api.php?action=username&userid=' + encodeURIComponent(userid);
+		$.get(url, callback);
+	}
+
+	function searchUsernames(query, callback) {
+		var url = 'api.php?action=userid&query=' + encodeURIComponent(query);
+		$.get(url, callback);
 	}
 
 	function fetchEventSummary(eventId, callback) {
@@ -74,6 +75,7 @@ window.api = (function() {
 	}
 
 	return {
+		fetchUsername: fetchUsername,
 		searchUsernames: searchUsernames,
 		fetchEventSummary: fetchEventSummary
 	};

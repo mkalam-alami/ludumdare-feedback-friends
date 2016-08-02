@@ -57,7 +57,6 @@ if ($action == 'eventsummary') {
 
 else if ($action == 'userid') {
 
-	$event_id = util_sanitize_query_param('event');
 	$query = util_sanitize_query_param('query');
 
 	$stmt = mysqli_prepare($db, "SELECT DISTINCT(uid), author FROM entry WHERE author LIKE ? ORDER BY author LIMIT 20");
@@ -82,6 +81,20 @@ else if ($action == 'userid') {
 
 	mysqli_stmt_close($stmt);
 	
+}
+
+else if ($action == 'username') {
+
+	$userid = util_sanitize_query_param('userid');
+	$rows = db_query($db, "SELECT author FROM entry WHERE uid = ? ORDER BY author LIMIT 1", 'i', $userid);
+
+	$json = [];
+	if (count($rows) == 1) {
+		$json['author'] = $rows[0]['author'];
+	}
+
+	header('Content-Type: application/json');
+	print(json_encode($json));
 }
 
 mysqli_close($db);

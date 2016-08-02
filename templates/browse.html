@@ -1,11 +1,3 @@
-<script>
-	var config = {
-		{{#config}}
-		'{{{key}}}': '{{{value}}}',
-		{{/config}}
-	};
-</script>
-
 <div id="contents" class="container">
 
 	<div class="row row-eq-height">
@@ -15,7 +7,7 @@
 				<label for="username">View games as</label>
 				<div class="input-group">
 					<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
-					<input id="userid" type="hidden" name="userid" value="{{userid}}" />
+					<input id="userid" type="hidden" name="userid" />
 					<p class="username-description">Hide games that you've already commented on (except when searching)</p>
 				</div>
 
@@ -33,11 +25,11 @@
 					{{/events}}
 					</ul>
 				</div>
-				<input id="search-event" type="hidden" name="event" value="{{search_event}}" data-active-event="{{active_event}}" />
+				<input id="search-event" type="hidden" name="event" />
 
 				<label for="platforms">Restrict platforms</label>
 				<div class="input-group search-platforms-container">
-					<select id="search-platforms" name="platforms[]" multiple="multiple">
+					<select id="search-platforms" name="platforms" multiple="multiple">
 						<option value="windows">Windows</option>
 						<option value="linux">Linux</option>
 						<option value="osx">OS X</option>
@@ -50,7 +42,7 @@
 							<option value="flash">Flash</option>
 						</optgroup>
 					</select>
-					<div id="search-platforms-values" class="hidden">{{search_platforms}}</div>
+					<div id="search-platforms-values" class="hidden"></div>
 				</div>
 
 				<label for="platforms">Entries sorting</label>
@@ -68,11 +60,11 @@
 						<p class="list-group-item-text">I'm feeling lucky</p>
 					</a>
 				</div>
-				<input id="search-sorting" type="hidden" name="sorting" value="{{search_sorting}}" />
+				<input id="search-sorting" type="hidden" name="sorting" />
 
 				<label for="query">Search</label>
 				<div class="input-group">
-					<input id="search-query" type="text" class="form-control" name="query" value="{{search_query}}" placeholder="Keyword or user ID" />
+					<input id="search-query" type="text" class="form-control" name="query" placeholder="Keyword or user ID" />
 					<ul class="search-syntax-tips">
 						<li><i>Wildcard:</i> ludum*</li>
 						<li><i>OR:</i> ludum dare</li>

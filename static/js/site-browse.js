@@ -37,6 +37,21 @@ function loadTemplates() {
 
 // AJAX/History support
 
+function readQueryParams() {
+ 	var params = {};
+	location.search.substr(1).split("&").forEach(function(item) {
+	    var string = item.split("=");
+	    var key = decodeURIComponent(string[0]);
+	    if (!params[key]) {
+	   		params[key] = decodeURIComponent(string[1]);
+	    }
+	    else {
+	   		params[key] += ',' + decodeURIComponent(string[1]);
+	    }
+	});
+	return params;
+}
+
 function pushHistory(url) {
 	if (window.location.search == '?' + $('#search').serialize()) {
 		return;
@@ -82,17 +97,23 @@ function refreshSorting() {
 }
 
 function reset(eventId) {
-	//$('#search-event').val(eventId || $('#search-event').attr('data-active-event'));
 	$('#search-sorting').val('coolness');
 	$('#search-platforms').val([]);
 	$('#search-platforms').multiselect('refresh');
 	$('#search-query').val('');
-	//refreshEvent();
 	refreshSorting();
 	runSearch();
 }
 
 function bindSearch() {
+
+	// Read query params
+	var params = readQueryParams();
+	$('#userid').val(params.userid);
+	$('#search-event').val(params.event || config.LDFF_ACTIVE_EVENT_ID);
+	$('#search-sorting').val(params.sorting || 'coolness');
+	$('#search-query').val(params.query);
+	$('#search-platforms').val(params.platforms ? params.platforms.split(',') : '');
 
 	// Event
 	refreshEvent();
@@ -102,14 +123,20 @@ function bindSearch() {
 		runSearch();
 	});
 
+	// Init username
+	if (params.userid) {
+		api.fetchUsername(params.userid, function(data) {
+			$('#username').val(data.author);
+		});
+	}
+
 	// Username
 	$('#username').typeahead({
 		minLength: 2,
 		highlight: true,
 	}, {
 		source: function(query, syncResults, asyncResults) {
-			var eventId = getEventId();
-			api.searchUsernames(eventId, query, asyncResults);
+			api.searchUsernames(query, asyncResults);
 		},
 		async: true,
 		limit: 1e99, // Limiting happens server-side
@@ -142,7 +169,6 @@ function bindSearch() {
 	});
 
 	// Platforms
-	$('#search-platforms').val($('#search-platforms-values').text().split(', '));
 	$('#search-platforms').multiselect();
 	$('#search-platforms').change(runSearch);
 

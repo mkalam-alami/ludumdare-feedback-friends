@@ -18,17 +18,24 @@ if (LDFF_SCRAPING_ENABLED && LDFF_SCRAPING_PSEUDO_CRON) {
 
 // Detect current event
 
-$event_id = LDFF_ACTIVE_EVENT_ID; // TODO Support multiple events through a query param
-if (isset($_GET['event'])) {
+$event_id = LDFF_ACTIVE_EVENT_ID;
+if (isset($_GET['event']) && $_GET['event']) {
 	$event_id = util_sanitize_query_param('event');
 }
-
 
 // Rendering functions
 
 function init_context($db) {
 	global $events, $event_id;
 
+	// Prepare config (will be available in JS in the "config" global variable)
+	$config = array(
+		array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
+		array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
+		array('key' => 'LDFF_SCRAPING_ROOT', 'value' => LDFF_SCRAPING_ROOT),
+	);
+
+	// Prepare events list
 	$events_render = array();
 	foreach ($events as $id => $label) {
 		$events_render[] = array(
@@ -37,24 +44,20 @@ function init_context($db) {
 			);
 	}
 
-	$stmt = mysqli_prepare($db, "SELECT last_updated FROM entry WHERE event_id = ? ORDER BY last_updated LIMIT 1");
-	mysqli_stmt_bind_param($stmt, 's', $event_id);
-	mysqli_stmt_execute($stmt);
-	$result = mysqli_stmt_get_result($stmt);
-	$row = mysqli_fetch_array($result);
-	$oldest_entry_updated = $row[0];
-	mysqli_stmt_close($stmt);
+ 	// Prepare oldest entry age
+	$rows = db_query($db, "SELECT last_updated FROM entry WHERE event_id = ? ORDER BY last_updated LIMIT 1", 's', $event_id);
+	$oldest_entry_updated = $rows[0]['last_updated'];
 	$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
 
 	$context = array();
-	$context['root'] = LDFF_ROOT_URL;
-	$context['ld_root'] = LDFF_SCRAPING_ROOT;
+	$context['config'] = $config;
+	$context['root'] = LDFF_ROOT_URL; // TODO Remove, use config instead
+	$context['ld_root'] = LDFF_SCRAPING_ROOT; // TODO Remove, use config instead
+	$context['active_event'] = LDFF_ACTIVE_EVENT_ID; // TODO Remove, use config instead
+	$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
 	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
 	$context['event_url'] = LDFF_SCRAPING_ROOT . $event_id . '/?action=preview';
 	$context['events'] = $events_render;
-	$context['active_event'] = LDFF_ACTIVE_EVENT_ID;
-	$context['search_event'] = $event_id;
-	$context['is_active_event'] = LDFF_ACTIVE_EVENT_ID == $event_id;
 	$context['oldest_entry_age'] = $oldest_entry_age;
 	$context['google_analytics_id'] = LDFF_GOOGLE_ANALYTICS_ID;
 
@@ -222,7 +225,6 @@ function page_details($db) {
 
 		cache_write($cache_key, $output);
 
-
 	}
 
 	echo $output;
@@ -234,81 +236,18 @@ function page_details($db) {
 function page_browse($db) {
 	global $event_id;
 
-	// Determine user ID and store in the cookie; GET param overrides any old cookie
-	$userid = null;
-	if (isset($_GET['userid'])) {
-		$userid = util_sanitize_query_param('userid');
-	} else if (isset($_COOKIE['userid'])) {
-		$userid = util_sanitize($_COOKIE['userid']);
-	}
-	if (!is_numeric($userid)) {
-		$userid = null;
-	}
-	if ($userid) {
-		setcookie('userid', $userid, time() + 31*24*60*60);
-	} else {
-		// Clear the cookie by setting an expiry time in the past
-		setcookie('userid', '', time() - 60*60);
-	}
-
 	// Caching
-	$uid = intval(util_sanitize_query_param('uid'));
 	$output = null;
 	$cache_key = $event_id.'__browse';
-	if (LDFF_EMERGENCY_MODE) $cache_key .= '-emergency';
-	if (isset($_GET['platforms'])) {
-		$platforms = '';
-		foreach ($_GET['platforms'] as $raw_platform) {
-			$platforms .= util_sanitize($raw_platform).' ';
-		}
-		$cache_key .= '-platforms:'.$platforms;
-	}
-	if (isset($_GET['sorting'])) $cache_key .= '-sorting:'.util_sanitize_query_param('sorting');
-	if (isset($_GET['userid'])) $cache_key .= '-userid:'.util_sanitize_query_param('userid');
 	$output = cache_read($cache_key);
 
 	if (!$output) {
 
-		// Fetch corresponding username
-		$username = null;
-		if ($userid) {
-			$stmt = mysqli_prepare($db, "SELECT author FROM entry WHERE uid = ? LIMIT 1");
-			mysqli_stmt_bind_param($stmt, 'i', $userid);
-			if(!mysqli_stmt_execute($stmt)){
-				mysqli_stmt_close($stmt);
-				log_error_and_die('Failed to fetch username', mysqli_error($db));
-			}
-			$results = mysqli_stmt_get_result($stmt);
-			if ($row = mysqli_fetch_array($results)) {
-				$username = $row[0];
-			}
-			mysqli_stmt_close($stmt);
-		}
-
-		$config = array(
-			array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
-			array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
-			array('key' => 'LDFF_SCRAPING_ROOT', 'value' => LDFF_SCRAPING_ROOT),
-		);
+		// Build context
 		$templates = util_load_templates(['results', 'result', 'cartridge']);
 
-		// Build context
-		$sorting = util_sanitize_query_param('sorting');
-		if (!$sorting) {
-			$sorting = 'coolness';
-		}
-
 		$context = init_context($db);
-		$context['config'] = $config;
-		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
-		$context['username'] = $username;
-		$context['userid'] = $userid;
-		$context['search_query'] = util_sanitize_query_param('query');
-		$context['search_sorting'] = $sorting;
 		$context['templates'] = $templates;
-		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
-			$context['search_platforms'] = implode(', ', array_map('util_sanitize', $_GET['platforms']));
-		}
 
 		// Render
 		$output = render('header', $context)
