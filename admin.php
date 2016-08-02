@@ -87,8 +87,56 @@ else if (isset($_GET['reset'])) {
  	}
 }
 
+// XXX Trophy experiments
+else if (isset($_GET['trophy'])) {
+	util_require_admin();
+
+	$event_id = util_sanitize_query_param('trophy');
+	if (!$event_id) {
+		$event_id = LDFF_ACTIVE_EVENT_ID;
+	}
+	$keywords = explode(',', util_sanitize_query_param('keywords'));
+
+	$uids = [];
+	$scores = [];
+	foreach ($keywords as $keyword) {
+		$rows = db_query($db, "SELECT uid_entry, COUNT(*) as score FROM comment WHERE comment LIKE ? AND event_id = ? GROUP BY uid_entry HAVING score > 0",
+			'ss', '%'.$keyword.'%', $event_id);
+		foreach ($rows as $row) {
+			$uid = $row['uid_entry'];
+			if (!isset($uids[$uid])) {
+				$uids[$uid] = $uid;
+				$scores[$uid] = 0;
+			}
+			$scores[$uid] += $row['score']; 
+		}
+	}
+
+	array_multisort($scores, SORT_DESC, $uids);
+
+	$template = $mustache->loadTemplate('cartridge');
+	$context = array(
+		'event_url' => "index.php?event_id=$event_id"
+		);
+	echo '<html><head><link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" /><link rel="stylesheet" type="text/css" href="static/css/site.css" /></head><body style="background-image: none; background-color: white">';
+	for ($i = 0; $i < 10; $i++) {
+		if (isset($uids[$i])) {
+			echo "<a href='index.php?event=$event_id&uid=".$uids[$i]."'>".$uids[$i].": ".$scores[$i]." matches</a><br />";
+			$entries = db_query($db, "SELECT * FROM entry WHERE uid = ? AND event_id = ?", 'is', $uids[$i], $event_id);
+			$entry = $entries[0];
+			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
+			$context['entry'] = $entry;
+			echo $template->render($context);
+			echo '<br /><br />';
+		}
+	}
+	echo '</body></html>';
+}
+
+
+
 else {
-	echo '?cache[&clear], ?coolness, ?reset=[event]';
+	echo '?cache[&clear], ?coolness, ?reset=[event], ?trophy=[event]&keywords=[keywords]';
 }
 
 mysqli_close($db);
