@@ -10,7 +10,6 @@ var ENTRY_HEIGHT = 339;
 var OFFSCREEN_ROWS = 3;
 
 var templates = {};
-var eventCache = {};
 
 var resultsVirtualScroll = null;
 
@@ -110,7 +109,7 @@ function bindSearch() {
 	}, {
 		source: function(query, syncResults, asyncResults) {
 			var eventId = getEventId();
-			searchUsernames(eventId, query, asyncResults);
+			api.searchUsernames(eventId, query, asyncResults);
 		},
 		async: true,
 		limit: 1e99, // Limiting happens server-side
@@ -171,42 +170,13 @@ function bindSearch() {
 	});
 }
 
-function searchUsernames(eventId, query, callback) {
-	$.get(
-		'../../userid.php?event=' + encodeURIComponent(eventId) + '&query=' + encodeURIComponent(query),
-		function(data, textStatus, jqXHR) {
-			callback(data);
-		}
-	);
-}
 
 function runSearch() {
 	var url = '?' + $('#search').serialize();
 	pushHistory(url);
 
 	var eventId = getEventId();
-	if (eventCache[eventId]) {
-		refreshResults();
-	} else {
-		$('#loader').show();
-		var url = 'eventsummary.php?event=' + encodeURIComponent(eventId);
-		$.get(url, function(entries) {
-			augmentEntries(eventId, entries);
-			eventCache[eventId] = entries;
-			refreshResults();
-			$('#loader').hide();
-		});
-	}
-}
-
-function augmentEntries(eventId, entries) {
-	for (var i = 0; i < entries.length; i++) {
-		var entry = entries[i];
-		// Picture URLs aren't sent from the server; that would be redundant and wasteful.
-		entry.picture = createPictureUrl(eventId, entry.uid);
-		// Platforms are sent in a single string to save on punctuation.
-		entry.platforms = entry.platforms.toLowerCase().split(' ');
-	}
+	api.fetchEventSummary(eventId, refreshResults);
 }
 
 function isUsersOwnEntry(userId, entry) {
@@ -342,9 +312,8 @@ function sortEntries(sorting, entries) {
 	}
 }
 
-function refreshResults() {
+function refreshResults(entries) {
 	var eventId = getEventId();
-	var entries = eventCache[eventId];
 	var results = [];
 
 	var userId = parseInt($('#userid').val()) || null;
@@ -471,10 +440,6 @@ function createVirtualScroll(container, items, renderFunction, idPrefix) {
 
 function createEventUrl(eventId) {
 	return config.LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
-}
-
-function createPictureUrl(eventId, uid) {
-	return 'data/' + encodeURIComponent(eventId) + '/' + encodeURIComponent(uid) + '.jpg';
 }
 
 function renderEntry(eventId, entry) {
