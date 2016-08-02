@@ -90,7 +90,6 @@ function _scraping_run_step_entry($db, $uid) {
 					$comment['comment'],
 					$score_per_author[$uid_author]);
 				$score_per_author[$uid_author] += $score;
-
 				mysqli_stmt_bind_param($stmt,
 				 'siissssi',
 				  $event_id,
@@ -105,6 +104,7 @@ function _scraping_run_step_entry($db, $uid) {
 				mysqli_stmt_execute($stmt) or log_error(mysqli_error($db));
 			}
 		}
+		print_r($score_per_author);
 
 		mysqli_stmt_close($stmt);
 
@@ -112,7 +112,6 @@ function _scraping_run_step_entry($db, $uid) {
 		$comments_given = score_comments_given($db, $event_id, $uid);
 		$comments_received = score_comments_received($db, $event_id, $uid);
 		$coolness = score_coolness($comments_given, $comments_received);
-		echo $comments_given."-".$comments_received.'<br />';
 
 		// Update entry table
 		$update_stmt = mysqli_prepare($db, "UPDATE entry SET author=?, author_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
