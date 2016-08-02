@@ -100,7 +100,7 @@ function _scraping_run_step_entry($db, $uid) {
 					$comment['author'],
 					$comment['comment'],
 					date_format($comment['date'], 'Y-m-d H:i'),
-					date_format($comment['date'], 'Y-m-d H:i')
+					$score
 				);
 				mysqli_stmt_execute($stmt) or log_error(mysqli_error($db));
 			}
@@ -109,20 +109,11 @@ function _scraping_run_step_entry($db, $uid) {
 		mysqli_stmt_close($stmt);
 
 		// Coolness
-		$comments_given = score_comments_given($db, LDFF_ACTIVE_EVENT_ID, $uid);
-		$comments_received = score_comments_received($db, LDFF_ACTIVE_EVENT_ID, $uid);
+		$comments_given = score_comments_given($db, $event_id, $uid);
+		$comments_received = score_comments_received($db, $event_id, $uid);
 		$coolness = score_coolness($comments_given, $comments_received);
+		echo $comments_given."-".$comments_received.'<br />';
 
-		if(empty($comments_given)){
-			$comments_given = 0;
-		}
-		if(empty($comments_received)){
-			$comments_received = 0;
-		}
-		if(empty($coolness)){
-			$coolness = 0;
-		}
-		
 		// Update entry table
 		$update_stmt = mysqli_prepare($db, "UPDATE entry SET author=?, author_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
 		mysqli_stmt_bind_param($update_stmt,
@@ -142,26 +133,22 @@ function _scraping_run_step_entry($db, $uid) {
 		mysqli_stmt_execute($update_stmt);
 
 		if (mysqli_stmt_affected_rows($update_stmt) == 0) {
-			$insert_stmt = mysqli_prepare($db, "INSERT INTO
+			db_query($db, "INSERT INTO
 				entry(uid,event_id,author,author_page,title,type,description,platforms,
 					comments_given,comments_received,coolness,last_updated)
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())");
-				mysqli_stmt_bind_param($insert_stmt,
-					'isssssssiii',
-					$uid,
-					$event_id,
-					$entry['author'],
-					$entry['author_page'],
-					$entry['title'],
-					$entry['type'],
-					$entry['description'],
-					$entry['platforms'],
-					$comments_given,
-					$comments_received,
-					$coolness
-				);
-				mysqli_stmt_execute($insert_stmt);
-				mysqli_stmt_close($insert_stmt);
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
+				'isssssssiii',
+				$uid,
+				$event_id,
+				$entry['author'],
+				$entry['author_page'],
+				$entry['title'],
+				$entry['type'],
+				$entry['description'],
+				$entry['platforms'],
+				$comments_given,
+				$comments_received,
+				$coolness);
 		}
 		mysqli_stmt_close($update_stmt);
 	}

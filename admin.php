@@ -75,34 +75,14 @@ else if (isset($_GET['coolness'])) {
 else if (isset($_GET['reset']) && isset($_GET['event_id']) && $_GET['areyousure'] == 'yes') {
 	$event_id = util_sanitize_query_param('event_id');
 
-	$stmt = mysqli_prepare($db, "DELETE FROM entry WHERE event_id = ?");
-	mysqli_stmt_bind_param($stmt, 's', $event_id);
-	if(!mysqli_stmt_execute($stmt)){
-		mysqli_stmt_close($stmt);
-		die(mysqli_error($db));
-	}
-	mysqli_stmt_close($stmt);
-
-	$stmt = mysqli_prepare($db, "DELETE FROM comment WHERE event_id = ?");
-	mysqli_stmt_bind_param($stmt, 's', $event_id);
-	if(!mysqli_stmt_execute($stmt)){
-		mysqli_stmt_close($stmt);
-		die(mysqli_error($db));
-	}
-	mysqli_stmt_close($stmt);
-
-	$id = 'scraping_event_id';
-	$stmt = mysqli_prepare($db, "DELETE FROM setting WHERE id = ?");
-	mysqli_stmt_bind_param($stmt, 's', $id);
-	if(!mysqli_stmt_execute($stmt)){
-		mysqli_stmt_close($stmt);
-		die(mysqli_error($db));
-	}
-	mysqli_stmt_close($stmt);
+	db_query($db, "DELETE FROM entry WHERE event_id = ?", 's', $event_id);
+	db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
+	db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
+	db_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'");
 }
 
 else {
-	echo '?cache[&clear], ?coolness, ?reset=[event]';
+	echo '?cache[&clear], ?coolness, ?reset&event_id=[event]&areyousure=yes';
 }
 
 mysqli_close($db);

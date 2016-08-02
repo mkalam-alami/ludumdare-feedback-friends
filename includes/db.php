@@ -25,14 +25,17 @@ function db_select_single_value($db, $query) {
 	return $row[0];
 }
 
-function db_query($db, $sql, $bind_params_str, ...$params) {
+function db_query($db, $sql, $bind_params_str = '', ...$params) {
 	$result = false;
 	if ($stmt = mysqli_prepare($db, $sql)) {
-		if (count($params) == 1 && gettype($params[0]) == 'array') {
-			$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params[0]);
-		}
-		else {
-			$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
+		$bind_success = true;
+		if ($bind_params_str) {
+			if (count($params) == 1 && gettype($params[0]) == 'array') {
+				$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params[0]);
+			}
+			else {
+				$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
+			}
 		}
 		if ($bind_success) {
 			if ($result = mysqli_stmt_execute($stmt)) {

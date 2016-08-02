@@ -19,27 +19,30 @@ function score_evaluate_comment($author_uid, $entry_uid, $comment, $previous_com
 }
 
 function score_comments_given($db, $event_id, $uid) {
-	$stmt = mysqli_prepare($db, "SELECT SUM(score) FROM comment
-		WHERE event_id = ? AND uid_author = ? AND uid_entry != ?");
-	mysqli_stmt_bind_param($stmt, 'sii', $event_id, $uid, $uid);
-	mysqli_stmt_execute($stmt);
-	$result = mysqli_stmt_get_result($stmt);
-	$row = mysqli_fetch_array($result);
-	mysqli_stmt_close($stmt);
-	return $row[0];
+	$rows = db_query($db, "SELECT SUM(score) as sum FROM comment
+		WHERE event_id = ? AND uid_author = ? AND uid_entry != ?",
+		'sii', $event_id, $uid, $uid);
+	if ($rows && count($rows) == 1) {
+		$sum = $rows[0]['sum'];
+		return $sum ? $sum : 0;
+	}
+	else {
+		return 0;
+	}
 }
 
 function score_comments_received($db, $event_id, $uid) {
-		$stmt = mysqli_prepare($db, "SELECT SUM(score) FROM comment
-			WHERE event_id = ? AND uid_entry = ? AND uid_author != ?
-			AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")");
-
-		mysqli_stmt_bind_param($stmt, 'sii', $event_id, $uid, $uid);
-		mysqli_stmt_execute($stmt);
-		$result = mysqli_stmt_get_result($stmt);
-		$row = mysqli_fetch_array($result);
-		mysqli_stmt_close($stmt);
-		return $row[0];
+	$rows = db_query($db, "SELECT SUM(score) as sum FROM comment
+		WHERE event_id = ? AND uid_entry = ? AND uid_author != ?
+		AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")",
+		'sii', $event_id, $uid, $uid);
+	if ($rows && count($rows) == 1) {
+		$sum = $rows[0]['sum'];
+		return $sum ? $sum : 0;
+	}
+	else {
+		return 0;
+	}
 }
 
 function score_coolness($given, $received) {

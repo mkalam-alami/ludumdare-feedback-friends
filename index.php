@@ -46,8 +46,13 @@ function init_context($db) {
 
  	// Prepare oldest entry age
 	$rows = db_query($db, "SELECT last_updated FROM entry WHERE event_id = ? ORDER BY last_updated LIMIT 1", 's', $event_id);
-	$oldest_entry_updated = $rows[0]['last_updated'];
-	$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
+	if ($rows && count($rows) == 1) {
+		$oldest_entry_updated = $rows[0]['last_updated'];
+		$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
+	}
+	else {
+		$oldest_entry_age = '?';
+	}
 
 	$context = array();
 	$context['config'] = $config;
@@ -97,15 +102,11 @@ function page_details($db) {
 	if (!$output) {
 
 		// Gather entry info
-		$entry_stmt = mysqli_prepare($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ?");
-		mysqli_stmt_bind_param($entry_stmt, 'si', $event_id, $uid);
-		if(!mysqli_stmt_execute($entry_stmt)){
-			mysqli_stmt_close($entry_stmt);
+		$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ? LIMIT 1", 'si', $event_id, $uid);
+		if (!$rows) {
 			log_error_and_die('Failed to fetch entry', mysqli_error($db));
 		}
-		$results = mysqli_stmt_get_result($entry_stmt);
-		$entry = mysqli_fetch_array($results);
-		mysqli_stmt_close($entry_stmt);
+		$entry = count($rows) == 1 ? $rows[0] : [];
 
 		if (isset($entry['type'])) {
 			// Rendering info
@@ -114,61 +115,26 @@ function page_details($db) {
 			$entry['platforms_label'] = util_format_platforms($entry['platforms']);
 
 			// Comments (given)
-			$comments_given_stmt = mysqli_prepare($db, "SELECT comment.*, entry.author FROM comment, entry
+			$entry['given'] = db_query($db, "SELECT comment.*, entry.author FROM comment, entry
 				WHERE comment.event_id = ? AND entry.event_id = ?
 				AND comment.uid_entry = entry.uid
 				AND comment.uid_author = ? AND comment.uid_entry != ?
-				ORDER BY `date` DESC, `order` DESC");
-
-			mysqli_stmt_bind_param($comments_given_stmt, 'ssii', $event_id, $event_id, $uid, $uid);
-			if(!mysqli_stmt_execute($comments_given_stmt)){
-				mysqli_stmt_close($comments_given_stmt);
-				log_error_and_die('Failed to fetch entry', mysqli_error($db));
-			}
-			$results = mysqli_stmt_get_result($comments_given_stmt);
-			$comments = array();
-			while ($comment = mysqli_fetch_array($results)) {
-				$comments[] = $comment;
-			}
-			$entry['given'] = $comments;
-			mysqli_stmt_close($comments_given_stmt);
+				ORDER BY `date` DESC, `order` DESC",
+				'ssii', $event_id, $event_id, $uid, $uid);
 
 			// Comments (received)
-			$comments_received_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
+			$entry['received'] = db_query($db, "SELECT * FROM comment WHERE event_id = ?
 				AND uid_entry = ? AND uid_author != ?
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")
-				ORDER BY `date` DESC, `order` DESC");
-
-			mysqli_stmt_bind_param($comments_received_stmt, 'sii', $event_id, $uid, $uid);
-			if(!mysqli_stmt_execute($comments_received_stmt)){
-				mysqli_stmt_close($comments_received_stmt);
-				log_error_and_die('Failed to fetch entry', mysqli_error($db));
-			}
-			$results = mysqli_stmt_get_result($comments_received_stmt);
-			$comments = array();
-			while ($comment = mysqli_fetch_array($results)) {
-				$comments[] = $comment;
-			}
-			$entry['received'] = $comments;
-			mysqli_stmt_close($comments_received_stmt);
+				ORDER BY `date` DESC, `order` DESC", 
+				'sii', $event_id, $uid, $uid);
 
 			// Mentions
-			$mentions_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
-				AND comment LIKE ?
-				ORDER BY `date` DESC, `order` DESC");
 			$entry_author = "%@{$entry['author']}%";
-			mysqli_stmt_bind_param($mentions_stmt, 'ss', $event_id, $entry_author);
-			if(!mysqli_stmt_execute($mentions_stmt)){
-				mysqli_stmt_close($mentions_stmt);
-				log_error_and_die('Failed to fetch entry', mysqli_error($db));
-			}
-			$results = mysqli_stmt_get_result($mentions_stmt);
-			$comments = array();
-			while ($comment = mysqli_fetch_array($results)) {
-				$comments[] = $comment;
-			}
-			$entry['mentions'] = $comments;
-			mysqli_stmt_close($mentions_stmt);
+			$entry['mentions'] = db_query($db, "SELECT * FROM comment WHERE event_id = ?
+				AND comment LIKE ?
+				ORDER BY `date` DESC, `order` DESC",
+				'ss', $event_id, $entry_author);
 
 			// Highlight mentions in bold
 			foreach ($entry['mentions'] as &$mention) {
@@ -176,36 +142,16 @@ function page_details($db) {
 			};
 
 			// Friends
-			$friends_stmt = mysqli_prepare($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry
+			$friends = db_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry
 					WHERE comment1.event_id = ?
 					AND comment2.event_id = ?
 					AND comment1.uid_author = ?
 					AND comment2.uid_author != ?
 					AND comment1.uid_entry = comment2.uid_author
 					AND comment2.uid_entry = ?
-					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC");
-
-			mysqli_stmt_bind_param($friends_stmt, 'ssiii',
-				$event_id,
-				$event_id,
-				$uid,
-				$uid,
-				$uid
-			);
-
-			if(!mysqli_stmt_execute($friends_stmt)){
-				mysqli_stmt_close($friends_stmt);
-				log_error_and_die('Failed to fetch comments', mysqli_error($db));
-			}
-			$results = mysqli_stmt_get_result($friends_stmt);
-
-			$friends = array();
-			while ($friend = mysqli_fetch_array($results)) {
-				$friends[] = $friend;
-			}
+					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC",
+					'ssiii', $event_id, $event_id, $uid, $uid, $uid);
 			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
-
-			mysqli_stmt_close($friends_stmt);
 
 			// Misc stats
 			$entry['given_average'] = score_average($entry['given']);
