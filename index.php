@@ -68,18 +68,6 @@ function render($template_name, $context) {
 	return $template->render($context);
 }
 
-function prepare_entry_context($entry) {
-	global $event_id;
-
-	if (isset($entry['type'])) {
-		$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
-		$entry['type'] = util_format_type($entry['type']);
-		$entry['platforms'] = util_format_platforms($entry['platforms']);
-	}
-
-	return $entry;
-}
-
 // PAGE : Entry details
 
 function page_details($db) {
@@ -117,9 +105,12 @@ function page_details($db) {
 		mysqli_stmt_close($entry_stmt);
 
 		if (isset($entry['type'])) {
+			// Rendering info
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
+			$entry['type_label'] = util_format_type($entry['type']);
+			$entry['platforms_label'] = util_format_platforms($entry['platforms']);
 
-			// Comments
+			// Comments (given)
 			$comments_given_stmt = mysqli_prepare($db, "SELECT comment.*, entry.author FROM comment, entry
 				WHERE comment.event_id = ? AND entry.event_id = ?
 				AND comment.uid_entry = entry.uid
@@ -139,6 +130,7 @@ function page_details($db) {
 			$entry['given'] = $comments;
 			mysqli_stmt_close($comments_given_stmt);
 
+			// Comments (received)
 			$comments_received_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
 				AND uid_entry = ? AND uid_author != ?
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")
@@ -157,6 +149,7 @@ function page_details($db) {
 			$entry['received'] = $comments;
 			mysqli_stmt_close($comments_received_stmt);
 
+			// Mentions
 			$mentions_stmt = mysqli_prepare($db, "SELECT * FROM comment WHERE event_id = ?
 				AND comment LIKE ?
 				ORDER BY `date` DESC, `order` DESC");
@@ -171,8 +164,6 @@ function page_details($db) {
 			while ($comment = mysqli_fetch_array($results)) {
 				$comments[] = $comment;
 			}
-
-
 			$entry['mentions'] = $comments;
 			mysqli_stmt_close($mentions_stmt);
 
@@ -213,7 +204,7 @@ function page_details($db) {
 
 			mysqli_stmt_close($friends_stmt);
 
-			// Misc numbers
+			// Misc stats
 			$entry['given_average'] = score_average($entry['given']);
 			$entry['given_count'] = count($entry['given']);
 			$entry['received_count'] = count($entry['received']);

@@ -29,10 +29,12 @@ function util_sanitize_query_param($key) {
 	}
 }
 
+// Also implemented in JS, see site-api.js > _formatType()
 function util_format_type($value) {
 	return ucfirst($value); // capitalize the first letter to get "Compo" or "Jam"
 }
 
+// Also implemented in JS, see site-api.js > _formatPlatforms()
 function util_format_platforms($value) {
 	static $PLATFORM_LABELS = array(
 		'osx' => 'OSX',

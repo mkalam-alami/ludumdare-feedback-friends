@@ -24,11 +24,13 @@ window.api = (function() {
 				for (var i = 0; i < entries.length; i++) {
 					var entry = entries[i];
 					// Picture URLs aren't sent from the server; that would be redundant and wasteful.
-					entry.picture = 'data/' + encodeURIComponent(eventId) + '/' + encodeURIComponent(entry.uid) + '.jpg';
+					entry.picture = _createPictureUrl(encodeURIComponent(eventId), encodeURIComponent(entry.uid));
 					// Platforms are sent in a single string to save on punctuation.
 					entry.platforms = entry.platforms.toLowerCase().split(' ');
-					// Format type
-
+					// Format type (also implemented in PHP, see util_format_type)
+					entry.type_label = _formatType(entry.type);
+					// Format platforms (also implemented in JS, see util_format_platforms)
+					entry.platforms_label = _formatPlatforms(entry.platforms);
 				}
 
 				eventCache[eventId] = entries;
@@ -36,6 +38,39 @@ window.api = (function() {
 				callback(eventCache[eventId]);
 			});
 		}
+	}
+
+	function _createPictureUrl(eventId, uid) {
+		return 'data/' + eventId + '/' + uid + '.jpg';
+	}
+
+	function _formatType(type) {
+		return _capitalizeFirstLetter(type);
+	}
+
+	var PLATFORM_LABELS = {
+		'osx': 'OSX',
+		'flash': '(Flash)',
+		'html5': '(HTML5)',
+		'unity': '(Unity)'
+	};
+
+	function _formatPlatforms(platforms) {
+		var result = '';
+		platforms.forEach(function(platform) {
+			if (PLATFORM_LABELS[platform]) {
+				result += PLATFORM_LABELS[platform];
+			}
+			else {
+				result += _capitalizeFirstLetter(platform);
+			}
+			result += ' ';
+		});
+		return result;
+	}
+
+	function _capitalizeFirstLetter(text) {
+		return text.charAt(0).toUpperCase() + text.substr(1);
 	}
 
 	return {
