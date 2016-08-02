@@ -302,12 +302,17 @@ function page_browse($db) {
 		$templates = util_load_templates(['results', 'result', 'cartridge']);
 
 		// Build context
+		$sorting = util_sanitize_query_param('sorting');
+		if (!$sorting) {
+			$sorting = 'coolness';
+		}
+
 		$context = init_context($db);
 		$context['config'] = $config;
 		$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
 		$context['username'] = $username;
 		$context['userid'] = $userid;
-		$context['search_query'] = $_GET['query'];
+		$context['search_query'] = util_sanitize_query_param('query');
 		$context['search_sorting'] = $sorting;
 		$context['templates'] = $templates;
 		if (isset($_GET['platforms']) && is_array($_GET['platforms'])) {
