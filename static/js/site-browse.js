@@ -109,7 +109,8 @@ function bindSearch() {
 
 	// Read query params
 	var params = readQueryParams();
-	$('#userid').val(params.userid);
+	$('#userid').val(localStorage ? localStorage.userid : '');
+	$('#username').val(localStorage ? localStorage.username : '');
 	$('#search-event').val(params.event || config.LDFF_ACTIVE_EVENT_ID);
 	$('#search-sorting').val(params.sorting || 'coolness');
 	$('#search-query').val(params.query);
@@ -122,13 +123,6 @@ function bindSearch() {
 		refreshEvent();
 		runSearch();
 	});
-
-	// Init username
-	if (params.userid) {
-		api.fetchUsername(params.userid, function(data) {
-			$('#username').val(data.author);
-		});
-	}
 
 	// Username
 	$('#username').typeahead({
@@ -150,11 +144,20 @@ function bindSearch() {
 	});
 	$('#username').bind('typeahead:select', function(e, selection) {
 		$('#userid').val(selection.userid);
+		if (localStorage) {
+			localStorage.userid = selection.userid;
+			localStorage.username = selection.username;
+		}
 		runSearch();
 	});
 	$('#username').bind('typeahead:change', function(e, value) {
 		if (!value) {
 			$('#userid').val('');
+		if (localStorage) {
+			delete localStorage.userid;
+			delete localStorage.username;
+			console.log(localStorage);
+		}
 			runSearch();
 		}
 	});

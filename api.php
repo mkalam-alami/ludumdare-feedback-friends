@@ -83,20 +83,6 @@ else if ($action == 'userid') {
 	
 }
 
-else if ($action == 'username') {
-
-	$userid = util_sanitize_query_param('userid');
-	$rows = db_query($db, "SELECT author FROM entry WHERE uid = ? ORDER BY author LIMIT 1", 'i', $userid);
-
-	$json = [];
-	if (count($rows) == 1) {
-		$json['author'] = $rows[0]['author'];
-	}
-
-	header('Content-Type: application/json');
-	print(json_encode($json));
-}
-
 mysqli_close($db);
 
 ?>
