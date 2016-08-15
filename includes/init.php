@@ -5,6 +5,7 @@
 define('LDFF_VERSION', 3);
 define('LDFF_PAGE_SIZE', 9);
 define('LDFF_SCRAPING_ROOT', 'http://ludumdare.com/compo/');
+define('LDFF_FORCE_REFRESH_DELAY', 5*60);
 
 // Includes
 

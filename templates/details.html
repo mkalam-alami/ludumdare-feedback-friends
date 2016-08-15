@@ -33,21 +33,18 @@
 			            </p>
 			            {{/friends_rows}}
 
-						<p class="padded">
-							<b>Last time scraped</b><br />
-							{{last_updated}}</b>
-						</p>
+			            <div class="row padded">
+							<div class="col-sm-2" {{#refresh_disabled}}title="This entry has been updated recently"{{/refresh_disabled}}>
+								<a href="?event={{event}}&amp;uid={{uid}}&amp;refresh" class="btn btn-default {{refresh_disabled}}" style="padding: 5px; margin-top: 4px">Force refresh</a>
+							</div>
+							<div class="col-sm-5">
+								<b>Last time scraped</b><br />
+								{{last_updated}}</b>
+							</div>
+			            </div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-
-	<div class="row text-center padded">
-		<div class="col-md-12">
-			<p class="alert alert-warning">
-				<b>N.B.</b> Comments may take a while to appear<!-- (estimated: up to about <i>{{oldest_entry_age}}mn</i>)-->, so don't worry if some are missing and the score is off.
-			</p>
 		</div>
 	</div>
 	<div id="details-comments" class="row padded">

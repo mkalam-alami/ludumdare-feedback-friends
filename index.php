@@ -79,6 +79,14 @@ function render($template_name, $context) {
 
 // PAGE : Entry details
 
+function _fetch_entry($db, $event_id, $uid) {
+	$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ? LIMIT 1", 'si', $event_id, $uid);
+	if (!$rows) {
+		log_error_and_die('Failed to fetch entry', mysqli_error($db));
+	}
+	return count($rows) == 1 ? $rows[0] : [];
+}
+
 function page_details($db) {
 	global $event_id;
 
@@ -94,20 +102,21 @@ function page_details($db) {
 	$output = cache_read($cache_key);
 
 	// Force refresh
+	$entry = null;
 	if (isset($_GET['refresh'])) {
-		util_require_admin();
-		scraping_refresh_entry($db, $uid);
-		$output = null;
+		$entry = _fetch_entry($db, $event_id, $uid);
+		if (time() - strtotime($entry['last_updated']) > LDFF_FORCE_REFRESH_DELAY || util_is_admin()) {
+			scraping_refresh_entry($db, $uid);
+			$entry = null;
+			$output = null;
+		}
 	}
 
 	if (!$output) {
-
 		// Gather entry info
-		$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ? LIMIT 1", 'si', $event_id, $uid);
-		if (!$rows) {
-			log_error_and_die('Failed to fetch entry', mysqli_error($db));
+		if ($entry == null) {
+			$entry = _fetch_entry($db, $event_id, $uid);
 		}
-		$entry = count($rows) == 1 ? $rows[0] : [];
 
 		if (isset($entry['type'])) {
 			// Rendering info
@@ -164,6 +173,9 @@ function page_details($db) {
 		// Build context
 		$context = init_context($db);
 		$context['entry'] = $entry;
+		if (time() - strtotime($entry['last_updated']) < LDFF_FORCE_REFRESH_DELAY) {
+			$context['refresh_disabled'] = 'disabled';
+		}
 
 		// Render
 		$output = render('header', $context)
