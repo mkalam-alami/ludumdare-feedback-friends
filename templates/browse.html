@@ -1,110 +1,114 @@
-<div id="contents" class="container">
+<div class="container-fluid">
+	<div class="row">
+	<div class="col-sm-10 col-sm-offset-1">
 
-	<div class="row row-eq-height">
-		<div class="col-md-3">
-			{{^emergency_mode}}
-			<form id="search" action="." method="get">
-				<label for="username">View games as</label>
-				<div class="input-group">
-					<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
-					<input id="userid" type="hidden" />
-					<p class="username-description">Hide games that you've already commented on (except when searching)</p>
-				</div>
-
-				<div class="search-separator"></div>
-
-				<label for="platforms">Event</label>
-				<div class="input-group dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-						<span id="search-event-label"></span>
-						<span class="caret"></span>
-					</button>
-					<ul id="search-event-dropdown" class="dropdown-menu" aria-labelledby="search-event">
-					{{#events}}
-						<li><a id="search-event-option-{{id}}" href="#" data-value="{{id}}">{{label}}</a></li>
-					{{/events}}
-					</ul>
-				</div>
-				<input id="search-event" type="hidden" name="event" />
-
-				<label for="platforms">Restrict platforms</label>
-				<div class="input-group search-platforms-container">
-					<select id="search-platforms" name="platforms" multiple="multiple">
-						<optgroup label="OS">
-							<option value="windows">Windows</option>
-							<option value="linux">Linux</option>
-							<option value="osx">OS X</option>
-							<option value="android">Android</option>
-						</optgroup>
-						<optgroup label="Web">
-							<option value="web">All web entries</option>
-							<option value="html5">HTML5</option>
-							<option value="unity">Unity</option>
-							<option value="flash">Flash</option>
-						</optgroup>
-						<optgroup label="VR">
-							<option value="htcvive">HTC Vive</option>
-							<option value="oculus">Oculus Rift</option>
-							<option value="cardboard">Google Cardboard</option>
-						</optgroup>
-						<optgroup label="Other">
-							<option value="unknown">Unknown</option>
-						</optgroup>
-					</select>
-					<div id="search-platforms-values" class="hidden"></div>
-				</div>
-
-				<label for="platforms">Entries sorting</label>
-				<div class="list-group">
-					<a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
-						<h4 class="list-group-item-heading">By balance</h4>
-						<p class="list-group-item-text">Show me the games deserving feedback the most</p>
-					</a>
-					<a id="search-sorting-button-received" class="search-sorting-button list-group-item" data-value="received" href="#" >
-						<h4 class="list-group-item-heading">By received comments</h4>
-						<p class="list-group-item-text">Games with little to no comments</p>
-					</a>
-					<a id="search-sorting-button-random" class="search-sorting-button list-group-item" data-value="random" href="#" >
-						<h4 class="list-group-item-heading">Random</h4>
-						<p class="list-group-item-text">I'm feeling lucky</p>
-					</a>
-				</div>
-				<input id="search-sorting" type="hidden" name="sorting" />
-
-				<label for="query">Search</label>
-				<div class="input-group">
-					<input id="search-query" type="text" class="form-control" name="query" placeholder="Keyword or user ID" />
-					<ul class="search-syntax-tips">
-						<li><i>Wildcard:</i> ludum*</li>
-						<li><i>OR:</i> ludum dare</li>
-						<li><i>AND:</i> +ludum +dare</li>
-						<li><i>NOT:</i> ludum -dare</li>
-					</ul>
-				</div>
-				<div class="input-group btn-group">
-					<button id="search-reset" type="button" class="btn btn-default">Clear</button>
-				</div>
-
-				{{/emergency_mode}}
-				{{#emergency_mode}}
-					<div class="alert alert-warning">
-						<p><span class="glyphicon glyphicon-warning-sign"></span> <b>Emergency mode</b></p>
-						<p>Due to high traffic, most features are temporarily disabled :-P</p>
+		<div id="contents" class="row row-eq-height">
+			<div class="col-md-3">
+				{{^emergency_mode}}
+				<form id="search" action="." method="get">
+					<label for="username">View games as</label>
+					<div class="input-group">
+						<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
+						<input id="userid" type="hidden" />
+						<p class="username-description">Hide games that you've already commented on (except when searching)</p>
 					</div>
-				{{/emergency_mode}}
 
-				<div class="search-separator"></div>
+					<div class="search-separator"></div>
 
-				<h3><a href="?p=faq">FAQ</a></h3>
-			</form>
-		</div>
-		<div id="results-container" class="col-md-9 text-center">
-			<div id="results">
+					<label for="platforms">Event</label>
+					<div class="input-group dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+							<span id="search-event-label"></span>
+							<span class="caret"></span>
+						</button>
+						<ul id="search-event-dropdown" class="dropdown-menu" aria-labelledby="search-event">
+						{{#events}}
+							<li><a id="search-event-option-{{id}}" href="#" data-value="{{id}}">{{label}}</a></li>
+						{{/events}}
+						</ul>
+					</div>
+					<input id="search-event" type="hidden" name="event" />
+
+					<label for="platforms">Restrict platforms</label>
+					<div class="input-group search-platforms-container">
+						<select id="search-platforms" name="platforms" multiple="multiple">
+							<optgroup label="OS">
+								<option value="windows">Windows</option>
+								<option value="linux">Linux</option>
+								<option value="osx">OS X</option>
+								<option value="android">Android</option>
+							</optgroup>
+							<optgroup label="Web">
+								<option value="web">All web entries</option>
+								<option value="html5">HTML5</option>
+								<option value="unity">Unity</option>
+								<option value="flash">Flash</option>
+							</optgroup>
+							<optgroup label="VR">
+								<option value="htcvive">HTC Vive</option>
+								<option value="oculus">Oculus Rift</option>
+								<option value="cardboard">Google Cardboard</option>
+							</optgroup>
+							<optgroup label="Other">
+								<option value="unknown">Unknown</option>
+							</optgroup>
+						</select>
+						<div id="search-platforms-values" class="hidden"></div>
+					</div>
+
+					<label for="platforms">Entries sorting</label>
+					<div class="list-group">
+						<a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
+							<h4 class="list-group-item-heading">By balance</h4>
+							<p class="list-group-item-text">Show me the games deserving feedback the most</p>
+						</a>
+						<a id="search-sorting-button-received" class="search-sorting-button list-group-item" data-value="received" href="#" >
+							<h4 class="list-group-item-heading">By received comments</h4>
+							<p class="list-group-item-text">Games with little to no comments</p>
+						</a>
+						<a id="search-sorting-button-random" class="search-sorting-button list-group-item" data-value="random" href="#" >
+							<h4 class="list-group-item-heading">Random</h4>
+							<p class="list-group-item-text">I'm feeling lucky</p>
+						</a>
+					</div>
+					<input id="search-sorting" type="hidden" name="sorting" />
+
+					<label for="query">Search</label>
+					<div class="input-group">
+						<input id="search-query" type="text" class="form-control" name="query" placeholder="Keyword or user ID" />
+						<ul class="search-syntax-tips">
+							<li><i>Wildcard:</i> ludum*</li>
+							<li><i>OR:</i> ludum dare</li>
+							<li><i>AND:</i> +ludum +dare</li>
+							<li><i>NOT:</i> ludum -dare</li>
+						</ul>
+					</div>
+					<div class="input-group btn-group">
+						<button id="search-reset" type="button" class="btn btn-default">Clear</button>
+					</div>
+
+					{{/emergency_mode}}
+					{{#emergency_mode}}
+						<div class="alert alert-warning">
+							<p><span class="glyphicon glyphicon-warning-sign"></span> <b>Emergency mode</b></p>
+							<p>Due to high traffic, most features are temporarily disabled :-P</p>
+						</div>
+					{{/emergency_mode}}
+
+					<div class="search-separator"></div>
+
+					<h3><a href="?p=faq">FAQ</a></h3>
+				</form>
 			</div>
-			<div id="loader" style="display: none">
-				<img src="static/img/ajax-loader.gif" />
+			<div id="results-container" class="col-md-9 text-center">
+				<div id="results">
+				</div>
+				<div id="loader" style="display: none">
+					<img src="static/img/ajax-loader.gif" />
+				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	{{#templates}}
