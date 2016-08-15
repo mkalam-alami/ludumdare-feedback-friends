@@ -18,7 +18,7 @@ function _scraping_run_step_uids($db) {
 	$stmt = mysqli_prepare($db, "SELECT COUNT(*) FROM entry WHERE uid = ? AND event_id = ?");
 
 	// Find all entry UIDs
-	$uids = ld_fetch_uids();
+	$uids = ld_fetch_uids($event_id);
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
@@ -38,13 +38,11 @@ function _scraping_run_step_uids($db) {
 	return $uids;
 }
 
-function _scraping_run_step_entry($db, $uid) {
+function _scraping_run_step_entry($db, $event_id, $uid) {
 	$entry = null;
 
-	$event_id = LDFF_ACTIVE_EVENT_ID;
-
 	if (!_scraping_is_uid_blacklisted($uid)) {
-		$entry = ld_fetch_entry($uid); // TODO Fix encoding issues (e.g. LD35/UID 1645 author)
+		$entry = ld_fetch_entry($event_id, $uid);
 	}
 	else {
 		$stmt = mysqli_prepare($db, "DELETE FROM entry WHERE uid = ?");
@@ -57,9 +55,9 @@ function _scraping_run_step_entry($db, $uid) {
 
 		// Save picture
 		if ($entry['picture']) {
-			util_check_picture_folder(LDFF_ACTIVE_EVENT_ID);
+			util_check_picture_folder($event_id);
 			$picture_data = file_get_contents($entry['picture']);
-			file_put_contents(util_get_picture_file_path(LDFF_ACTIVE_EVENT_ID, $uid), $picture_data)
+			file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data)
 			or die('Cannot write in data/ folder');
 		}
 
@@ -91,8 +89,8 @@ function _scraping_run_step_entry($db, $uid) {
 					$score_per_author[$uid_author]);
 				$score_per_author[$uid_author] += $score;
 				mysqli_stmt_bind_param($stmt,
-				 'siissssi',
-				  $event_id,
+					'siissssi',
+				 	$event_id,
 					$uid,
 					$comment['order'],
 					$comment['uid_author'],
@@ -154,8 +152,8 @@ function _scraping_run_step_entry($db, $uid) {
 	return $entry;
 }
 
-function scraping_refresh_entry($db, $uid) {
-	_scraping_run_step_entry($db, $uid);
+function scraping_refresh_entry($db, $event_id, $uid) {
+	_scraping_run_step_entry($db, $event_id, $uid);
 }
 
 function _scraping_log_step($report_entry) {
@@ -313,7 +311,7 @@ function scraping_run($db) {
 					$params .= ',frontpage';
 				}
 
-				$entry = _scraping_run_step_entry($db, $uid);
+				$entry = _scraping_run_step_entry($db, $event_id, $uid);
 				$report_entry['type'] = 'entry';
 				$report_entry['params'] = $params;
 				$report_entry['result'] = $entry;

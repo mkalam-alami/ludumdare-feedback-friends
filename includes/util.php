@@ -7,7 +7,7 @@ function util_time_elapsed() {
 }
 
 function util_is_admin() {
-	return LDFF_PRODUCTION && (php_sapi_name() == "cli" 
+	return !LDFF_PRODUCTION || (php_sapi_name() == "cli" 
 			|| (isset($_GET['p']) && $_GET['p'] == LDFF_ADMIN_PASSWORD));
 }
 
@@ -42,7 +42,9 @@ function util_format_type($value) {
 function util_format_platforms($value) {
 	static $PLATFORM_LABELS = array(
 		'osx' => 'OSX',
-		'html5' => 'HTML5'
+		'html5' => 'HTML5',
+		'vrgames' => 'VR',
+		'htcvive' => 'Vive'
 	);
 
 	$result = '';

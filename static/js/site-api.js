@@ -45,15 +45,19 @@ window.api = (function() {
 		return 'data/' + eventId + '/' + uid + '.jpg';
 	}
 
+	// Also implemented in PHP, see util_format_type()
 	function _formatType(type) {
 		return _capitalizeFirstLetter(type);
 	}
 
 	var PLATFORM_LABELS = {
 		'osx': 'OSX',
-		'html5': 'HTML5'
+		'html5': 'HTML5',
+		'vrgames': 'VR',
+		'htcvive': 'Vive'
 	};
 
+	// Also implemented in PHP, see util_format_platforms()
 	function _formatPlatforms(platforms) {
 		var result = '';
 		platforms.forEach(function(platform) {

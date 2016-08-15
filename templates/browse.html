@@ -30,16 +30,25 @@
 				<label for="platforms">Restrict platforms</label>
 				<div class="input-group search-platforms-container">
 					<select id="search-platforms" name="platforms" multiple="multiple">
-						<option value="windows">Windows</option>
-						<option value="linux">Linux</option>
-						<option value="osx">OS X</option>
-						<option value="android">Android</option>
-						<option value="unknown">Other/Unknown</option>
+						<optgroup label="Desktop">
+							<option value="windows">Windows</option>
+							<option value="linux">Linux</option>
+							<option value="osx">OS X</option>
+						</optgroup>
 						<optgroup label="Web">
 							<option value="web">All web entries</option>
 							<option value="html5">HTML5</option>
 							<option value="unity">Unity</option>
 							<option value="flash">Flash</option>
+						</optgroup>
+						<optgroup label="VR">
+							<option value="htcvive">HTC Vive</option>
+							<option value="oculus">Oculus Rift</option>
+							<option value="cardboard">Google Cardboard</option>
+						</optgroup>
+						<optgroup label="Other">
+							<option value="android">Android</option>
+							<option value="unknown">Unknown</option>
 						</optgroup>
 					</select>
 					<div id="search-platforms-values" class="hidden"></div>

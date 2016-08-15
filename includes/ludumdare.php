@@ -1,17 +1,17 @@
 <?php
 
-function _ld_fetch_page($queryParams) {
-	$url = LDFF_SCRAPING_ROOT . LDFF_ACTIVE_EVENT_ID . '/?' . $queryParams;
+function _ld_fetch_page($event_id, $queryParams) {
+	$url = LDFF_SCRAPING_ROOT . $event_id . '/?' . $queryParams;
 	return file_get_contents($url);
 }
 
 /*
 	Retrieves UIDs from all event entries.
 */
-function ld_fetch_uids() {
+function ld_fetch_uids($event_id) {
 	$entry_list = array();
 
-	$data = _ld_fetch_page('action=misc_links');
+	$data = _ld_fetch_page($event_id, 'action=misc_links');
 	phpQuery::newDocumentHTML($data);
 
 	foreach(pq('#compo2 td > a') as $entry_el) {
@@ -24,7 +24,7 @@ function ld_fetch_uids() {
 /*
 	Retrieves the full info for an entry
 */
-function ld_fetch_entry($uid) {
+function ld_fetch_entry($event_id, $uid) {
 	static $PLATFORM_KEYWORDS = array(
 		'windows' => ['windows', 'win32', 'win64', 'exe', 'java', 'jar'],
 		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
@@ -33,11 +33,15 @@ function ld_fetch_entry($uid) {
 		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas', 'unity'],
 		'flash' => ['flash', 'swf'],
 		'html5' => ['html', 'webgl', 'canvas'],
-		'unity' => ['unity']
+		'unity' => ['unity'],
+		'vrgames' => ['vr', 'vive', 'oculus', 'cardboard'],
+		'htcvive' => ['vive'],
+		'oculus' => ['oculus'],
+		'cardboard' => ['cardboard']
 	);
 
 	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
-	$html = _ld_fetch_page('action=preview&uid=' . $uid);
+	$html = _ld_fetch_page($event_id, 'action=preview&uid=' . $uid);
  	preg_match_all('/<script.*?>[\s\S]*?<\/script>/', $html, $tmp);
     $scripts_array = $tmp[0]; 
     foreach ($scripts_array as $script_id => $script_item){

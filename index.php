@@ -106,7 +106,7 @@ function page_details($db) {
 	if (isset($_GET['refresh'])) {
 		$entry = _fetch_entry($db, $event_id, $uid);
 		if (time() - strtotime($entry['last_updated']) > LDFF_FORCE_REFRESH_DELAY || util_is_admin()) {
-			scraping_refresh_entry($db, $uid);
+			scraping_refresh_entry($db, $event_id, $uid);
 			$entry = null;
 			$output = null;
 		}
