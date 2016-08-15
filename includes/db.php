@@ -14,15 +14,14 @@ function db_connect() {
 	return $db;
 }
 
-function db_select_single_row($db, $query) {
-	$results = mysqli_query($db, $query);
-	return mysqli_fetch_array($results);
+function db_select_single_row($db, $query, $bind_params_str = '', ...$params) {
+	$results = db_query($db, $query, $bind_params_str, ...$params);
+	return $results[0];
 }
 
-function db_select_single_value($db, $query) {
-	$results = mysqli_query($db, $query);
-	$row = mysqli_fetch_array($results);
-	return $row[0];
+function db_select_single_value($db, $query, $bind_params_str = '', ...$params) {
+	$results = db_query($db, $query, $bind_params_str, ...$params);
+	return $results[0][0];
 }
 
 function db_query($db, $sql, $bind_params_str = '', ...$params) {

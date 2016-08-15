@@ -62,14 +62,9 @@ function _scraping_run_step_entry($db, $event_id, $uid) {
 		}
 
 		// Save comments
-		$stmt = mysqli_prepare($db, "SELECT MAX(`order`) FROM `comment` WHERE uid_entry = ? AND event_id = ?");
-		mysqli_stmt_bind_param($stmt, 'is', $uid, $event_id);
-		mysqli_stmt_execute($stmt);
-		$result = mysqli_stmt_get_result($stmt);
-		$row = mysqli_fetch_array($result);
-		$max_order = $row[0];
-		mysqli_stmt_close($stmt);
-
+		$max_order = db_select_single_value($db,
+			"SELECT MAX(`order`) FROM `comment` WHERE uid_entry = ? AND event_id = ?", 
+			'is', $uid, $event_id);
 		$order = 1;
 		$new_comments = false;
 
@@ -77,17 +72,17 @@ function _scraping_run_step_entry($db, $event_id, $uid) {
 
 		$score_per_author = array();
 		foreach ($entry['comments'] as $comment) {
-			if ($order++ > $max_order) {
-				$uid_author = $comment['uid_author'];
-				if (!isset($score_per_author[$uid_author])) {
-					$score_per_author[$uid_author] = 0;
-				}
+			$uid_author = $comment['uid_author'];
+			if (!isset($score_per_author[$uid_author])) {
+				$score_per_author[$uid_author] = 0;
+			}
+			$score = score_evaluate_comment($uid_author,
+				$uid,
+				$comment['comment'],
+				$score_per_author[$uid_author]);
+			$score_per_author[$uid_author] += $score;
 
-				$score = score_evaluate_comment($uid_author,
-					$uid,
-					$comment['comment'],
-					$score_per_author[$uid_author]);
-				$score_per_author[$uid_author] += $score;
+			if ($order++ > $max_order) {
 				mysqli_stmt_bind_param($stmt,
 					'siissssi',
 				 	$event_id,
