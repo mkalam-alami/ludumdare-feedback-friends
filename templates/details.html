@@ -8,7 +8,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-md-8">
-						<h1><a href="{{event_url}}&amp;uid={{uid}}">{{title}}</a> <a class="back" href="?event={{search_event}}">Back</a><br />
+						<h1><a href="{{event_url}}&amp;uid={{uid}}">{{title}}</a> <a class="back" href="?event={{event}}">Back</a><br />
 						<span class="note">by {{#author_page}}<a href="{{ld_root}}author/{{author_page}}">{{author}}</a>{{/author_page}}{{^author_page}}{{author}}{{/author_page}}<!-- XXX Tmp retro-compatibility -->, 
 						for <a href="{{event_url}}">{{event_title}}</a></span></h1>
 					</div>
@@ -22,7 +22,7 @@
 						<div style="padding: 1px">
 						<div class="btn-group">
 							{{#friends}}
-								<a href="?event={{search_event}}&amp;uid={{uid_author}}" class="btn btn-primary">{{author}}</a>&nbsp;
+								<a href="?event={{event}}&amp;uid={{uid_author}}" class="btn btn-primary">{{author}}</a>&nbsp;
 							{{/friends}}
 						</div>
 						</div>
@@ -56,7 +56,7 @@
 			<table class="table text-left">
 			{{#given}}
 				<tr><td>
-					<h4><span class="note pull-right">{{date}}</span>to <a href="?event={{search_event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
+					<h4><span class="note pull-right">{{date}}</span>to <a href="?event={{event}}&amp;uid={{uid_entry}}">{{author}}</a> <i>({{score}}p)</i></h4>
 					{{{comment}}}<br />
 					<a class="note pull-right" href="{{event_url}}&amp;uid={{uid_entry}}">Entry page</a>
 				</td></tr>
@@ -70,7 +70,7 @@
 				<tr><td>
 					<h4><span class="note pull-right">{{date}}</span>
 					{{#uid_author}}
-						<a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a> 
+						<a href="?event={{event}}&amp;uid={{uid_author}}">{{author}}</a> 
 					{{/uid_author}}
 					{{^uid_author}}
 						<span style="color: grey">{{author}}</span> 
@@ -88,7 +88,7 @@
 				<tr><td>
 					<h4><span class="note pull-right text-right">{{date}}</span>
 					{{#uid_author}}
-						<a href="?event={{search_event}}&amp;uid={{uid_author}}">{{author}}</a>
+						<a href="?event={{event}}&amp;uid={{uid_author}}">{{author}}</a>
 					{{/uid_author}}
 					{{^uid_author}}
 						<span style="color: grey">{{author}}</span>
@@ -110,7 +110,7 @@
 	{{^entry}}
 	<div class="row padded">
 		<div class="col-md-12">
-			<h3>This user does not have an entry. <a href="?event={{search_event}}" class="back">Back</a></h3>
+			<h3>This user does not have an entry. <a href="?event={{event}}" class="back">Back</a></h3>
 		</div>
 	</div>
 	{{/entry}}

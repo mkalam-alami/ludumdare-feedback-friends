@@ -60,6 +60,7 @@ function init_context($db) {
 	$context['ld_root'] = LDFF_SCRAPING_ROOT; // TODO Remove, use config instead
 	$context['active_event'] = LDFF_ACTIVE_EVENT_ID; // TODO Remove, use config instead
 	$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
+	$context['event'] = $event_id;
 	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
 	$context['event_url'] = LDFF_SCRAPING_ROOT . $event_id . '/?action=preview';
 	$context['events'] = $events_render;
