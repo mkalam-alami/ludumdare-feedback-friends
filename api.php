@@ -5,6 +5,8 @@ require_once(__DIR__ . '/includes/init.php');
 $db = db_connect();
 $action = util_sanitize_query_param('action');
 
+header('Access-Control-Allow-Origin: *');
+
 if ($action == 'eventsummary') {
 
 	$event_id = util_sanitize_query_param('event');
