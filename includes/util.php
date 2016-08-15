@@ -38,9 +38,7 @@ function util_format_type($value) {
 function util_format_platforms($value) {
 	static $PLATFORM_LABELS = array(
 		'osx' => 'OSX',
-		'flash' => '(Flash)',
-		'html5' => '(HTML5)',
-		'unity' => '(Unity)'
+		'html5' => 'HTML5'
 	);
 
 	$result = '';

@@ -30,11 +30,10 @@ function ld_fetch_entry($uid) {
 		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
 		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
 		'android' => ['android', 'apk'],
-
-		'web flash' => ['flash', 'swf'],
-		'web html5' => ['html', 'webgl'],
-		'web unity' => ['unity'],
-		'web' => ['web']
+		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas', 'unity'],
+		'flash' => ['flash', 'swf'],
+		'html5' => ['html', 'webgl', 'canvas'],
+		'unity' => ['unity']
 	);
 
 	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
@@ -68,11 +67,18 @@ function ld_fetch_entry($uid) {
 					$platforms .= ' ';
 				}
 				$platforms .= $platform_name;
-				if (strpos($platform_name, 'web') !== false) {
-					break; // Don't add multiple web platforms (e.g. "web unity" + "web")
-				}
 			}
 		}
+
+		// Special case: if there's an embed, it's a web entry
+		if (strpos($platforms, 'web') === false && pq('.embed-controls')->size() > 0) {
+			if ($platforms != '') {
+				$platforms .= ' ';
+			}
+			$platforms .= 'web';
+		}
+
+		// Special case: unknown platform
 		if ($platforms == '') {
 			$platforms = 'unknown';
 		}

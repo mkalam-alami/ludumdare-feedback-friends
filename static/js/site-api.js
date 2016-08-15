@@ -51,9 +51,7 @@ window.api = (function() {
 
 	var PLATFORM_LABELS = {
 		'osx': 'OSX',
-		'flash': '(Flash)',
-		'html5': '(HTML5)',
-		'unity': '(Unity)'
+		'html5': 'HTML5'
 	};
 
 	function _formatPlatforms(platforms) {

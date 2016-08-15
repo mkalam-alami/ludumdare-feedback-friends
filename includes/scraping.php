@@ -104,7 +104,6 @@ function _scraping_run_step_entry($db, $uid) {
 				mysqli_stmt_execute($stmt) or log_error(mysqli_error($db));
 			}
 		}
-		print_r($score_per_author);
 
 		mysqli_stmt_close($stmt);
 
