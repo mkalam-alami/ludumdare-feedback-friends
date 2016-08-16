@@ -361,7 +361,7 @@ function refreshResults(entries) {
 					results.push(entry);
 				}
 			} else {
-				if (!userId || (!isUsersOwnEntry(userId, entry) && !hasUserCommented(userId, entry))) {
+				if (!userId || !hasUserCommented(userId, entry)) {
 					results.push(entry);
 				}
 			}
