@@ -371,6 +371,27 @@ function refreshResults(entries) {
 	sortEntries(sorting, results);
 
 	renderResults(results);
+
+	updateUserEntryLink(eventId, userId, entries);
+}
+
+function updateUserEntryLink(eventId, userId, entries) {
+	var p = $('#user-entry-link');
+	console.log(arguments);
+
+	p.hide();
+	if (userId) {
+		for (var i = 0; i < entries.length; i++) {
+			var entry = entries[i];
+			if (entry.uid == userId) {
+				p.show();
+				p.find('a')
+					.text(entry.title)
+					.attr('href', createEntryDetailsUrl(eventId, entry));
+				break;
+			}
+		}
+	}
 }
 
 function renderResults(results) {
@@ -469,6 +490,10 @@ function createVirtualScroll(container, items, renderFunction, idPrefix) {
 
 function createEventUrl(eventId) {
 	return config.LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
+}
+
+function createEntryDetailsUrl(eventId, entry) {
+	return '?event=' + encodeURIComponent(eventId) + '&uid=' + encodeURIComponent(entry.uid);
 }
 
 function renderEntry(eventId, entry) {

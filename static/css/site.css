@@ -160,6 +160,12 @@ span.twitter-typeahead .tt-menu {
 
 /* Search block */
 
+.user-entry-link {
+	display: none;
+	margin-top: 10px;
+	margin-bottom: 0;
+}
+
 .username-description {
 	clear: both;
 	color: #555;

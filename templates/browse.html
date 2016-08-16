@@ -6,11 +6,11 @@
 			<div class="col-md-3">
 				{{^emergency_mode}}
 				<form id="search" action="." method="get">
-					<label for="username">View games as</label>
+					<label for="username">Your username <abbr title="Hides games that you've already commented on (except when searching)">[?]</abbr></label>
 					<div class="input-group">
 						<input id="username" type="text" class="form-control" value="{{username}}" placeholder="Username" />
 						<input id="userid" type="hidden" />
-						<p class="username-description">Hide games that you've already commented on (except when searching)</p>
+						<p id="user-entry-link" class="user-entry-link cloak">Your entry: <strong><a href=""></a></strong></p>
 					</div>
 
 					<div class="search-separator"></div>
