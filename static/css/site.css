@@ -327,6 +327,12 @@ span.twitter-typeahead .tt-menu {
 	border-top: 10px solid #baa989;
 }
 
+.comment {
+	padding: 8px;
+	border-top: 1px solid #ddd;
+	word-wrap: break-word;
+}
+
 /* Medium devices */
 @media (min-width: 992px) {
 	#details-entry {
