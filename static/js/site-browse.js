@@ -37,21 +37,6 @@ function loadTemplates() {
 
 // AJAX/History support
 
-function readQueryParams() {
- 	var params = {};
-	location.search.substr(1).split("&").forEach(function(item) {
-	    var string = item.split("=");
-	    var key = decodeURIComponent(string[0]);
-	    if (!params[key]) {
-	   		params[key] = decodeURIComponent(string[1]);
-	    }
-	    else {
-	   		params[key] += ',' + decodeURIComponent(string[1]);
-	    }
-	});
-	return params;
-}
-
 function pushHistory(url) {
 	if (window.location.search == '?' + $('#search').serialize()) {
 		return;
@@ -108,7 +93,7 @@ function reset(eventId) {
 function bindSearch() {
 
 	// Read query params
-	var params = readQueryParams();
+	var params = api.readQueryParams();
 	$('#userid').val(localStorage ? localStorage.userid : '');
 	$('#username').val(localStorage ? localStorage.username : '');
 	$('#search-event').val(params.event || config.LDFF_ACTIVE_EVENT_ID);
@@ -361,7 +346,7 @@ function refreshResults(entries) {
 					results.push(entry);
 				}
 			} else {
-				if (!userId || !hasUserCommented(userId, entry)) {
+				if (!userId || userId == entry.uid || !hasUserCommented(userId, entry)) {
 					results.push(entry);
 				}
 			}
@@ -377,8 +362,6 @@ function refreshResults(entries) {
 
 function updateUserEntryLink(eventId, userId, entries) {
 	var p = $('#user-entry-link');
-	console.log(arguments);
-
 	p.hide();
 	if (userId) {
 		for (var i = 0; i < entries.length; i++) {

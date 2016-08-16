@@ -4,6 +4,21 @@ window.api = (function() {
 
 	var eventCache = {};
 
+	function readQueryParams() {
+	 	var params = {};
+		location.search.substr(1).split("&").forEach(function(item) {
+		    var string = item.split("=");
+		    var key = decodeURIComponent(string[0]);
+		    if (!params[key]) {
+		   		params[key] = decodeURIComponent(string[1]);
+		    }
+		    else {
+		   		params[key] += ',' + decodeURIComponent(string[1]);
+		    }
+		});
+		return params;
+	}
+
 	function fetchUsername(userid, callback) {
 		var url = 'api.php?action=username&userid=' + encodeURIComponent(userid);
 		$.get(url, callback);
@@ -77,6 +92,7 @@ window.api = (function() {
 	}
 
 	return {
+		readQueryParams: readQueryParams,
 		fetchUsername: fetchUsername,
 		searchUsernames: searchUsernames,
 		fetchEventSummary: fetchEventSummary
