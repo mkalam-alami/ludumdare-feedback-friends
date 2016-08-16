@@ -472,11 +472,13 @@ function createEventUrl(eventId) {
 }
 
 function renderEntry(eventId, entry) {
+	var userId = $('#userid').val();
 	var context = {
 		entry: entry,
 		event_id: eventId,
 		event_url: createEventUrl(eventId),
 		root: config.LDFF_ROOT_URL,
+		mine: entry.uid == userId,
 	};
 	var elt = $(Mustache.render(templates.result, context, templates));
 	cartridgesStyling(elt.find('.entry'));
