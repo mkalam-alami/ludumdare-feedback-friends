@@ -121,8 +121,6 @@ span.twitter-typeahead .tt-menu {
 	background: #151e27 url('../img/header_bg.jpg') repeat-x;
 	background-position: top center;
 	padding: 20px;
-	border-bottom: 10px solid #45545e;
-	box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
 #header:before, #header:after {
@@ -148,7 +146,7 @@ span.twitter-typeahead .tt-menu {
 
 #header-logo {
 	display: block;
-	margin: 30px auto;
+	margin: 30px auto 20px auto;
 	width: 80%;
 	max-width: 544px;
 }
@@ -156,6 +154,22 @@ span.twitter-typeahead .tt-menu {
 #header-logo:hover {
 	filter: sepia(50%);
 	-webkit-filter: sepia(50%);
+}
+
+#menu {
+	width: 100%;
+    text-align: center;
+    background-color: #45545e;
+    padding: 8px;
+	box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    color: #CCD;
+    font-size: 1.8rem;
+}
+
+#menu a {
+    color: white;
+    font-weight: bold;
+    margin: 0 10px;
 }
 
 /* Search block */
