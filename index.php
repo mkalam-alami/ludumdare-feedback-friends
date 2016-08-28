@@ -81,7 +81,7 @@ function render($template_name, $context) {
 
 function _fetch_entry($db, $event_id, $uid) {
 	$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ? LIMIT 1", 'si', $event_id, $uid);
-	if (!$rows) {
+	if ($rows === false) {
 		log_error_and_die('Failed to fetch entry', mysqli_error($db));
 	}
 	return count($rows) == 1 ? $rows[0] : [];
@@ -173,7 +173,7 @@ function page_details($db) {
 		// Build context
 		$context = init_context($db);
 		$context['entry'] = $entry;
-		if (time() - strtotime($entry['last_updated']) < LDFF_FORCE_REFRESH_DELAY) {
+		if ($entry && time() - strtotime($entry['last_updated']) < LDFF_FORCE_REFRESH_DELAY) {
 			$context['refresh_disabled'] = 'disabled';
 		}
 
