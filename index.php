@@ -171,12 +171,17 @@ function page_details($db) {
 		}
 
 		// Build context
+        $last_updated_secs = time() - strtotime($entry['last_updated']);
 		$context = init_context($db);
-		$context['entry'] = $entry;
-		if ($entry && time() - strtotime($entry['last_updated']) < LDFF_FORCE_REFRESH_DELAY) {
+		if ($entry && $last_updated_secs < LDFF_FORCE_REFRESH_DELAY) {
 			$context['refresh_disabled'] = 'disabled';
 		}
-
+        if ($last_updated_secs < 60*60*48) {
+            $last_updated_mns = round($last_updated_secs/60);
+            $entry['last_updated'] = $last_updated_mns . ' minute' . (($last_updated_mns!=1)?'s':'') . ' ago';
+        }
+		$context['entry'] = $entry;
+        
 		// Render
 		$output = render('header', $context)
 			.render('details', $context)
