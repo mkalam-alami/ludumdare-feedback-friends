@@ -38,7 +38,7 @@ function _scraping_run_step_uids($db) {
 	return $uids;
 }
 
-function _scraping_run_step_entry($db, $event_id, $uid) {
+function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 	$entry = null;
 
 	if (!_scraping_is_uid_blacklisted($uid)) {
@@ -57,8 +57,10 @@ function _scraping_run_step_entry($db, $event_id, $uid) {
 		if ($entry['picture']) {
 			util_check_picture_folder($event_id);
 			$picture_data = file_get_contents($entry['picture']);
-			file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data)
-			or die('Cannot write in data/ folder');
+			if (!file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data) &&
+			    !$ignore_write_errors) {
+				die('Cannot write in data/ folder');
+			}
 		}
 
 		// Save comments
@@ -148,7 +150,7 @@ function _scraping_run_step_entry($db, $event_id, $uid) {
 }
 
 function scraping_refresh_entry($db, $event_id, $uid) {
-	_scraping_run_step_entry($db, $event_id, $uid);
+	_scraping_run_step_entry($db, $event_id, $uid, true);
 }
 
 function _scraping_log_step($report_entry) {
@@ -306,7 +308,7 @@ function scraping_run($db) {
 					$params .= ',frontpage';
 				}
 
-				$entry = _scraping_run_step_entry($db, $event_id, $uid);
+				$entry = _scraping_run_step_entry($db, $event_id, $uid, false);
 				$report_entry['type'] = 'entry';
 				$report_entry['params'] = $params;
 				$report_entry['result'] = $entry;
