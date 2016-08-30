@@ -270,10 +270,10 @@ function scraping_run($db) {
 			// ...do we go through missing UIDs?
 			$fetching_missing_uid = false;
 			$refresh_font_page_uid = false;
-			if (strlen($missing_uids) > 0) {
+			while (strlen($missing_uids) > 0 && !$fetching_missing_uid) {
 				$missing_uids_array = explode(',', $missing_uids, 2);
 				$uid = $missing_uids_array[0];
-				if ($uid != '') {
+				if ($uid != '' && !_scraping_is_uid_blacklisted($uid)) {
 					$fetching_missing_uid = true;
 					$missing_uids = $missing_uids_array[1];
 				}
