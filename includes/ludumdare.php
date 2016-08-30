@@ -30,7 +30,7 @@ function ld_fetch_entry($event_id, $uid) {
 		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
 		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
 		'android' => ['android', 'apk'],
-		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas', 'unity'],
+		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas'],
 		'flash' => ['flash', 'swf'],
 		'html5' => ['html', 'webgl', 'canvas'],
 		'unity' => ['unity'],
