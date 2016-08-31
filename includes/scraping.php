@@ -273,9 +273,9 @@ function scraping_run($db) {
 			while (strlen($missing_uids) > 0 && !$fetching_missing_uid) {
 				$missing_uids_array = explode(',', $missing_uids, 2);
 				$uid = $missing_uids_array[0];
+				$missing_uids = $missing_uids_array[1];
 				if ($uid != '' && !_scraping_is_uid_blacklisted($uid)) {
 					$fetching_missing_uid = true;
-					$missing_uids = $missing_uids_array[1];
 				}
 			}
 			if (!$fetching_missing_uid) {
