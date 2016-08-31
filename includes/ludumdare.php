@@ -103,23 +103,26 @@ function ld_fetch_entry($event_id, $uid) {
 		$author_link = pq('#compo2 a strong');
 
 		// Build entry array
-		$entry = array(
-			'uid' => $uid,
-			'author' => utf8_decode($author_link->text()),
-			'author_page' => utf8_decode(preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href'))),
-			'title' => utf8_decode(pq('#compo2 h2')->eq(0)->text()),
-			'type' => (pq('#compo2 > div > i')->text() == 'Competition Entry') ? 'compo' : 'jam',
-			'description' => utf8_decode(pq(pq('#compo2 h2')->eq(1))->prev()->html()),
-			'platforms' => $platforms,
-			'picture' => pq('.shot-nav img')->attr('src'),
-			'comments' => $comments
-		);
-		return $entry;
+        $author = utf8_decode($author_link->text());
+        if ($uid && $author) {
+            $entry = array(
+                'uid' => $uid,
+                'author' => $author,
+                'author_page' => utf8_decode(preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href'))),
+                'title' => utf8_decode(pq('#compo2 h2')->eq(0)->text()),
+                'type' => (pq('#compo2 > div > i')->text() == 'Competition Entry') ? 'compo' : 'jam',
+                'description' => utf8_decode(pq(pq('#compo2 h2')->eq(1))->prev()->html()),
+                'platforms' => $platforms,
+                'picture' => pq('.shot-nav img')->attr('src'),
+                'comments' => $comments
+            );
+            
+            return $entry;
+        }
 
 	}
-	else {
-		return null;
-	}
+    
+	return null;
 	
 }
 
