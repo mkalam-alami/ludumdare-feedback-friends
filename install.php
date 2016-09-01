@@ -83,6 +83,19 @@ if ($current_version < LDFF_VERSION) {
 		$current_version = write_version($db, $target_version);
 	}
 
+	$target_version = 4;
+	if ($current_version < $target_version) {
+		// This index helps to filter entries down to the current event.
+		// Without it, we get an 'ALL' join type (i.e. full table scan). With it,
+		// we get 'ref' type.
+		mysqli_query($db, "ALTER DATABASE '".LDFF_MYSQL_DATABASE."' CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+		mysqli_query($db, "ALTER TABLE comment CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+		mysqli_query($db, "ALTER TABLE entry CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+		mysqli_query($db, "ALTER TABLE setting CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+
+		$current_version = write_version($db, $target_version);
+	}
+    
 	/*
 	$target_version = X;
 	if ($current_version < $target_version) {

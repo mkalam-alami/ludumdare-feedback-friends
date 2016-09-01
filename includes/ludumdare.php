@@ -47,6 +47,7 @@ function ld_fetch_entry($event_id, $uid) {
     foreach ($scripts_array as $script_id => $script_item){
         $html = str_replace($script_item, '', $html);
     }
+    
 	phpQuery::newDocumentHTML($html);
 
 	// Grab title to make sure we're on a working entry page
@@ -93,9 +94,9 @@ function ld_fetch_entry($event_id, $uid) {
 		foreach (pq('.comment') as $comment) {
 			$comments[] = array(
 				'uid_author' => intval(str_replace('?action=preview&uid=', '', pq('a', $comment)->attr('href'))),
-				'author' => utf8_decode(pq('a', $comment)->text()),
+				'author' => utf8_decode(pq('a', $comment)->text()), // fix phpQuery double-encoding
 				'order' => $order++,
-				'comment' => utf8_decode(pq('p', $comment)->html()),
+				'comment' => pq('p', $comment)->html(),
 				'date' => date_create_from_format('M d, Y @ g:ia', pq('small', $comment)->text())
 			);
 		}
@@ -103,15 +104,15 @@ function ld_fetch_entry($event_id, $uid) {
 		$author_link = pq('#compo2 a strong');
 
 		// Build entry array
-        $author = utf8_decode($author_link->text());
+        $author = utf8_decode($author_link->text()); // fix phpQuery double-encoding
         if ($uid && $author) {
             $entry = array(
                 'uid' => $uid,
                 'author' => $author,
-                'author_page' => utf8_decode(preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href'))),
-                'title' => utf8_decode(pq('#compo2 h2')->eq(0)->text()),
+                'author_page' => preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href')),
+                'title' => pq('#compo2 h2')->eq(0)->text(),
                 'type' => (pq('#compo2 > div > i')->text() == 'Competition Entry') ? 'compo' : 'jam',
-                'description' => utf8_decode(pq(pq('#compo2 h2')->eq(1))->prev()->html()),
+                'description' => pq(pq('#compo2 h2')->eq(1))->prev()->html(),
                 'platforms' => $platforms,
                 'picture' => pq('.shot-nav img')->attr('src'),
                 'comments' => $comments
