@@ -20,6 +20,7 @@ define('LDFF_SCRAPING_SLEEP', 0); // time to sleep betwen requests, in seconds
 define('LDFF_SCRAPING_FRONTPAGE_MAX_AGE', 300); // max age after which scraping is forced for the 9 frontpage entries, in seconds.
 define('LDFF_SCRAPING_PSEUDO_CRON', false);
 define('LDFF_SCRAPING_PSEUDO_CRON_DELAY', 60); // delay between executions, in seconds
+define('LDFF_SCRAPING_REFRESH_COMMENTS', false); // only enable to force the scraping to refresh comments (typically after a bug fix)
 
 // Logging
 define('LDFF_LOG_ENABLED', true);

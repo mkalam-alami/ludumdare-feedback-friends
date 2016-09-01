@@ -62,6 +62,12 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 				die('Cannot write in data/ folder');
 			}
 		}
+        
+        // Clear comments if a refresh is needed
+        if (LDFF_SCRAPING_REFRESH_COMMENTS) {
+            db_query($db, "DELETE FROM `comment` WHERE uid_entry = ? AND event_id = ?",
+                'is', $uid, $event_id);
+        }
 
 		// Save comments
 		$max_order = db_select_single_value($db,
