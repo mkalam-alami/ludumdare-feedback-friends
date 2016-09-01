@@ -111,7 +111,18 @@ else if (isset($_GET['trophy'])) {
 			$scores[$uid] += $row['score']; 
 		}
 	}
-
+    
+    // Normalize scores by comment count
+	foreach ($uids as $uid) {
+		$rows = db_query($db, "SELECT COUNT(*) as comment_count FROM comment WHERE event_id = ? AND uid_entry = ?",
+			'si', $event_id, $uid);
+		foreach ($rows as $row) {
+            if ($row['comment_count'] > 10) {
+                $scores[$uid] = floor($scores[$uid] * 10000. / $row['comment_count']);
+            }
+		}
+	}
+    
 	array_multisort($scores, SORT_DESC, $uids);
 
 	$template = $mustache->loadTemplate('cartridge');
@@ -121,7 +132,7 @@ else if (isset($_GET['trophy'])) {
 	echo '<html><head><link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" /><link rel="stylesheet" type="text/css" href="static/css/site.css" /></head><body style="background-image: none; background-color: white">';
 	for ($i = 0; $i < 10; $i++) {
 		if (isset($uids[$i])) {
-			echo "<a href='index.php?event=$event_id&uid=".$uids[$i]."'>".$uids[$i].": ".$scores[$i]." matches</a><br />";
+			echo "<a href='index.php?event=$event_id&uid=".$uids[$i]."'>".$uids[$i].": ".$scores[$i]." points</a><br />";
 			$entries = db_query($db, "SELECT * FROM entry WHERE uid = ? AND event_id = ?", 'is', $uids[$i], $event_id);
 			$entry = $entries[0];
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
