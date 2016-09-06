@@ -1,5 +1,10 @@
 {{! This template is used only on the client. }}
 <h1><a href="{{event_url}}">{{event_title}}</a></h1>
 <h2>{{title}} <span id="results-count">({{entry_count}} entries)</span></h2>
+{{#rescue_mode}}
+<div class="alert alert-warning center">
+<b>Rescue stats</b>: <span style="font-size: 2rem">{{rescue_zero}}</span> games don't have any comments, let's fix that!
+</div>
+{{/rescue_mode}}
 <div id="results-virtual-scroll">
 </div>

@@ -360,7 +360,7 @@ function refreshResults(entries) {
 
 	sortEntries(sorting, results);
 
-	renderResults(results);
+	renderResults(sorting, results);
 
 	updateUserEntryLink(eventId, userId, entries);
 }
@@ -382,7 +382,7 @@ function updateUserEntryLink(eventId, userId, entries) {
 	}
 }
 
-function renderResults(results) {
+function renderResults(sorting, results) {
 	if (resultsVirtualScroll) {
 		resultsVirtualScroll.unbind();
 		resultsVirtualScroll = null;
@@ -396,9 +396,22 @@ function renderResults(results) {
 	context.event_url = createEventUrl(eventId);
 	context.title = (eventId != config.LDFF_ACTIVE_EVENT_ID || getSearchQuery()) ? 'Search results' : 'These entries need feedback!';
 	context.entry_count = results.length;
+    if (sorting == 'received') {
+        context.rescue_mode = true;
+        context.rescue_zero = countEntriesWithoutComments(results);
+    }
 	$('#results').html(Mustache.render(templates.results, context, templates));
 
 	resultsVirtualScroll = createVirtualScroll($('#results-virtual-scroll'), results, renderEntry.bind(null, eventId), 'result-');
+}
+
+function countEntriesWithoutComments(entries) {
+    return entries.reduce(function(acc, entry) {
+        if (entry.comments_received == 0) {
+            acc++;
+        }
+        return acc;
+    }, 0);
 }
 
 function createVirtualScroll(container, items, renderFunction, idPrefix) {
