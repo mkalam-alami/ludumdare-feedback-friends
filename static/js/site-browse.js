@@ -397,8 +397,10 @@ function renderResults(sorting, results) {
 	context.title = (eventId != config.LDFF_ACTIVE_EVENT_ID || getSearchQuery()) ? 'Search results' : 'These entries need feedback!';
 	context.entry_count = results.length;
     if (sorting == 'received') {
-        context.rescue_mode = true;
         context.rescue_zero = countEntriesWithoutComments(results);
+        if (context.rescue_zero > 0) {
+            context.rescue_mode = true;
+        }
     }
 	$('#results').html(Mustache.render(templates.results, context, templates));
 
