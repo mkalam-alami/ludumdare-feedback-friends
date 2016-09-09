@@ -15,7 +15,10 @@ function ld_fetch_uids($event_id) {
 	phpQuery::newDocumentHTML($data);
 
 	foreach(pq('#compo2 td > a') as $entry_el) {
-		$entry_list[] = str_replace('?action=preview&uid=', '', pq($entry_el)->attr('href'));
+		$uid = str_replace('?action=preview&uid=', '', pq($entry_el)->attr('href'));
+        if ($uid != 0) { // ld.com issue: an entry with UID 0 can be displayed
+            $entry_list[] = $uid;
+        }
 	}
 
 	return $entry_list;
