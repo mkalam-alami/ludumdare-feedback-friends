@@ -53,10 +53,11 @@ function ld_fetch_entry($event_id, $uid) {
     
 	phpQuery::newDocumentHTML($html);
 
-	// Grab title to make sure we're on a working entry page
-	$title = pq('#compo2 h2')->eq(0)->text();
-
-	if ($title) {
+	// Grab author info to make sure we're on a working entry page
+    $author_link = pq('#compo2 a strong');
+    $author = utf8_decode($author_link->text()); // fix phpQuery double-encoding
+    $author_page = preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href'));
+	if ($author && $author_page) {
 
 		// Figure out platforms
 		$platforms = '';
@@ -104,15 +105,12 @@ function ld_fetch_entry($event_id, $uid) {
 			);
 		}
 
-		$author_link = pq('#compo2 a strong');
-
 		// Build entry array
-        $author = utf8_decode($author_link->text()); // fix phpQuery double-encoding
         if ($uid && $author) {
             $entry = array(
                 'uid' => $uid,
                 'author' => $author,
-                'author_page' => preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href')),
+                'author_page' => $author_page,
                 'title' => pq('#compo2 h2')->eq(0)->text(),
                 'type' => (pq('#compo2 > div > i')->text() == 'Competition Entry') ? 'compo' : 'jam',
                 'description' => pq(pq('#compo2 h2')->eq(1))->prev()->html(),
