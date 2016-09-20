@@ -389,12 +389,17 @@ function renderResults(sorting, results) {
 	}
 
 	var eventId = getEventId();
+  
+  var title = 'Search results';
+  if (eventId == config.LDFF_ACTIVE_EVENT_ID && !getSearchQuery() && (sorting == 'coolness' || sorting == 'received')) {
+    title = 'These entries need feedback!';
+  }
 
 	var context = {};
 	context.root = config.LDFF_ROOT_URL;
 	context.event_title = $('#search-event-option-' + eventId).text();
 	context.event_url = createEventUrl(eventId);
-	context.title = (eventId != config.LDFF_ACTIVE_EVENT_ID || getSearchQuery()) ? 'Search results' : 'These entries need feedback!';
+	context.title = title;
 	context.entry_count = results.length;
     if (sorting == 'received') {
         context.rescue_zero = countEntriesWithoutComments(results);
