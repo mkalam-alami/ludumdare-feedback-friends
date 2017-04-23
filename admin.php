@@ -127,8 +127,8 @@ else if (isset($_GET['trophy'])) {
 
 	$template = $mustache->loadTemplate('cartridge');
 	$context = array(
-		'event_url' => "http://ludumdare.com/compo/$event_id/?action=preview"
-		);
+		'event_url' => is_numeric($event_id) ? LD_WEB_ROOT : (LD_OLD_WEB_ROOT . $event_id . "/?action=preview")
+	);
 	echo '<html><head><link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" /><link rel="stylesheet" type="text/css" href="static/css/site.css" /></head><body style="background-image: none; background-color: white">';
 	for ($i = 0; $i < 10; $i++) {
 		if (isset($uids[$i])) {

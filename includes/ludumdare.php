@@ -1,24 +1,23 @@
 <?php
 
-function _ld_fetch_page($event_id, $queryParams) {
-	$url = LDFF_SCRAPING_ROOT . $event_id . '/?' . $queryParams;
+
+function _ld_fetch_page($path) {
+	$url = LD_SCRAPING_ROOT . $path;
 	return file_get_contents($url);
 }
 
 /*
 	Retrieves UIDs from all event entries.
 */
-function ld_fetch_uids($event_id) {
+function ld_fetch_uids($event_id, $page = 0) {
 	$entry_list = array();
 
-	$data = _ld_fetch_page($event_id, 'action=misc_links');
-	phpQuery::newDocumentHTML($data);
-
-	foreach(pq('#compo2 td > a') as $entry_el) {
-		$uid = str_replace('?action=preview&uid=', '', pq($entry_el)->attr('href'));
-        if ($uid != 0) { // ld.com issue: an entry with UID 0 can be displayed
-            $entry_list[] = $uid;
-        }
+	$queryOffset = 25 * $page;
+	$data = _ld_fetch_page('node/feed/9405/parent+superparent/item/game?offset=' . $queryOffset . '&limit=25');
+	$json = json_decode($data, true);
+	
+	foreach($json['feed'] as $node) {
+    $entry_list[] = $node['id'];
 	}
 
 	return $entry_list;
@@ -43,88 +42,102 @@ function ld_fetch_entry($event_id, $uid) {
 		'cardboard' => ['cardboard']
 	);
 
-	// Fetch page and remove <script> tags for phpQuery (http://stackoverflow.com/a/36912417)
-	$html = _ld_fetch_page($event_id, 'action=preview&uid=' . $uid);
- 	preg_match_all('/<script.*?>[\s\S]*?<\/script>/', $html, $tmp);
-    $scripts_array = $tmp[0]; 
-    foreach ($scripts_array as $script_id => $script_item){
-        $html = str_replace($script_item, '', $html);
-    }
-    
-	phpQuery::newDocumentHTML($html);
+	// Fetch entry & figure out platforms
 
-	// Grab author info to make sure we're on a working entry page
-    $author_link = pq('#compo2 a strong');
-    $author = utf8_decode($author_link->text()); // fix phpQuery double-encoding
-    $author_page = preg_replace('/..\/author\/(.*)\//i', '$1', $author_link->parent()->attr('href'));
-	if ($author && $author_page) {
+	$data = _ld_fetch_page('node/get/' . $uid);
+	$json = json_decode($data, true);
+	$entry_info = $json['node'][0];
 
-		// Figure out platforms
-		$platforms = '';
-		$platforms_text = strtolower(pq('.links li')->text());
-		foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
-			$found = false;
-			foreach ($keywords as $keyword) {
-				if (strpos($platforms_text, $keyword) !== false) {
-					$found = true;
-					break;
-				}
-			}
-
-			if ($found) {
-				if ($platforms != '') {
-					$platforms .= ' ';
-				}
-				$platforms .= $platform_name;
+	$platforms = '';
+	$platforms_text = strtolower($entry_info['body']);
+	foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
+		$found = false;
+		foreach ($keywords as $keyword) {
+			if (strpos($platforms_text, $keyword) !== false) {
+				$found = true;
+				break;
 			}
 		}
 
-		// Special case: if there's an embed, it's a web entry
-		if (strpos($platforms, 'web') === false && pq('.embed-controls')->size() > 0) {
+		if ($found) {
 			if ($platforms != '') {
 				$platforms .= ' ';
 			}
-			$platforms .= 'web';
+			$platforms .= $platform_name;
 		}
-
-		// Special case: unknown platform
-		if ($platforms == '') {
-			$platforms = 'unknown';
-		}
-
-		// Gather comments
-		$comments = array();
-		$order = 1;
-		foreach (pq('.comment') as $comment) {
-			$comments[] = array(
-				'uid_author' => intval(str_replace('?action=preview&uid=', '', pq('a', $comment)->attr('href'))),
-				'author' => utf8_decode(pq('a', $comment)->text()), // fix phpQuery double-encoding
-				'order' => $order++,
-				'comment' => pq('p', $comment)->html(),
-				'date' => date_create_from_format('M d, Y @ g:ia', pq('small', $comment)->text())
-			);
-		}
-
-		// Build entry array
-        if ($uid && $author) {
-            $entry = array(
-                'uid' => $uid,
-                'author' => $author,
-                'author_page' => $author_page,
-                'title' => pq('#compo2 h2')->eq(0)->text(),
-                'type' => (pq('#compo2 > div > i')->text() == 'Competition Entry') ? 'compo' : 'jam',
-                'description' => pq(pq('#compo2 h2')->eq(1))->prev()->html(),
-                'platforms' => $platforms,
-                'picture' => pq('.shot-nav img')->attr('src'),
-                'comments' => $comments
-            );
-            
-            return $entry;
-        }
-
 	}
-    
-	return null;
+	if ($platforms == '') {
+		$platforms = 'unknown';
+	}
+
+	// Fetch comments
+
+	$comment_data = _ld_fetch_page('note/get/' . $uid);
+	$comment_json = json_decode($comment_data, true);
+	$comment_info = $comment_json['note'];
+
+  $Parsedown = new Parsedown();
+	$comments = array();
+	$order = 1;
+	$authors_to_fetch = [$entry_info['author']];
+	foreach ($comment_info as $comment) {
+		if (!array_search($comment['author'], $authors_to_fetch)) {
+			$authors_to_fetch[] = $comment['author'];
+		}
+		$comments[] = array(
+			'uid_author' => $comment['author'],
+			'author' => null, // Will be fetched below
+			'order' => $order++,
+			'comment' => strip_tags($Parsedown->text($comment['body'])),
+			'date' => new DateTime($comment['created'])
+		);
+	}
+
+	// Fetch authors (both for the entry & commenters)
+
+	$authors_url = 'node/get/' . implode('+', $authors_to_fetch);
+	$authors_data = _ld_fetch_page($authors_url);
+	$authors_json = json_decode($authors_data, true);
+	$authors_info = $authors_json['node'];
+
+	foreach ($authors_info as $author_info) {
+		if ($author_info['id'] == $entry_info['author']) {
+			$author = $author_info['name'];
+			$author_link = LD_WEB_ROOT . 'users/' . $author_info['path'];
+		  $author_page = $author_info['slug'];
+		}
+		foreach ($comments as &$comment) {
+			if ($author_info['id'] == $comment['uid_author']) {
+				$comment['author'] = $author_info['name'];
+			}
+		}
+	}
+  
+  // Locate first picture
+
+  preg_match('/\!\[.*\]\((.*)\)/', $entry_info['body'], $pictures);
+  if (count($pictures) > 1) {
+	  $first_picture = str_replace('///', 'http://static.jam.vg/', $pictures[1]);
+	} else {
+		$first_picture = null;
+	}
+  
+	// Build entry array
+
+	$entry = array(
+    'uid' => $uid,
+    'author' => $author,
+    'author_page' => $author_page,
+    'entry_page' => str_replace('//', '/', LDFF_ACTIVE_EVENT_PATH . $entry_info['slug']),
+    'title' => $entry_info['name'],
+    'type' => ($entry_info['subsubtype'] == 'jam') ? 'jam' : 'compo',
+    'description' => strip_tags($Parsedown->text($entry_info['body'])),
+    'platforms' => $platforms,
+    'picture' => $first_picture,
+    'comments' => $comments
+  );
+  
+  return $entry;
 	
 }
 

@@ -1,6 +1,7 @@
 {
     "require": {
     	"electrolinux/phpquery": "^0.9.6",
-        "mustache/mustache": "^2.10"
+        "mustache/mustache": "^2.10",
+        "erusev/parsedown": "^1.6"
     }
 }

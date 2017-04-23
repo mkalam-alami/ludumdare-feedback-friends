@@ -9,16 +9,14 @@ function _scraping_is_uid_blacklisted($uid) {
 	return array_search($uid, $blacklist) !== false;
 }
 
-
-function _scraping_run_step_uids($db) {
+function _scraping_run_step_uids($db, $page) {
 	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
 	global $db;
-
+	
+	// Find a page of entry UIDs and mark missing ones
 	$event_id = LDFF_ACTIVE_EVENT_ID;
+	$uids = ld_fetch_uids($event_id, $page);
 	$stmt = mysqli_prepare($db, "SELECT COUNT(*) FROM entry WHERE uid = ? AND event_id = ?");
-
-	// Find all entry UIDs
-	$uids = ld_fetch_uids($event_id);
 	if (count($uids) > 0) {
 		$missing_uids = setting_read($db, $SETTING_MISSING_UIDS, '');
 		foreach ($uids as $uid) {
@@ -63,11 +61,11 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 			}
 		}
         
-        // Clear comments if a refresh is needed
-        if (LDFF_SCRAPING_REFRESH_COMMENTS) {
-            db_query($db, "DELETE FROM `comment` WHERE uid_entry = ? AND event_id = ?",
-                'is', $uid, $event_id);
-        }
+    // Clear comments if a refresh is needed
+    if (LDFF_SCRAPING_REFRESH_COMMENTS) {
+        db_query($db, "DELETE FROM `comment` WHERE uid_entry = ? AND event_id = ?",
+            'is', $uid, $event_id);
+    }
 
 		// Save comments
 		$max_order = db_select_single_value($db,
@@ -133,14 +131,15 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 
 		if (mysqli_stmt_affected_rows($update_stmt) == 0) {
 			db_query($db, "INSERT INTO
-				entry(uid,event_id,author,author_page,title,type,description,platforms,
+				entry(uid,event_id,author,author_page,entry_page,title,type,description,platforms,
 					comments_given,comments_received,coolness,last_updated)
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
-				'isssssssiii',
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
+				'issssssssiii',
 				$uid,
 				$event_id,
 				$entry['author'],
 				$entry['author_page'],
+				$entry['entry_page'],
 				$entry['title'],
 				$entry['type'],
 				$entry['description'],
@@ -209,7 +208,7 @@ function _scraping_log_report($report) {
 			- Read the UIDs page
 			- Fetch info for an entry
 
-		1. Read the UIDs page and store all the UIDs missing from the DB in the "setting" table
+		1. Read the UIDs pages and store all the UIDs missing from the DB in the "setting" table
 		2. If we found missing UIDs, then run through them to scrape them.
 		   Otherwise, run through all existing UIDs, while at the same time
 		   making sure the 9 front page entries were updated during the last X minutes.
@@ -220,6 +219,7 @@ function scraping_run($db) {
 	static $SETTING_EVENT_ID = 'scraping_event_id';
 	static $SETTING_MISSING_UIDS = 'scraping_missing_uids';
 	static $SETTING_LAST_READ_ENTRY = 'scraping_last_read_entry';
+	static $SETTING_LAST_READ_UIDS_PAGE = 'scraping_last_read_uids_page';
 
 	// Init
 	$report = array();
@@ -235,6 +235,7 @@ function scraping_run($db) {
 	$event_id_cache = setting_read($db, $SETTING_EVENT_ID, -1);
 	if ($event_id_cache != LDFF_ACTIVE_EVENT_ID) {
 		setting_write($db, $SETTING_MISSING_UIDS, '');
+		setting_write($db, $SETTING_LAST_READ_UIDS_PAGE, -1);
 		setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 		setting_write($db, $SETTING_EVENT_ID, LDFF_ACTIVE_EVENT_ID);
 	}
@@ -260,11 +261,19 @@ function scraping_run($db) {
 		// Read UIDs page
 		$last_read_entry = setting_read($db, $SETTING_LAST_READ_ENTRY, -1);
 		if ($last_read_entry == -1) {
-			$uids = _scraping_run_step_uids($db);
+			$last_read_page = setting_read($db, $SETTING_LAST_READ_UIDS_PAGE, -1);
+			$uids = _scraping_run_step_uids($db, $last_read_page + 1);
 			$report_entry['type'] = 'uids';
 			$report_entry['result'] = $uids;
 			$report_entry['error'] = mysqli_error($db);
-			setting_write($db, $SETTING_LAST_READ_ENTRY, 0);
+
+			if (count($uids) > 0) {
+				setting_write($db, $SETTING_LAST_READ_UIDS_PAGE, $last_read_page + 1);
+			} else {
+				// Switch to entry info mode
+				setting_write($db, $SETTING_LAST_READ_UIDS_PAGE, -1);
+				setting_write($db, $SETTING_LAST_READ_ENTRY, 0);
+			}
 		}
 
 		// Fetch entry info
@@ -320,17 +329,23 @@ function scraping_run($db) {
 				$report_entry['result'] = $entry;
 				$report_entry['error'] = mysqli_error($db);
 
+				$switch_to_uids_mode = false;
 				if ($fetching_missing_uid) {
 					setting_write($db, $SETTING_MISSING_UIDS, $missing_uids);
 					if ($missing_uids == '') {
-						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+						$switch_to_uids_mode = true;
 					}
 				}
 				else if (!$refresh_font_page_uid) {
 					setting_write($db, $SETTING_LAST_READ_ENTRY, $uid);
 					if ($next_uid == null) {
-						setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+						$switch_to_uids_mode = true;
 					}
+				}
+
+				if ($switch_to_uids_mode) {
+					setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
+					setting_write($db, $SETTING_LAST_READ_UIDS_PAGE, -1);
 				}
 			}
 			else {

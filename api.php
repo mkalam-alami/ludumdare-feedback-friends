@@ -15,7 +15,7 @@ if ($action == 'eventsummary') {
 	$gzip_output = cache_read($cache_key);
 	if (!$gzip_output) {
 		$stmt = mysqli_prepare($db,
-			"SELECT entry.uid, entry.author, entry.title, entry.type, entry.platforms, entry.comments_given, entry.comments_received, entry.coolness, entry.last_updated, GROUP_CONCAT(comment.uid_author)
+			"SELECT entry.uid, entry.author, entry.title, entry.type, entry.platforms, entry.comments_given, entry.comments_received, entry.coolness, entry.last_updated, entry.entry_page, GROUP_CONCAT(comment.uid_author)
 			 FROM entry
 				  LEFT OUTER JOIN comment ON entry.event_id = comment.event_id AND entry.uid = comment.uid_entry
 			 WHERE entry.event_id = ?
@@ -39,7 +39,8 @@ if ($action == 'eventsummary') {
 				'comments_received' => $row[6],
 				'coolness' => $row[7],
 				'last_updated' => $row[8],
-				'commenter_ids' => array_map('intval', explode(',', $row[9])),
+				'entry_page' => $row[9],
+				'commenter_ids' => array_map('intval', explode(',', $row[10])),
 			));
 		}
 
@@ -49,7 +50,7 @@ if ($action == 'eventsummary') {
 
 	header('Content-Type: application/json');
 	header('Content-Encoding: gzip');
-	header('Content-Length: '.strlen($gzip_output));
+	header('Content-Length: ' . strlen($gzip_output));
 
 	print($gzip_output);
 

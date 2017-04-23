@@ -4,8 +4,11 @@
 
 define('LDFF_VERSION', 4);
 define('LDFF_PAGE_SIZE', 9);
-define('LDFF_SCRAPING_ROOT', 'http://ludumdare.com/compo/');
 define('LDFF_FORCE_REFRESH_DELAY', 5*60);
+define('LD_WEB_ROOT', 'https://ldjam.com');
+define('LD_SCRAPING_ROOT', 'http://api.ldjam.com/vx/');
+define('LD_OLD_WEB_ROOT', 'http://ludumdare.com/compo/');
+
 
 // Includes
 

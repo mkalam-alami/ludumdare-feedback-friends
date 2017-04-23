@@ -31,8 +31,9 @@ function init_context($db) {
 	// Prepare config (will be available in JS in the "config" global variable)
 	$config = array(
 		array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
-		array('key' => 'LDFF_ROOT_URL', 'value' => LDFF_ROOT_URL),
-		array('key' => 'LDFF_SCRAPING_ROOT', 'value' => LDFF_SCRAPING_ROOT),
+		array('key' => 'LD_WEB_ROOT', 'value' => LD_WEB_ROOT),
+		array('key' => 'LD_OLD_WEB_ROOT', 'value' => LD_OLD_WEB_ROOT),
+		array('key' => 'LD_SCRAPING_ROOT', 'value' => LD_SCRAPING_ROOT),
 	);
 
 	// Prepare events list
@@ -56,17 +57,15 @@ function init_context($db) {
 
 	$context = array();
 	$context['config'] = $config;
-	$context['root'] = LDFF_ROOT_URL; // TODO Remove, use config instead
-	$context['ld_root'] = LDFF_SCRAPING_ROOT; // TODO Remove, use config instead
-	$context['active_event'] = LDFF_ACTIVE_EVENT_ID; // TODO Remove, use config instead
+	$context['root'] = LDFF_ROOT_URL;
+	$context['ld_root'] = LD_WEB_ROOT;
 	$context['emergency_mode'] = LDFF_EMERGENCY_MODE;
 	$context['event'] = $event_id;
 	$context['event_title'] = isset($events[$event_id]) ? $events[$event_id] : 'Unknown event';
-	$context['event_url'] = LDFF_SCRAPING_ROOT . $event_id . '/?action=preview';
+	$context['event_url'] = (is_numeric($event_id)) ? LD_WEB_ROOT : (LD_OLD_WEB_ROOT . $event_id . '/?action=preview'); // TODO Better ldjam.com event URL
 	$context['events'] = $events_render;
 	$context['oldest_entry_age'] = $oldest_entry_age;
 	$context['google_analytics_id'] = LDFF_GOOGLE_ANALYTICS_ID;
-
 	return $context;
 }
 
@@ -171,15 +170,26 @@ function page_details($db) {
 		}
 
 		// Build context
-        $last_updated_secs = time() - strtotime($entry['last_updated']);
-		$context = init_context($db);
-		if ($entry && $last_updated_secs < LDFF_FORCE_REFRESH_DELAY) {
-			$context['refresh_disabled'] = 'disabled';
+    if ($entry) {
+			$last_updated_secs = time() - strtotime($entry['last_updated']);
+			$context = init_context($db);
+			if ($entry && $last_updated_secs < LDFF_FORCE_REFRESH_DELAY) {
+				$context['refresh_disabled'] = 'disabled';
+			}
+	    if ($last_updated_secs < 60*60*48) {
+				$last_updated_mns = round($last_updated_secs/60);
+				$entry['last_updated'] = $last_updated_mns . ' minute' . (($last_updated_mns!=1)?'s':'') . ' ago';
+	    }
+			if ($entry['entry_page']) {
+				$entry['entry_url'] = LD_WEB_ROOT . $entry['entry_page'];
+				$entry['author_url'] = LD_WEB_ROOT . '/users/' . $entry['author_page'];
+			} else {
+				$entry['entry_url'] = LD_OLD_WEB_ROOT . $event_id . '/?action=preview&uid=' . $entry['uid'];
+				if ($entry['author_page']) {
+					$entry['author_url'] = LD_OLD_WEB_ROOT . 'author/' . $entry['author_page'];
+				}
+			}
 		}
-        if ($last_updated_secs < 60*60*48) {
-            $last_updated_mns = round($last_updated_secs/60);
-            $entry['last_updated'] = $last_updated_mns . ' minute' . (($last_updated_mns!=1)?'s':'') . ' ago';
-        }
 		$context['entry'] = $entry;
         
 		// Render

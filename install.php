@@ -95,6 +95,13 @@ if ($current_version < LDFF_VERSION) {
 
 		$current_version = write_version($db, $target_version);
 	}
+  
+	$target_version = 5;
+	if ($current_version < $target_version) {
+    // Links to entries can no longer be deduced from user UIDs, we now have to store actual URLs
+		mysqli_query($db, "ALTER TABLE `entry` ADD `entry_page` VARCHAR(255) NOT NULL AFTER `author_page`;");
+		$current_version = write_version($db, $target_version);
+	}
     
 	/*
 	$target_version = X;

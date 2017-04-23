@@ -497,7 +497,12 @@ function createVirtualScroll(container, items, renderFunction, idPrefix) {
 }
 
 function createEventUrl(eventId) {
-	return config.LDFF_SCRAPING_ROOT + encodeURIComponent(eventId) + '/?action=preview';
+	if (!isOldEvent(eventId)) {
+		return config.LD_WEB_ROOT;
+	} else {
+		// Wordpress link
+		return config.LD_OLD_WEB_ROOT + encodeURIComponent(eventId) + '/?action=preview';
+	}
 }
 
 function createEntryDetailsUrl(eventId, entry) {
@@ -506,16 +511,25 @@ function createEntryDetailsUrl(eventId, entry) {
 
 function renderEntry(eventId, entry) {
 	var userId = $('#userid').val();
+	var entryUrl;
+	if (!isOldEvent(eventId)) {
+		entry.entry_url = config.LD_WEB_ROOT + entry['entry_page'];
+	} else {
+		entry.entry_url = config.LD_OLD_WEB_ROOT + eventId + '/?action=preview&uid=' + entry.uid;
+	}
 	var context = {
 		entry: entry,
 		event_id: eventId,
 		event_url: createEventUrl(eventId),
-		root: config.LDFF_ROOT_URL,
 		mine: entry.uid == userId,
 	};
 	var elt = $(Mustache.render(templates.result, context, templates));
 	cartridgesStyling(elt.find('.entry'));
 	return elt;
+}
+
+function isOldEvent(eventId) {
+	return isNaN(parseInt(eventId));
 }
 
 })();

@@ -1,9 +1,10 @@
 <?php
 
 // Competition config
-define('LDFF_ACTIVE_EVENT_ID', 'ludum-dare-35');
+define('LDFF_ACTIVE_EVENT_ID', 'ludum-dare-38');
+define('LDFF_ACTIVE_EVENT_PATH', '/events/ludum-dare/38/');
 $events = array(
-		'ludum-dare-35' => 'Ludum Dare 35'
+		'9405' => 'Ludum Dare 38'
 	);
 
 // Database configuration
