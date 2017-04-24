@@ -37,17 +37,33 @@ function ld_fetch_author_uid($uid) {
 	Retrieves the full info for an entry
 */
 function ld_fetch_entry($event_id, $uid) {
-	static $PLATFORM_KEYWORDS = array(
+	/*static $PLATFORM_KEYWORDS = array(
 		'windows' => ['windows', 'win32', 'win64', 'exe', 'java', 'jar'],
 		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
 		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
 		'android' => ['android', 'apk'],
-		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas'],
+		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas', 'javascript'],
 		'flash' => ['flash', 'swf'],
-		'html5' => ['html', 'webgl', 'canvas'],
+		'html5' => ['html', 'webgl', 'canvas', 'javascript'],
 		'unity' => ['unity'],
-		'vrgames' => ['vr', 'vive', 'oculus', 'cardboard'],
-		'htcvive' => ['vive'],
+		'vrgames' => ['vr', 'htc', 'vive', 'oculus', 'cardboard'],
+		'htcvive' => ['htc', 'vive'],
+		'oculus' => ['oculus'],
+		'cardboard' => ['cardboard']
+	);*/
+
+	/* XXX More conservative platform detection until we actually have download links on ldjam.com */
+	static $PLATFORM_KEYWORDS = array(
+		'windows' => ['windows', 'win32', 'win64', ' java ', ' jar '],
+		'linux' => ['linux', 'debian', 'ubuntu', ' java ', ' jar '],
+		'osx' => [' mac ', 'osx', 'os/x', 'os x', ' java ', ' jar '],
+		'android' => ['android', 'apk'],
+		'web' => [' web ', 'swf', 'html', 'webgl', 'javascript'],
+		'flash' => ['swf'],
+		'html5' => ['html', 'webgl', 'javascript'],
+		'unity' => ['unity'],
+		'vrgames' => ['htc', 'oculus', 'cardboard'],
+		'htcvive' => ['htc'],
 		'oculus' => ['oculus'],
 		'cardboard' => ['cardboard']
 	);
