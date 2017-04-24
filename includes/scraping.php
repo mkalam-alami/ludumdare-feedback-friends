@@ -108,8 +108,8 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 		mysqli_stmt_close($stmt);
 
 		// Coolness
-		$comments_given = score_comments_given($db, $event_id, $uid);
-		$comments_received = score_comments_received($db, $event_id, $uid);
+		$comments_given = score_comments_given($db, $event_id, $uid, $entry['uid_author']);
+		$comments_received = score_comments_received($db, $event_id, $uid, $entry['uid_author']);
 		$coolness = score_coolness($comments_given, $comments_received);
 
 		// Update entry table

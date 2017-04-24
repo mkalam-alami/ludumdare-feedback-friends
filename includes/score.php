@@ -18,10 +18,10 @@ function score_evaluate_comment($comment_author, $entry_author, $comment, $previ
 	return $score;
 }
 
-function score_comments_given($db, $event_id, $uid) {
+function score_comments_given($db, $event_id, $uid, $uid_author) {
 	$rows = db_query($db, "SELECT SUM(score) as sum FROM comment
 		WHERE event_id = ? AND uid_author = ? AND uid_entry != ?",
-		'sii', $event_id, $uid, $uid);
+		'sii', $event_id, $uid_author, $uid);
 	if ($rows && count($rows) == 1) {
 		$sum = $rows[0]['sum'];
 		return $sum ? $sum : 0;
@@ -31,11 +31,11 @@ function score_comments_given($db, $event_id, $uid) {
 	}
 }
 
-function score_comments_received($db, $event_id, $uid) {
+function score_comments_received($db, $event_id, $uid, $uid_author) {
 	$rows = db_query($db, "SELECT SUM(score) as sum FROM comment
 		WHERE event_id = ? AND uid_entry = ? AND uid_author != ?
 		AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")",
-		'sii', $event_id, $uid, $uid);
+		'sii', $event_id, $uid, $uid_author);
 	if ($rows && count($rows) == 1) {
 		$sum = $rows[0]['sum'];
 		return $sum ? $sum : 0;
