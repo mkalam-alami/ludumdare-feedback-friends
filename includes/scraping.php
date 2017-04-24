@@ -54,16 +54,11 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 		// Save picture
 		if ($entry['picture']) {
 			util_check_picture_folder($event_id);
-			try {
-				$picture_data = file_get_contents($entry['picture']);
-				if (!file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data) &&
-				    !$ignore_write_errors) {
-					$error = 'Cannot write in data/ folder';
-					log_error($error);
-					die($error);
-				}
-			} catch (Exception $e) {
-				log_warning('Failed to download picture for entry ' . $entry['title'] . ': ' . $entry['picture']);
+			$picture_data = file_get_contents($entry['picture']);
+			if (!file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data) &&
+			    !$ignore_write_errors) {
+				$error_info = error_get_last();
+				log_warning('Failed to download picture for entry ' . $entry['title'] . ': ' . $error_info['message']);
 			}
 		}
         
