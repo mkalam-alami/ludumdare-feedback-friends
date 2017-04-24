@@ -2,7 +2,7 @@
 
 // Global constants
 
-define('LDFF_VERSION', 4);
+define('LDFF_VERSION', 5);
 define('LDFF_PAGE_SIZE', 9);
 define('LDFF_FORCE_REFRESH_DELAY', 5*60);
 define('LD_WEB_ROOT', 'https://ldjam.com');
