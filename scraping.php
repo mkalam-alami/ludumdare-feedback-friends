@@ -18,8 +18,8 @@ if (LDFF_SCRAPING_ENABLED) {
 	$db = db_connect();
 
 	echo '<pre>';
-	//print_r(ld_fetch_entry($db, 15312));
-	print_r(scraping_run($db));
+	print_r(ld_fetch_entry($db, 15312));
+	//print_r(scraping_run($db));
 	echo '</pre>';
 
 	mysqli_close($db);

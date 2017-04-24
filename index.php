@@ -79,7 +79,8 @@ function render($template_name, $context) {
 // PAGE : Entry details
 
 function _fetch_entry($db, $event_id, $uid) {
-	$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND uid = ? LIMIT 1", 'si', $event_id, $uid);
+	// Accept either entry UID or author UID, otherwise links to commenter entries would be costly
+	$rows = db_query($db, "SELECT * FROM entry WHERE event_id = ? AND (uid = ? OR uid_author = ?) LIMIT 1", 'sii', $event_id, $uid, $uid);
 	if ($rows === false) {
 		log_error_and_die('Failed to fetch entry', mysqli_error($db));
 	}
@@ -105,7 +106,7 @@ function page_details($db) {
 	if (isset($_GET['refresh'])) {
 		$entry = _fetch_entry($db, $event_id, $uid);
 		if (time() - strtotime($entry['last_updated']) > LDFF_FORCE_REFRESH_DELAY || util_is_admin()) {
-			scraping_refresh_entry($db, $event_id, $uid);
+			scraping_refresh_entry($db, $event_id, $entry['uid']);
 			$entry = null;
 			$output = null;
 		}
@@ -127,16 +128,16 @@ function page_details($db) {
 			$entry['given'] = db_query($db, "SELECT comment.*, entry.author FROM comment, entry
 				WHERE comment.event_id = ? AND entry.event_id = ?
 				AND comment.uid_entry = entry.uid
-				AND comment.uid_author = ? AND comment.uid_entry != ?
+				AND comment.uid_entry != ? AND comment.uid_author = ?
 				ORDER BY `date` DESC, `order` DESC",
-				'ssii', $event_id, $event_id, $uid, $uid);
+				'ssii', $event_id, $event_id, $entry['uid'], $entry['uid_author']);
 
 			// Comments (received)
 			$entry['received'] = db_query($db, "SELECT * FROM comment WHERE event_id = ?
 				AND uid_entry = ? AND uid_author != ?
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")
 				ORDER BY `date` DESC, `order` DESC", 
-				'sii', $event_id, $uid, $uid);
+				'sii', $event_id, $entry['uid'], $entry['uid_author']);
 
 			// Mentions
 			$entry_author = "%@{$entry['author']}%";
@@ -159,7 +160,7 @@ function page_details($db) {
 					AND comment1.uid_entry = comment2.uid_author
 					AND comment2.uid_entry = ?
 					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC",
-					'ssiii', $event_id, $event_id, $uid, $uid, $uid);
+					'ssiii', $event_id, $event_id, $entry['uid_author'], $entry['uid_author'], $entry['uid']);
 			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
 
 			// Misc stats

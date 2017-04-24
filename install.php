@@ -98,8 +98,11 @@ if ($current_version < LDFF_VERSION) {
   
 	$target_version = 5;
 	if ($current_version < $target_version) {
-    // Links to entries can no longer be deduced from user UIDs, we now have to store actual URLs
-		mysqli_query($db, "ALTER TABLE `entry` ADD `entry_page` VARCHAR(255) NOT NULL AFTER `author_page`;");
+		// Upgrade to ldjam.com
+    // - Links to entries can no longer be deduced from user UIDs, we now have to store actual URLs
+    mysqli_query($db, "ALTER TABLE `entry` ADD `entry_page` VARCHAR(255) NOT NULL AFTER `author_page`;");
+		// - Author UIDs & Entry UIDs are no longer the same
+		mysqli_query($db, "ALTER TABLE `entry` ADD `uid_author` INT(11) NOT NULL AFTER `uid`");
 		$current_version = write_version($db, $target_version);
 	}
     

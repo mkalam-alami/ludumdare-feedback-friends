@@ -1,8 +1,8 @@
 <?php
 
-function score_evaluate_comment($author_uid, $entry_uid, $comment, $previous_comments_score) {
+function score_evaluate_comment($comment_author, $entry_author, $comment, $previous_comments_score) {
 	$score = 0;
-	if ($author_uid != $entry_uid) {
+	if ($comment_author != $entry_author) {
 		$text_length = strlen(util_sanitize($comment));
 		if ($text_length > 300) { // Elaborate comments
 			$score = 3;

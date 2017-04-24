@@ -54,10 +54,16 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 		// Save picture
 		if ($entry['picture']) {
 			util_check_picture_folder($event_id);
-			$picture_data = file_get_contents($entry['picture']);
-			if (!file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data) &&
-			    !$ignore_write_errors) {
-				die('Cannot write in data/ folder');
+			try {
+				$picture_data = file_get_contents($entry['picture']);
+				if (!file_put_contents(util_get_picture_file_path($event_id, $uid), $picture_data) &&
+				    !$ignore_write_errors) {
+					$error = 'Cannot write in data/ folder';
+					log_error($error);
+					die($error);
+				}
+			} catch (Exception $e) {
+				log_warning('Failed to download picture for entry ' . $entry['title'] . ': ' . $entry['picture']);
 			}
 		}
         
@@ -83,7 +89,7 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 				$score_per_author[$uid_author] = 0;
 			}
 			$score = score_evaluate_comment($uid_author,
-				$uid,
+				$entry['uid_author'],
 				$comment['comment'],
 				$score_per_author[$uid_author]);
 			$score_per_author[$uid_author] += $score;
@@ -112,11 +118,13 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 		$coolness = score_coolness($comments_given, $comments_received);
 
 		// Update entry table
-		$update_stmt = mysqli_prepare($db, "UPDATE entry SET author=?, author_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
+		$update_stmt = mysqli_prepare($db, "UPDATE entry SET uid_author=?, author=?, author_page=?, entry_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
 		mysqli_stmt_bind_param($update_stmt,
-			'ssssssiiiis',
+			'isssssssiiiis',
+			$entry['uid_author'],
 			$entry['author'],
 			$entry['author_page'],
+			$entry['entry_page'],
 			$entry['title'],
 			$entry['type'],
 			$entry['description'],
@@ -131,11 +139,12 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 
 		if (mysqli_stmt_affected_rows($update_stmt) == 0) {
 			db_query($db, "INSERT INTO
-				entry(uid,event_id,author,author_page,entry_page,title,type,description,platforms,
+				entry(uid,uid_author,event_id,author,author_page,entry_page,title,type,description,platforms,
 					comments_given,comments_received,coolness,last_updated)
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
-				'issssssssiii',
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
+				'iissssssssiii',
 				$uid,
+				$entry['uid_author'],
 				$event_id,
 				$entry['author'],
 				$entry['author_page'],

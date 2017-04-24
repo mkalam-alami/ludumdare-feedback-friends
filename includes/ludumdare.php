@@ -24,6 +24,16 @@ function ld_fetch_uids($event_id, $page = 0) {
 }
 
 /*
+	Retrieves the author UID matching an entry UID
+
+function ld_fetch_author_uid($uid) {
+	$data = _ld_fetch_page('node/get/' . $uid);
+	$json = json_decode($data, true);
+	$entry_info = $json['node'][0];
+	return $entry_info['author'];
+}*/
+
+/*
 	Retrieves the full info for an entry
 */
 function ld_fetch_entry($event_id, $uid) {
@@ -102,6 +112,7 @@ function ld_fetch_entry($event_id, $uid) {
 
 	foreach ($authors_info as $author_info) {
 		if ($author_info['id'] == $entry_info['author']) {
+			$author_uid = $author_info['id'];
 			$author = $author_info['name'];
 			$author_link = LD_WEB_ROOT . 'users/' . $author_info['path'];
 		  $author_page = $author_info['slug'];
@@ -126,6 +137,7 @@ function ld_fetch_entry($event_id, $uid) {
 
 	$entry = array(
     'uid' => $uid,
+    'uid_author' => $author_uid,
     'author' => $author,
     'author_page' => $author_page,
     'entry_page' => str_replace('//', '/', LDFF_ACTIVE_EVENT_PATH . $entry_info['slug']),
