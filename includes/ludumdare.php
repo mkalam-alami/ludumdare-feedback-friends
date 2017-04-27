@@ -48,7 +48,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	static $PLATFORM_KEYWORDS = array(
 		'windows' => ['windows', 'win32', 'win64', ' java ', ' jar '],
 		'linux' => ['linux', 'debian', 'ubuntu', ' java ', ' jar '],
-		'osx' => [' mac ', 'osx', 'os/x', 'os x', ' java ', ' jar '],
+		'osx' => [' mac ', ' mac:', 'osx', 'os/x', 'os x', ' java ', ' jar '],
 		'android' => ['android', 'apk'],
 		'web' => [' web ', 'swf', 'html', 'webgl', 'javascript'],
 		'flash' => ['swf'],
@@ -78,14 +78,16 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 		return null;
 	}
 
-	// Guess game platforms
+	// Guess game platforms from description
 
+  $Parsedown = new Parsedown();
+	$description = preg_replace('/[\t\r\n]+/', ' ', strtolower(strip_tags($Parsedown->text($entry_info['body']))));
 	$platforms = '';
-	$platforms_text = strtolower($entry_info['body']);
+	echo $description;
 	foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
 		$found = false;
 		foreach ($keywords as $keyword) {
-			if (strpos($platforms_text, $keyword) !== false) {
+			if (strpos($description, $keyword) !== false) {
 				$found = true;
 				break;
 			}
@@ -108,7 +110,6 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	$comment_json = json_decode($comment_data, true);
 	$comment_info = $comment_json['note'];
 
-  $Parsedown = new Parsedown();
 	$comments = array();
 	$order = 1;
 	$authors_to_fetch = [];
@@ -179,7 +180,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
     'entry_page' => str_replace('//', '/', LDFF_ACTIVE_EVENT_PATH . $entry_info['slug']),
     'title' => $entry_info['name'],
     'type' => ($entry_info['subsubtype'] == 'jam') ? 'jam' : 'compo',
-    'description' => strip_tags($Parsedown->text($entry_info['body'])),
+    'description' => $description,
     'platforms' => $platforms,
     'picture' => $first_picture,
     'comments' => $comments
