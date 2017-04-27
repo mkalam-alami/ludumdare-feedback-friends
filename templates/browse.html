@@ -56,6 +56,17 @@
 						<div id="search-platforms-values" class="hidden"></div>
 					</div>
 
+					<label for="query">Search <abbr title="Search supports: wildcards (ludum*), or (ludum dare), and (+ludum +dare), not (ludum -dare)">[?]</abbr></label>
+					<div class="input-group">
+						<input id="search-query" type="text" class="form-control" name="query" placeholder="Keyword or user ID" />
+					</div>
+
+					<div class="input-group">
+						<button id="search-reset" type="button" class="btn btn-default">Clear</button>
+					</div>
+
+					<div class="search-separator"></div>
+
 					<label for="platforms">Entries sorting</label>
 					<div class="list-group">
 						<a id="search-sorting-button-coolness" class="search-sorting-button list-group-item active" data-value="coolness" href="#">
@@ -80,20 +91,6 @@
 						</a>
 					</div>
 					<input id="search-sorting" type="hidden" name="sorting" />
-
-					<label for="query">Search</label>
-					<div class="input-group">
-						<input id="search-query" type="text" class="form-control" name="query" placeholder="Keyword or user ID" />
-						<ul class="search-syntax-tips">
-							<li><i>Wildcard:</i> ludum*</li>
-							<li><i>OR:</i> ludum dare</li>
-							<li><i>AND:</i> +ludum +dare</li>
-							<li><i>NOT:</i> ludum -dare</li>
-						</ul>
-					</div>
-					<div class="input-group btn-group">
-						<button id="search-reset" type="button" class="btn btn-default">Clear</button>
-					</div>
 
 					{{/emergency_mode}}
 					{{#emergency_mode}}

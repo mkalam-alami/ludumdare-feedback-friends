@@ -1,6 +1,8 @@
 {{! Note: this template is used both on the client and on the server. }}
 <a class="entry" href="{{entry.entry_url}}">
-	<img class="entry-picture" src="{{root}}{{entry.picture}}" onerror="this.style.visibility = 'hidden'" />
+	<div class="entry-picture-slot">
+		<span class="entry-picture-align"></span><img class="entry-picture" src="{{root}}{{entry.picture}}" onerror="this.style.visibility = 'hidden'" />
+	</div>
 	<img class="entry-overlay" src="{{root}}static/img/cartridge{{#mine}}_mine{{/mine}}.png" />
 	<div class="entry-caption">
 		<div class="entry-title">{{entry.title}}</div>

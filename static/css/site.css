@@ -204,7 +204,7 @@ span.twitter-typeahead .tt-menu {
 }
 
 #search .input-group {
-	margin-bottom: 20px;
+	margin-bottom: 15px;
 }
 
 .search-platforms-container button, .search-platforms-container li, #search-query {
@@ -215,13 +215,11 @@ span.twitter-typeahead .tt-menu {
 	clear: both;
 	font-size: 1.2rem;
 	padding-top: 5px;
-	-webkit-padding-start: 20px;
+	-webkit-padding-start: 15px;
 }
 
 .search-separator {
-	margin-bottom: 20px;
-	/*margin-left: -15px;
-	margin-right: -15px;*/
+	margin-bottom: 15px;
 	border-bottom: 1px solid #baa989;
 }
 
@@ -280,6 +278,7 @@ span.twitter-typeahead .tt-menu {
 	padding-bottom: 0;
 	padding: 20px;
 	position: relative;
+	transition: 0.5s;
 }
 .entry:hover {
 	opacity: 0.7;
@@ -287,11 +286,26 @@ span.twitter-typeahead .tt-menu {
 	transition: 0.2s;
 }
 
-.entry-picture {
-	width: 100%;
-	max-width: 180px;
-	height: 140px;
+.entry-picture-slot {
 	border-radius: 8px 8px 0 0;
+	width: 180px;
+	height: 140px;
+	overflow: hidden;
+}
+
+.entry-picture-align {
+	display: inline-block;
+	vertical-align: middle;
+	width: 0;
+	height: 140px;
+}
+
+.entry-picture {
+	display: inline-block;
+	max-width: 180px;
+	max-height: 140px;
+	line-height: 140px;
+	vertical-align: middle;
 }
 
 .entry-overlay {
