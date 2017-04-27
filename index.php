@@ -147,7 +147,7 @@ function page_details($db) {
 
 			// Highlight mentions in bold
 			foreach ($entry['mentions'] as &$mention) {
-				$mention['comment'] = str_replace('@'.$entry['author'], '<b>@'.$entry['author'].'</b>', $mention['comment']);
+				$mention['comment'] = preg_replace('/\@'.$entry['author'].'/i', '<b>@'.$entry['author'].'</b>', $mention['comment']);
 			};
 
 			// Friends
