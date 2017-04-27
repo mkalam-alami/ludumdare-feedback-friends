@@ -157,15 +157,17 @@ function page_details($db) {
 			};
 
 			// Friends
-			$friends = db_query($db, "SELECT DISTINCT(comment2.uid_author), entry.author FROM comment comment1, comment comment2, entry
+			$friends = db_query($db, "SELECT DISTINCT(comment2.uid_author), comment2.author FROM comment comment1, comment comment2, entry entry2
 					WHERE comment1.event_id = ?
-					AND comment2.event_id = ?
 					AND comment1.uid_author = ?
-					AND comment2.uid_author != ?
-					AND comment1.uid_entry = comment2.uid_author
+					AND comment1.uid_entry = entry2.uid
+					AND comment2.event_id = comment1.event_id
+					AND comment2.uid_author != comment1.uid_author
 					AND comment2.uid_entry = ?
-					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC",
-					'ssiii', $event_id, $event_id, $uid_author, $uid_author, $entry['uid']);
+					AND entry2.event_id = comment2.event_id
+					AND (entry2.uid_author = comment2.uid_author OR (entry2.uid_author = 0 AND entry2.uid = comment2.uid_author))
+					ORDER BY comment1.date DESC",
+					'sii', $event_id, $uid_author, $entry['uid']);
 			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
 
 			// Misc stats
