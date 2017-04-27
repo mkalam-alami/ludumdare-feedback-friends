@@ -83,7 +83,6 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
   $Parsedown = new Parsedown();
 	$description = preg_replace('/[\t\r\n]+/', ' ', strtolower(strip_tags($Parsedown->text($entry_info['body']))));
 	$platforms = '';
-	echo $description;
 	foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
 		$found = false;
 		foreach ($keywords as $keyword) {
@@ -135,7 +134,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	}
 
 	// If needed, fetch author + commenters info
-  log_info("Fetching " . count($authors_to_fetch) . " authors for entry $uid (comment count: " . count($comments) . ")");
+  //log_info("Fetching " . count($authors_to_fetch) . " authors for entry $uid (comment count: " . count($comments) . ")");
 	if (count($authors_to_fetch) > 0) {
 		$authors_url = 'node/get/' . implode('+', $authors_to_fetch);
 		$authors_data = _ld_fetch_page($authors_url);
