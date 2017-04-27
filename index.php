@@ -118,6 +118,12 @@ function page_details($db) {
 		}
 
 		if (isset($entry['type'])) {
+			// Wordpress-compatible author UID
+			$uid_author = $entry['uid_author'];
+			if ($uid_author == 0) {
+				$uid_author = $entry['uid'];
+			}
+
 			// Rendering info
 			$entry['picture'] = util_get_picture_url($event_id, $entry['uid']);
 			$entry['type_label'] = util_format_type($entry['type']);
@@ -129,14 +135,14 @@ function page_details($db) {
 				AND comment.uid_entry = entry.uid
 				AND comment.uid_entry != ? AND comment.uid_author = ?
 				ORDER BY `date` DESC, `order` DESC",
-				'ssii', $event_id, $event_id, $entry['uid'], $entry['uid_author']);
+				'ssii', $event_id, $event_id, $entry['uid'], $uid_author);
 
 			// Comments (received)
 			$entry['received'] = db_query($db, "SELECT * FROM comment WHERE event_id = ?
 				AND uid_entry = ? AND uid_author != ?
 				AND uid_author NOT IN(".(LDFF_UID_BLACKLIST?LDFF_UID_BLACKLIST:"''").")
 				ORDER BY `date` DESC, `order` DESC", 
-				'sii', $event_id, $entry['uid'], $entry['uid_author']);
+				'sii', $event_id, $entry['uid'], $uid_author);
 
 			// Mentions
 			$entry_author = "%@{$entry['author']}%";
@@ -159,7 +165,7 @@ function page_details($db) {
 					AND comment1.uid_entry = comment2.uid_author
 					AND comment2.uid_entry = ?
 					AND entry.uid = comment2.uid_author ORDER BY comment1.date DESC",
-					'ssiii', $event_id, $event_id, $entry['uid_author'], $entry['uid_author'], $entry['uid']);
+					'ssiii', $event_id, $event_id, $uid_author, $uid_author, $entry['uid']);
 			$entry['friends_rows'] = util_array_chuck_into_object($friends, 5, 'friends'); // transformed for rendering
 
 			// Misc stats

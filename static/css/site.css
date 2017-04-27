@@ -367,6 +367,10 @@ span.twitter-typeahead .tt-menu {
 	word-wrap: break-word;
 }
 
+.comment a {
+	font-weight: normal;
+}
+
 /* Medium devices */
 @media (min-width: 992px) {
 	#details-entry {
