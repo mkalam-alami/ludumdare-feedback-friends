@@ -234,31 +234,30 @@ function parseQuery(query) {
 	}
 	// console.log('allOf:', allOf, 'noneOf:', noneOf, 'someOf:', someOf);
 	return function matches(input) {
-        if (typeof input == 'number') {
-            return input == query;
-        }
-        else {
-            for (var i = 0; i < allOf.length; i++) {
-                if (!allOf[i].test(input)) {
-                    return false;
-                }
-            }
-            for (var i = 0; i < noneOf.length; i++) {
-                if (noneOf[i].test(input)) {
-                    return false;
-                }
-            }
-            if (someOf.length > 0) {
-                for (var i = 0; i < someOf.length; i++) {
-                    if (someOf[i].test(input)) {
-                        return true;
-                    }
-                }
-                return false;
-            } else {
-                return true;
-            }
-        }
+		if (typeof input == 'number') {
+			return input == query;
+		} else {
+			for (var i = 0; i < allOf.length; i++) {
+				if (!allOf[i].test(input)) {
+					return false;
+				}
+			}
+			for (var i = 0; i < noneOf.length; i++) {
+				if (noneOf[i].test(input)) {
+					return false;
+				}
+			}
+			if (someOf.length > 0) {
+				for (var i = 0; i < someOf.length; i++) {
+					if (someOf[i].test(input)) {
+						return true;
+					}
+				}
+				return false;
+			} else {
+				return true;
+			}
+		}
 	};
 }
 

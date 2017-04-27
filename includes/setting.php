@@ -16,12 +16,9 @@ function setting_write($db, $id, $value) {
 				'ss', $id, $value)) {
 			die("Failed to insert setting '$id' with value '$value'");
 		}
-	}
-	else {
-		if (!db_query($db, "UPDATE setting SET value = ? WHERE id = ?",
-				'ss', $value, $id)) {
-			die("Failed to insert setting '$id' with value '$value'");
-		}
+	}	else if (!db_query($db, "UPDATE setting SET value = ? WHERE id = ?",
+			'ss', $value, $id)) {
+		die("Failed to insert setting '$id' with value '$value'");
 	}
 }
 

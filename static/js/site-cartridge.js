@@ -8,8 +8,7 @@ window.cartridgesStyling = (function() {
 			if (entryImg) {
 				if (entryImg.complete && entryImg.naturalWidth > 0) {
 					_configureImageColor(entry, entryImg);
-				}
-				else {
+				} else {
 					entryImg.addEventListener('load', function() {
 						_configureImageColor(entry, entryImg);
 					});

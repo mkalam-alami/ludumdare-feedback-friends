@@ -50,8 +50,7 @@ function init_context($db) {
 	if ($rows && count($rows) == 1) {
 		$oldest_entry_updated = $rows[0]['last_updated'];
 		$oldest_entry_age = ceil((time() - strtotime($oldest_entry_updated)) / 60);
-	}
-	else {
+	} else {
 		$oldest_entry_age = '?';
 	}
 
@@ -258,11 +257,9 @@ function page_static($db, $main_template) {
 
 if (isset($_GET['uid'])) {
 	page_details($db);
-}
-else if (isset($_GET['p']) == 'faq') {
+} else if (isset($_GET['p']) == 'faq') {
 	page_static($db, 'faq');
-}
-else {
+} else {
 	page_browse($db);
 }
 

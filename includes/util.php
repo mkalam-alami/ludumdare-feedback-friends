@@ -27,8 +27,7 @@ function util_sanitize($value) {
 function util_sanitize_query_param($key) {
 	if (isset($_GET[$key])) {
 		return util_sanitize($_GET[$key]);
-	}
-	else {
+	} else {
 		return '';
 	}
 }
@@ -52,8 +51,7 @@ function util_format_platforms($value) {
 	foreach($array as $key => $platform) {
 		if (isset($PLATFORM_LABELS[$platform])) {
 			$result .= $PLATFORM_LABELS[$platform];
-		}
-		else {
+		}	else {
 			$result .= ucfirst($platform);
 		}
 		$result .= ' ';

@@ -11,8 +11,7 @@ window.api = (function() {
 		    var key = decodeURIComponent(string[0]);
 		    if (!params[key]) {
 		   		params[key] = decodeURIComponent(string[1]);
-		    }
-		    else {
+		    } else {
 		   		params[key] += ',' + decodeURIComponent(string[1]);
 		    }
 		});
@@ -78,8 +77,7 @@ window.api = (function() {
 		platforms.forEach(function(platform) {
 			if (PLATFORM_LABELS[platform]) {
 				result += PLATFORM_LABELS[platform];
-			}
-			else {
+			}	else {
 				result += _capitalizeFirstLetter(platform);
 			}
 			result += ' ';

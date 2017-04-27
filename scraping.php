@@ -18,14 +18,16 @@ if (LDFF_SCRAPING_ENABLED) {
 	$db = db_connect();
 
 	echo '<pre>';
+  //print_r(_scraping_build_author_cache($db, 9405));
+  $author_cache = _scraping_build_author_cache($db, 9405);
+  print_r(_scraping_run_step_entry($db, 9405, 25889, $author_cache));
 	//print_r(ld_fetch_entry($db, 15312));
 	print_r(scraping_run($db));
 	echo '</pre>';
 
 	mysqli_close($db);
 
-}
-else {
+} else {
 	log_info("Scraping disabled, nothing to do.");
 }
 

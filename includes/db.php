@@ -21,7 +21,11 @@ function db_select_single_row($db, $query, $bind_params_str = '', ...$params) {
 
 function db_select_single_value($db, $query, $bind_params_str = '', ...$params) {
 	$results = db_query($db, $query, $bind_params_str, ...$params);
-	return $results[0][0];
+	if (isset($results[0]) && isset($results[0][0])) {
+		return $results[0][0];
+	} else {
+		return null;
+	}
 }
 
 function db_query($db, $sql, $bind_params_str = '', ...$params) {
@@ -31,8 +35,7 @@ function db_query($db, $sql, $bind_params_str = '', ...$params) {
 		if ($bind_params_str) {
 			if (count($params) == 1 && gettype($params[0]) == 'array') {
 				$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params[0]);
-			}
-			else {
+			}	else {
 				$bind_success = mysqli_stmt_bind_param($stmt, $bind_params_str, ...$params);
 			}
 		}

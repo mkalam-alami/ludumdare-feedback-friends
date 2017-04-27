@@ -80,8 +80,7 @@ else if (isset($_GET['reset'])) {
 		db_query($db, "DELETE FROM comment WHERE event_id = ?", 's', $event_id);
 		db_query($db, "DELETE FROM setting WHERE id = 'scraping_event_id'");
 		echo 'Done.';
- 	}
- 	else {
+ 	}	else {
  		echo '<form method="post"><input name="confirm" type="submit" value="Reset event '.$event_id.'?" /></form>';
 
  	}

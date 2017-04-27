@@ -1,6 +1,5 @@
 <?php
 
-
 function _ld_fetch_page($path) {
 	$url = LD_SCRAPING_ROOT . $path;
 	return file_get_contents($url);
@@ -24,19 +23,11 @@ function ld_fetch_uids($event_id, $page = 0) {
 }
 
 /*
-	Retrieves the author UID matching an entry UID
-
-function ld_fetch_author_uid($uid) {
-	$data = _ld_fetch_page('node/get/' . $uid);
-	$json = json_decode($data, true);
-	$entry_info = $json['node'][0];
-	return $entry_info['author'];
-}*/
-
-/*
 	Retrieves the full info for an entry
+	uid_author = Optionally, the author UID if known, for performance optimization
+  author_cache = Optionally, a map of cached user names (key = ID, value = name), for performance optimization
 */
-function ld_fetch_entry($event_id, $uid) {
+function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = []) {
 	/*static $PLATFORM_KEYWORDS = array(
 		'windows' => ['windows', 'win32', 'win64', 'exe', 'java', 'jar'],
 		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
@@ -46,7 +37,8 @@ function ld_fetch_entry($event_id, $uid) {
 		'flash' => ['flash', 'swf'],
 		'html5' => ['html', 'webgl', 'canvas', 'javascript'],
 		'unity' => ['unity'],
-		'vrgames' => ['vr', 'htc', 'vive', 'oculus', 'cardboard'],
+		'vrgam
+		es' => ['vr', 'htc', 'vive', 'oculus', 'cardboard'],
 		'htcvive' => ['htc', 'vive'],
 		'oculus' => ['oculus'],
 		'cardboard' => ['cardboard']
@@ -68,11 +60,25 @@ function ld_fetch_entry($event_id, $uid) {
 		'cardboard' => ['cardboard']
 	);
 
-	// Fetch entry & figure out platforms
+	// Fetch entry, combine with author if possible
 
-	$data = _ld_fetch_page('node/get/' . $uid);
+	$data = _ld_fetch_page('node/get/' . $uid . (($uid_author) ? '+' . $uid_author : ''));
 	$json = json_decode($data, true);
-	$entry_info = $json['node'][0];
+	$first_node = $json['node'][0];
+	$optional_second_node = (isset($json['node'][1])) ? $json['node'][1] : null;
+	if ($first_node['type'] == 'user') {
+		$entry_info = $optional_second_node;
+		$entry_author_info = $first_node;
+	} else {
+		$entry_info = $first_node;
+		$entry_author_info = $optional_second_node;
+	}
+	if ($entry_info['subtype'] != 'game') {
+		log_warning("Tried to fetch a [".$entry_info['type']."/".$entry_info['subtype']."] as a game");
+		return null;
+	}
+
+	// Guess game platforms
 
 	$platforms = '';
 	$platforms_text = strtolower($entry_info['body']);
@@ -105,44 +111,58 @@ function ld_fetch_entry($event_id, $uid) {
   $Parsedown = new Parsedown();
 	$comments = array();
 	$order = 1;
-	$authors_to_fetch = [$entry_info['author']];
+	$authors_to_fetch = [];
+	if (!$entry_author_info) {
+		$authors_to_fetch[] = $entry_info['author'];
+	}
 	foreach ($comment_info as $comment) {
-		if (!array_search($comment['author'], $authors_to_fetch)) {
-			$authors_to_fetch[] = $comment['author'];
+		if (isset($author_cache[$comment['author']])) {
+			$cached_author = $author_cache[$comment['author']];
+		} else {
+			$cached_author = null;
+			if (!array_search($comment['author'], $authors_to_fetch)) {
+				$authors_to_fetch[] = $comment['author'];
+			}
 		}
 		$comments[] = array(
 			'uid_author' => $comment['author'],
-			'author' => null, // Will be fetched below
+			'author' => $cached_author,
 			'order' => $order++,
 			'comment' => strip_tags($Parsedown->text($comment['body'])),
 			'date' => new DateTime($comment['created'])
 		);
 	}
 
-	// Fetch authors (both for the entry & commenters)
+	// If needed, fetch author + commenters info
+  log_info("Fetching " . count($authors_to_fetch) . " authors for entry $uid (comment count: " . count($comments) . ")");
+	if (count($authors_to_fetch) > 0) {
+		$authors_url = 'node/get/' . implode('+', $authors_to_fetch);
+		$authors_data = _ld_fetch_page($authors_url);
+		$authors_json = json_decode($authors_data, true);
+		$authors_info = $authors_json['node'];
 
-	$authors_url = 'node/get/' . implode('+', $authors_to_fetch);
-	$authors_data = _ld_fetch_page($authors_url);
-	$authors_json = json_decode($authors_data, true);
-	$authors_info = $authors_json['node'];
-
-	foreach ($authors_info as $author_info) {
-		if ($author_info['id'] == $entry_info['author']) {
-			$author_uid = $author_info['id'];
-			$author = $author_info['name'];
-			$author_link = LD_WEB_ROOT . 'users/' . $author_info['path'];
-		  $author_page = $author_info['slug'];
-		}
-		foreach ($comments as &$comment) {
-			if ($author_info['id'] == $comment['uid_author']) {
-				$comment['author'] = $author_info['name'];
+		foreach ($authors_info as $author_info) {
+			if ($author_info['id'] == $entry_info['author']) {
+				$entry_author_info = $author_info;
+			}
+			foreach ($comments as &$comment) {
+				if ($author_info['id'] == $comment['uid_author']) {
+					$comment['author'] = $author_info['name'];
+				}
 			}
 		}
-	}
-  
+  }
+
+  // Set author info
+
+	$author_uid = $entry_author_info['id'];
+	$author = $entry_author_info['name'];
+	$author_link = LD_WEB_ROOT . 'users/' . $entry_author_info['path'];
+  $author_page = $entry_author_info['slug'];
+
   // Locate first picture
 
-  preg_match('/\!\[.*\]\((.*)\)/', $entry_info['body'], $pictures);
+  preg_match('/\!\[[^]]*\]\(([^)]*)\)/', $entry_info['body'], $pictures);
   if (count($pictures) > 1) {
 	  $first_picture = str_replace('///', 'http://static.jam.vg/', $pictures[1]);
 	} else {

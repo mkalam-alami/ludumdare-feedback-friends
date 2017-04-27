@@ -6,11 +6,9 @@ function score_evaluate_comment($comment_author, $entry_author, $comment, $previ
 		$text_length = strlen(util_sanitize($comment));
 		if ($text_length > 300) { // Elaborate comments
 			$score = 3;
-		}
-		else if ($text_length > 100) { // Interesting comments
+		} else if ($text_length > 100) { // Interesting comments
 			$score = 2;
-		}
-		else { // Short comments
+		}	else { // Short comments
 			$score = 1;
 		}
 	}
@@ -25,8 +23,7 @@ function score_comments_given($db, $event_id, $uid, $uid_author) {
 	if ($rows && count($rows) == 1) {
 		$sum = $rows[0]['sum'];
 		return $sum ? $sum : 0;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
@@ -39,8 +36,7 @@ function score_comments_received($db, $event_id, $uid, $uid_author) {
 	if ($rows && count($rows) == 1) {
 		$sum = $rows[0]['sum'];
 		return $sum ? $sum : 0;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
@@ -64,8 +60,7 @@ function score_average($comments) {
 
 	if ($count > 0) {
 		return round(1. * $total / $count, 1);
-	}
-	else {
+	}	else {
 		return 0;
 	}
 }

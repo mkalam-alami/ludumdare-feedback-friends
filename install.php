@@ -113,8 +113,7 @@ if ($current_version < LDFF_VERSION) {
 		$current_version = write_version($db, $target_version);
 	}
 	*/
-}
-else {
+} else {
 	echo 'Nothing to upgrade.';
 }
 

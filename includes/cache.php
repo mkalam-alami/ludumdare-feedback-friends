@@ -3,8 +3,7 @@
 function cache_read($key) {
 	if (LDFF_PRODUCTION && LDFF_CACHING_TTL > 0) {
 		return apcu_fetch($key);
-	}
-	else {
+	}	else {
 		return null;
 	}
 }

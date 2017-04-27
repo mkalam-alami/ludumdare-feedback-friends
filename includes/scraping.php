@@ -36,13 +36,14 @@ function _scraping_run_step_uids($db, $page) {
 	return $uids;
 }
 
-function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
+function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ignore_write_errors = false) {
 	$entry = null;
 
 	if (!_scraping_is_uid_blacklisted($uid)) {
-		$entry = ld_fetch_entry($event_id, $uid);
-	}
-	else {
+		$uid_author = db_select_single_value($db, "SELECT uid_author FROM entry WHERE event_id = ? AND uid = ?",
+				'si', $event_id, $uid);
+		$entry = ld_fetch_entry($event_id, $uid, $uid_author, $author_cache);
+	}	else {
 		$stmt = mysqli_prepare($db, "DELETE FROM entry WHERE uid = ?");
 		mysqli_stmt_bind_param($stmt, 'i', $uid);
 		mysqli_stmt_execute($stmt);
@@ -61,7 +62,7 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 				$error_info = error_get_last();
 				log_warning('Failed to download picture for entry ' . $entry['title'] . ': ' . $error_info['message']);
 			} else {
-				util_resize_image($temp_path, $picture_path, 240);
+				util_resize_image($temp_path, $picture_path, 320);
 				unlink($temp_path);
 			}
 		}
@@ -163,7 +164,7 @@ function _scraping_run_step_entry($db, $event_id, $uid, $ignore_write_errors) {
 }
 
 function scraping_refresh_entry($db, $event_id, $uid) {
-	_scraping_run_step_entry($db, $event_id, $uid, true);
+	_scraping_run_step_entry($db, $event_id, $uid, [], true);
 }
 
 function _scraping_log_step($report_entry) {
@@ -173,8 +174,7 @@ function _scraping_log_step($report_entry) {
 
 	if ($report_entry['type'] == 'uids') {
 		$log_entry .= " uids = " . count($report_entry['result']);
-	}
-	else if ($report_entry['type'] == 'entry') {
+	}	else if ($report_entry['type'] == 'entry') {
 		$result = $report_entry['result'];
 		$log_entry .= ' params = '.$report_entry['params'].
 		' result = '.$result['title'].' by '.$result['author'].
@@ -185,8 +185,7 @@ function _scraping_log_step($report_entry) {
 		log_error('Error for step '.
 			$report_entry['type'].' '.$report_entry['params'].': '.
 			$report_entry['error']);
-	}
-	else {
+	}	else {
 		log_info($log_entry);
 	}
 }
@@ -207,6 +206,15 @@ function _scraping_log_report($report) {
 		" slept_per_step = ".$report['slept_per_step'].
 		" timeout = ".$report['timeout'].
 		" summary = $summary");
+}
+
+function _scraping_build_author_cache($db, $event_id) {
+  $results = db_query($db, "SELECT uid_author, author FROM entry WHERE event_id = ?", 's', $event_id);
+  $cache = [];
+  foreach ($results as $result) {
+    $cache[$result['uid_author']] = $result['author'];
+  }
+  return $cache;
 }
 
 /*
@@ -249,6 +257,7 @@ function scraping_run($db) {
 	}
 
 	$event_id = LDFF_ACTIVE_EVENT_ID;
+  $author_cache = _scraping_build_author_cache($db, $event_id);
 
 	$fp_stmt = mysqli_prepare($db, "SELECT entry.uid FROM entry
 		INNER JOIN(SELECT uid FROM entry WHERE event_id = ?
@@ -331,7 +340,7 @@ function scraping_run($db) {
 					$params .= ',frontpage';
 				}
 
-				$entry = _scraping_run_step_entry($db, $event_id, $uid, false);
+				$entry = _scraping_run_step_entry($db, $event_id, $uid, $author_cache, false);
 				$report_entry['type'] = 'entry';
 				$report_entry['params'] = $params;
 				$report_entry['result'] = $entry;
@@ -343,8 +352,7 @@ function scraping_run($db) {
 					if ($missing_uids == '') {
 						$switch_to_uids_mode = true;
 					}
-				}
-				else if (!$refresh_font_page_uid) {
+				}	else if (!$refresh_font_page_uid) {
 					setting_write($db, $SETTING_LAST_READ_ENTRY, $uid);
 					if ($next_uid == null) {
 						$switch_to_uids_mode = true;
@@ -355,8 +363,7 @@ function scraping_run($db) {
 					setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 					setting_write($db, $SETTING_LAST_READ_UIDS_PAGE, -1);
 				}
-			}
-			else {
+			} else {
 				log_warning("No UID to scrape found, forcing scraping reset");
 				setting_write($db, $SETTING_LAST_READ_ENTRY, -1);
 			}
