@@ -283,6 +283,7 @@ span.twitter-typeahead .tt-menu {
 	padding-bottom: 0;
 	padding: 20px;
 	position: relative;
+	font-weight: normal;
 	transition: 0.5s;
 }
 .entry:hover {
