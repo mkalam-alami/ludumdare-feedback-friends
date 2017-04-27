@@ -35,13 +35,36 @@ window.api = (function() {
 			$('#loader').show();
 			var url = 'api.php?action=eventsummary&event=' + encodeURIComponent(eventId);
 			$.get(url, function(entries) {
+				var unminified = {
+					_: 'uid',
+					a: 'author',
+					t: 'title',
+					y: 'type',
+					p: 'platforms',
+					g: 'comments_given',
+					r: 'comments_received',
+					c: 'coolness',
+					u: 'last_updated',
+					e: 'entry_page',
+					i: 'commenter_ids'
+				};
+
 				// Augment entries
 				for (var i = 0; i < entries.length; i++) {
 					var entry = entries[i];
+
+					// Un-minify
+					for (var key in unminified) {
+						entry[unminified[key]] = entry[key];
+						delete entry[key];
+					}
+
 					// Picture URLs aren't sent from the server; that would be redundant and wasteful.
 					entry.picture = _createPictureUrl(encodeURIComponent(eventId), encodeURIComponent(entry.uid));
 					// Platforms are sent in a single string to save on punctuation.
 					entry.platforms = entry.platforms.toLowerCase().split(' ');
+					// Same with commenter UIDs
+					entry.commenter_ids = (entry.commenter_ids || '').split(',').map(function(id) { return parseInt(id); });
 					// Format type (also implemented in PHP, see util_format_type)
 					entry.type_label = _formatType(entry.type);
 					// Format platforms (also implemented in JS, see util_format_platforms)

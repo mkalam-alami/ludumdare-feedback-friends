@@ -29,18 +29,19 @@ if ($action == 'eventsummary') {
 
 		$json = [];
 		while ($row = mysqli_fetch_row($results)) {
+			// keys are minified manually to save room
 			array_push($json, array(
-				'uid' => (int)$row[0],
-				'author' => $row[1],
-				'title' => $row[2],
-				'type' => $row[3],
-				'platforms' => $row[4],
-				'comments_given' => $row[5],
-				'comments_received' => $row[6],
-				'coolness' => $row[7],
-				'last_updated' => $row[8],
-				'entry_page' => $row[9],
-				'commenter_ids' => array_map('intval', explode(',', $row[10])),
+				'_' => (int)$row[0], // uid
+				'a' => $row[1], // author
+				't' => $row[2], // title
+				'y' => $row[3], // type
+				'p' => $row[4], // platforms
+				'g' => $row[5], // comments_given
+				'r' => $row[6], // comments_received
+				'c' => $row[7], // coolness
+				'u' => $row[8], // last_updated
+				'e' => $row[9], // entry_page
+				'i' => $row[10], // commenter_ids
 			));
 		}
 
