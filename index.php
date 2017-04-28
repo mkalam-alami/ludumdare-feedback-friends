@@ -33,7 +33,7 @@ function init_context($db) {
 		array('key' => 'LDFF_ACTIVE_EVENT_ID', 'value' => LDFF_ACTIVE_EVENT_ID),
 		array('key' => 'LD_WEB_ROOT', 'value' => LD_WEB_ROOT),
 		array('key' => 'LD_OLD_WEB_ROOT', 'value' => LD_OLD_WEB_ROOT),
-		array('key' => 'LD_SCRAPING_ROOT', 'value' => LD_SCRAPING_ROOT),
+		array('key' => 'LD_SCRAPING_ROOT', 'value' => LD_SCRAPING_ROOT)
 	);
 
 	// Prepare events list
@@ -65,6 +65,7 @@ function init_context($db) {
 	$context['events'] = $events_render;
 	$context['oldest_entry_age'] = $oldest_entry_age;
 	$context['google_analytics_id'] = LDFF_GOOGLE_ANALYTICS_ID;
+	$context['js_css_version'] = LDFF_JS_CSS_VERSION;
 	return $context;
 }
 

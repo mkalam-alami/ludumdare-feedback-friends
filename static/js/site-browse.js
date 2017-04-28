@@ -62,7 +62,7 @@ window.onpopstate = function (e) {
 // Search form
 
 function getEventId() {
-	return $('#search-event').val();
+	return $('#search-event').val() || config.LDFF_ACTIVE_EVENT_ID;
 }
 
 function getSearchQuery() {
