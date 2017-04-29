@@ -11,8 +11,8 @@ function _ld_fetch_page($path) {
 function ld_fetch_uids($event_id, $page = 0) {
 	$entry_list = array();
 
-	$queryOffset = 25 * $page;
-	$data = _ld_fetch_page('node/feed/9405/parent+superparent/item/game?offset=' . $queryOffset . '&limit=25');
+	$query_offset = 25 * $page;
+	$data = _ld_fetch_page('node/feed/9405/parent+superparent/item/game?offset=' . $query_offset . '&limit=25');
 	$json = json_decode($data, true);
 	
 	foreach($json['feed'] as $node) {
@@ -20,6 +20,18 @@ function ld_fetch_uids($event_id, $page = 0) {
 	}
 
 	return $entry_list;
+}
+
+function _ld_is_picture_url($url) {
+	$lower_case_url = strtolower($url);
+	if (!strpos($url, 'youtube')) {
+		foreach (array('jpg', 'gif', 'png') as $format) {
+			if (substr($lower_case_url, -strlen($format)) === $format) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 /*
@@ -162,12 +174,14 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 
   // Locate first picture
 
-  preg_match('/\!\[[^]]*\]\(([^)]*)\)/', $entry_info['body'], $pictures);
-  if (count($pictures) > 1) {
-	  $first_picture = str_replace('///', 'http://static.jam.vg/', $pictures[1]);
-	} else {
-		$first_picture = null;
-	}
+  preg_match_all('/\!\[[^]]*\]\(([^)]*)\)/', $entry_info['body'], $body_urls_match);
+  $first_picture = null;
+  foreach ($body_urls_match[1] as $body_url) {
+  	if (_ld_is_picture_url($body_url)) {
+  		$first_picture = str_replace('///', 'http://static.jam.vg/', $body_url);
+  		break;
+  	}
+  }
   
 	// Build entry array
 
