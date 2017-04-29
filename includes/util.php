@@ -111,8 +111,7 @@ function util_resize_image($originalFile, $targetFile, $newWidth) {
 		break;
 
 		default: 
-		log_error("Failed to resize picture $targetFile (mimetype: $mime)");
-		rename($originalFile, $targetFile);
+		return false;
 	}
 
 	$img = $image_create_func($originalFile);
@@ -126,6 +125,7 @@ function util_resize_image($originalFile, $targetFile, $newWidth) {
 		unlink($targetFile);
 	}
 	imagejpeg($tmp, $targetFile, 90);
+	return true;
 }
 
 ?>

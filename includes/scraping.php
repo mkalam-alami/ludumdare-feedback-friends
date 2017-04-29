@@ -52,17 +52,31 @@ function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ign
 
 	if ($entry) {
 
-		// Save picture
+		// Download & save picture
 		if ($entry['picture']) {
 			util_check_picture_folder($event_id);
 			$picture_data = file_get_contents($entry['picture']);
 			$temp_path = tempnam(__DIR__ . '/../data', 'tmppic');
       $picture_path = util_get_picture_file_path($event_id, $uid);
-			if (!file_put_contents($temp_path, $picture_data) && !$ignore_write_errors) {
-				$error_info = error_get_last();
-				log_warning('Failed to download picture for entry ' . $entry['title'] . ': ' . $error_info['message']);
-			} else {
-				util_resize_image($temp_path, $picture_path, 320);
+
+    	// Dump to temporary file, then resize it
+    	$success = file_put_contents($temp_path, $picture_data);
+    	if ($success) {
+				$success = util_resize_image($temp_path, $picture_path, 320);
+    	}
+
+			// Error handling
+			if (!$success) {
+				$entry['picture'] = null;
+				if (file_exists($picture_path)) {
+					unlink($picture_path);
+				}
+				if (!$ignore_write_errors) {
+					log_warning('Failed to prepare picture for entry ' . $entry['uid']);
+				}
+			}
+
+			if (file_exists($temp_path)) {
 				unlink($temp_path);
 			}
 		}
