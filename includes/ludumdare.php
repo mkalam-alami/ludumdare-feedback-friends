@@ -179,6 +179,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
   foreach ($body_urls_match[1] as $body_url) {
   	if (_ld_is_picture_url($body_url)) {
   		$first_picture = str_replace('///', 'http://static.jam.vg/', $body_url);
+  		log_info('Picture detection info for LDJam: '.$uid.','.$body_url);
   		break;
   	}
   }
