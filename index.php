@@ -266,8 +266,8 @@ function page_static($db, $main_template) {
 
 if (isset($_GET['uid'])) {
 	page_details($db);
-} else if (isset($_GET['p']) == 'faq') {
-	page_static($db, 'faq');
+} else if (isset($_GET['p']) && array_search($_GET['p'], array('help', 'about')) !== false) {
+	page_static($db, $_GET['p']);
 } else {
 	page_browse($db);
 }

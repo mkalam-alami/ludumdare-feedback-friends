@@ -59,7 +59,7 @@ a.back {
 	font-size: 70%;
 }
 
-h1, h2, h3 {
+h1, h2, h3, ul {
 	margin: 0 0 20px 0;
 }
 
@@ -151,7 +151,7 @@ span.twitter-typeahead .tt-menu {
 
 #header-logo {
 	display: block;
-	margin: 30px auto 20px auto;
+	margin: 20px auto 10px auto;
 	width: 80%;
 	max-width: 544px;
 }
