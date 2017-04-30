@@ -2,7 +2,8 @@
 
 // Global constants
 
-define('LDFF_VERSION', 5);
+define('LDFF_DB_VERSION', 5);
+define('LDFF_JS_CSS_VERSION', 3); // Change the value to force a JS/CSS refresh on each browser
 define('LDFF_PAGE_SIZE', 9);
 define('LDFF_FORCE_REFRESH_DELAY', 5*60);
 define('LD_WEB_ROOT', 'https://ldjam.com');

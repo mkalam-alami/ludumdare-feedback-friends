@@ -19,7 +19,7 @@ function write_version($db, $version) {
 $db = db_connect();
 $current_version = read_version($db);
 
-if ($current_version < LDFF_VERSION) {
+if ($current_version < LDFF_DB_VERSION) {
 
 	$target_version = 1;
 	if ($current_version < $target_version) {

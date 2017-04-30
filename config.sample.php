@@ -34,6 +34,5 @@ define('LDFF_ADMIN_PASSWORD', 'changeme'); // Add a "?p=..." param to admin requ
 define('LDFF_UID_BLACKLIST', ''); // Example: '234567,876543'. Comments are worth 0p, entry scraping is disabled
 define('LDFF_GOOGLE_ANALYTICS_ID', '');
 define('LDFF_CACHING_TTL', 10);
-define('LDFF_JS_CSS_VERSION', 1); // Change the value to force a JS/CSS refresh on each browser
 
 ?>

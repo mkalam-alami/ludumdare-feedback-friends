@@ -2,35 +2,35 @@
 
 /* latin-ext */
 @font-face {
-  font-family: 'Titillium Web';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Titillium Web'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v4/7XUFZ5tgS-tD6QamInJTcSo_WB_cotcEMUw1LsIE8mM.woff2) format('woff2');
-  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+	font-family: 'Titillium Web';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Titillium Web'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v4/7XUFZ5tgS-tD6QamInJTcSo_WB_cotcEMUw1LsIE8mM.woff2) format('woff2');
+	unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
 @font-face {
-  font-family: 'Titillium Web';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Titillium Web'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v4/7XUFZ5tgS-tD6QamInJTcZSnX671uNZIV63UdXh3Mg0.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	font-family: 'Titillium Web';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Titillium Web'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v4/7XUFZ5tgS-tD6QamInJTcZSnX671uNZIV63UdXh3Mg0.woff2) format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 /* latin-ext */
 @font-face {
-  font-family: 'Titillium Web';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Titillium WebBold'), local('TitilliumWeb-Bold'), url(https://fonts.gstatic.com/s/titilliumweb/v4/anMUvcNT0H1YN4FII8wpr-y7CP8YvcHYdGV61pt7QTE.woff2) format('woff2');
-  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+	font-family: 'Titillium Web';
+	font-style: normal;
+	font-weight: 700;
+	src: local('Titillium WebBold'), local('TitilliumWeb-Bold'), url(https://fonts.gstatic.com/s/titilliumweb/v4/anMUvcNT0H1YN4FII8wpr-y7CP8YvcHYdGV61pt7QTE.woff2) format('woff2');
+	unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
 @font-face {
-  font-family: 'Titillium Web';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Titillium WebBold'), local('TitilliumWeb-Bold'), url(https://fonts.gstatic.com/s/titilliumweb/v4/anMUvcNT0H1YN4FII8wprxP6Eu1_xfSBSoi9uie1FdE.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	font-family: 'Titillium Web';
+	font-style: normal;
+	font-weight: 700;
+	src: local('Titillium WebBold'), local('TitilliumWeb-Bold'), url(https://fonts.gstatic.com/s/titilliumweb/v4/anMUvcNT0H1YN4FII8wprxP6Eu1_xfSBSoi9uie1FdE.woff2) format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 
 /* General */
@@ -86,24 +86,24 @@ h1, h2, h3, ul {
 /* Bootstrap overrides */
 
 .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
-    background-color: #f0ad4e;
-    border-color: #eea236;
+	background-color: #f0ad4e;
+	border-color: #eea236;
 }
 
 .list-group-item.active .list-group-item-text, .list-group-item.active:focus .list-group-item-text, .list-group-item.active:hover .list-group-item-text {
-    color: #531;
+	color: #531;
 }
 
 .btn-primary {
-    background-color: #ffae32;
-    border-color: #ff9430;
-    color: black;
+	background-color: #ffae32;
+	border-color: #ff9430;
+	color: black;
 }
 
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
-    background-color: #ff6334 !important;
-    border-color: #ff6334 !important;
-    color: white;
+	background-color: #ff6334 !important;
+	border-color: #ff6334 !important;
+	color: white;
 }
 
 span.twitter-typeahead .tt-menu {
@@ -112,11 +112,11 @@ span.twitter-typeahead .tt-menu {
 
 /* Same height columns http://stackoverflow.com/a/19695851 */
 .row {
-  overflow: hidden; 
+	overflow: hidden; 
 }
 [class*="col-"]{
-  margin-bottom: -99999px;
-  padding-bottom: 99999px;
+	margin-bottom: -99999px;
+	padding-bottom: 99999px;
 }
 
 /* Header */
@@ -153,7 +153,7 @@ span.twitter-typeahead .tt-menu {
 	display: block;
 	margin: 20px auto 10px auto;
 	width: 80%;
-	max-width: 544px;
+	max-width: 400px;
 }
 
 #header-logo:hover {
@@ -163,18 +163,18 @@ span.twitter-typeahead .tt-menu {
 
 #menu {
 	width: 100%;
-    text-align: center;
-    background-color: #45545e;
-    padding: 8px;
+	text-align: center;
+	background-color: #45545e;
+	padding: 8px;
 	box-shadow: 0 0 8px rgba(0,0,0,0.3);
-    color: #CCD;
-    font-size: 1.8rem;
+	color: #CCD;
+	font-size: 1.8rem;
 }
 
 #menu a {
-    color: white;
-    font-weight: bold;
-    margin: 0 10px;
+	color: white;
+	font-weight: bold;
+	margin: 0 10px;
 }
 
 /* Search block */
@@ -200,7 +200,7 @@ span.twitter-typeahead .tt-menu {
 }
 
 .username-not-found {
-  margin: 3px 20px;
+	margin: 3px 20px;
 }
 
 #search {
