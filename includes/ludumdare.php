@@ -62,7 +62,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 		'linux' => ['linux', 'debian', 'ubuntu', ' java ', ' jar '],
 		'osx' => [' mac ', ' mac:', 'osx', 'os/x', 'os x', ' java ', ' jar '],
 		'android' => ['android', 'apk'],
-		'web' => [' web ', 'swf', 'html', 'webgl', 'javascript'],
+		'web' => [' web ', '(web ', 'swf', 'html', 'webgl', 'javascript'],
 		'flash' => ['swf'],
 		'html5' => ['html', 'webgl', 'javascript'],
 		'unity' => ['unity'],
