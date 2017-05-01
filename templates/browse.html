@@ -29,7 +29,7 @@
 					</div>
 					<input id="search-event" type="hidden" name="event" />
 
-					<label for="platforms">Restrict platforms</label>
+					<label for="platforms">Restrict games</label>
 					<div class="input-group search-platforms-container">
 						<select id="search-platforms" name="platforms" multiple="multiple">
 							<optgroup label="OS">
@@ -54,6 +54,17 @@
 							</optgroup>
 						</select>
 						<div id="search-platforms-values" class="hidden"></div>
+						<div id="search-category" class="btn-group" data-toggle="buttons">
+						  <label class="btn btn-default">
+						    <input type="radio" name="category" value="compo" autocomplete="off"> Compo
+						  </label>
+						  <label class="btn btn-default">
+						    <input type="radio" name="category" value="jam" autocomplete="off"> Jam
+						  </label>
+						  <label class="btn btn-default active">
+						    <input type="radio" name="category" value="" autocomplete="off" checked> Both
+						  </label>
+						</div>
 					</div>
 
 					<label for="query">Search <abbr title="Search supports: wildcards (ludum*), or (ludum dare), and (+ludum +dare), not (ludum -dare)">[?]</abbr></label>

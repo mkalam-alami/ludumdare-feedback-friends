@@ -216,6 +216,11 @@ span.twitter-typeahead .tt-menu {
 	font-size: 1.6rem;
 }
 
+#search-category {
+	display: block;
+	margin-top: 5px;
+}
+
 .search-syntax-tips {
 	clear: both;
 	font-size: 1.2rem;

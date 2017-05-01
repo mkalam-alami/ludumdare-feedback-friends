@@ -157,8 +157,11 @@ function bindSearch() {
 	});
 
 	// Platforms
-	$('#search-platforms').multiselect();
+	$('#search-platforms').multiselect({nonSelectedText: 'All platforms'});
 	$('#search-platforms').change(runSearch);
+
+	// Categories
+	$("input[name='category']").change(runSearch);
 
 	// Query
 	var lastKeyDown = 0;
@@ -187,6 +190,7 @@ function bindSearch() {
 
 function runSearch() {
 	var url = '?' + $('#search').serialize();
+	url = url.replace(/[a-z]+\=\&/g, '');
 	pushHistory(url);
 
 	var eventId = getEventId();
@@ -337,6 +341,7 @@ function refreshResults(entries) {
 	var userId = parseInt($('#userid').val()) || null;
 	var sorting = $('#search-sorting').val();
 	var platforms = $('#search-platforms').val();
+	var category = $('input[name=category]:checked').val();
 	var query = getSearchQuery();
 	var queryMatcher = query ? parseQuery(query) : null;
 
@@ -344,14 +349,16 @@ function refreshResults(entries) {
 
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i];
-		if (!platforms || matchesPlatforms(platforms, entry)) {
-			if (queryMatcher) {
-				if (matchesSearchQuery(queryMatcher, entry)) {
-					results.push(entry);
-				}
-			} else {
-				if (!userId || userId == entry.uid || !hasUserCommented(userId, entry)) {
-					results.push(entry);
+		if (!category || entry.type == category) {
+			if (!platforms || matchesPlatforms(platforms, entry)) {
+				if (queryMatcher) {
+					if (matchesSearchQuery(queryMatcher, entry)) {
+						results.push(entry);
+					}
+				} else {
+					if (!userId || userId == entry.uid || !hasUserCommented(userId, entry)) {
+						results.push(entry);
+					}
 				}
 			}
 		}
