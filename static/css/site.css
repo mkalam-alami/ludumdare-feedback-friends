@@ -149,6 +149,16 @@ span.twitter-typeahead .tt-menu {
 	width: 89px;
 }
 
+#header-subtitle {
+	text-align: center;
+	color: #CCC;
+}
+
+#header-subtitle a {
+	color: white;
+}
+
+
 #header-logo {
 	display: block;
 	margin: 20px auto 10px auto;
@@ -172,7 +182,7 @@ span.twitter-typeahead .tt-menu {
 }
 
 #menu a {
-	color: white;
+	color: #FFF;
 	font-weight: bold;
 	margin: 0 10px;
 }
