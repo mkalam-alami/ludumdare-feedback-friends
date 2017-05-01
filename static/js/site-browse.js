@@ -12,6 +12,7 @@ var OFFSCREEN_ROWS = 3;
 var templates = {};
 
 var resultsVirtualScroll = null;
+var searchEnabled = true;
 
 $(window).load(function() {
 	loadTemplates();
@@ -42,20 +43,31 @@ function pushHistory(url) {
 		return;
 	}
 	window.history.pushState({
-		"search-platforms": $('#search-platforms').val(),
-		"search-sorting": $('#search-sorting').val(),
-		"search-query": getSearchQuery(),
+		"event": getEventId(),
+		"platforms": $('#search-platforms').val(),
+		"sorting": $('#search-sorting').val(),
+		"query": getSearchQuery(),
+		"category": $('input[name=category]:checked').val(),
 	}, "", url);
 }
 
 window.onpopstate = function (e) {
 	if (e.state) {
-		$('#search-platforms').val(e.state['search-platforms']);
-		$('#search-sorting').val(e.state['search-sorting']);
-		$('#search-query').val(e.state['search-query']);
+		console.log("pop")
+		searchEnabled = false; // prevent search + history push from firing
+		$('#search-event-option-' + e.state['event']).click();
+		$('#search-sorting').val(e.state['sorting']);
+		$('#search-query').val(e.state['query']);
+		$('#search-platforms').val(e.state['platforms']);
 		$('#search-platforms').multiselect('refresh');
+    $('input:radio[name=category]')
+    	.filter('[value="' + e.state['category'] + '"]')
+    	.click();
 		refreshSorting();
-		runSearch();
+		searchEnabled = true;
+		console.log("!");
+		var eventId = getEventId();
+		api.fetchEventSummary(eventId, refreshResults);
 	}
 };
 
@@ -100,6 +112,11 @@ function bindSearch() {
 	$('#search-sorting').val(params.sorting || 'coolness');
 	$('#search-query').val(params.query);
 	$('#search-platforms').val(params.platforms ? params.platforms.split(',') : '');
+	if (params.category) {
+    $('input:radio[name=category]')
+    	.filter('[value="' + params.category + '"]')
+    	.click();
+	}
 
 	// Event
 	refreshEvent();
@@ -141,7 +158,6 @@ function bindSearch() {
 		if (localStorage) {
 			delete localStorage.userid;
 			delete localStorage.username;
-			console.log(localStorage);
 		}
 			runSearch();
 		}
@@ -189,12 +205,14 @@ function bindSearch() {
 
 
 function runSearch() {
-	var url = '?' + $('#search').serialize();
-	url = url.replace(/[a-z]+\=\&/g, '');
-	pushHistory(url);
+	if (searchEnabled) {
+		var url = '?' + $('#search').serialize();
+		url = url.replace(/[a-z]+\=\&/g, '');
+		pushHistory(url);
 
-	var eventId = getEventId();
-	api.fetchEventSummary(eventId, refreshResults);
+		var eventId = getEventId();
+		api.fetchEventSummary(eventId, refreshResults);
+	}
 }
 
 function isUsersOwnEntry(userId, entry) {
