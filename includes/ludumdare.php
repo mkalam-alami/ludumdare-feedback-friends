@@ -60,7 +60,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	static $PLATFORM_KEYWORDS = array(
 		'windows' => ['windows', 'win32', 'win64', ' java ', ' jar '],
 		'linux' => ['linux', 'debian', 'ubuntu', ' java ', ' jar '],
-		'osx' => [' mac ', ' mac:', 'osx', 'os/x', 'os x', ' java ', ' jar '],
+		'osx' => [' mac ', ' mac:', 'osx', 'os/x', 'os x', ' java ', ' jar ', 'macos'],
 		'android' => ['android', 'apk'],
 		'web' => [' web ', '(web ', 'swf', 'html', 'webgl', 'javascript'],
 		'flash' => ['swf'],
