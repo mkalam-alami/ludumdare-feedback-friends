@@ -53,7 +53,6 @@ function pushHistory(url) {
 
 window.onpopstate = function (e) {
 	if (e.state) {
-		console.log("pop")
 		searchEnabled = false; // prevent search + history push from firing
 		$('#search-event-option-' + e.state['event']).click();
 		$('#search-sorting').val(e.state['sorting']);
@@ -65,7 +64,6 @@ window.onpopstate = function (e) {
     	.click();
 		refreshSorting();
 		searchEnabled = true;
-		console.log("!");
 		var eventId = getEventId();
 		api.fetchEventSummary(eventId, refreshResults);
 	}

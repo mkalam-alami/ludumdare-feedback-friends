@@ -91,7 +91,8 @@ window.api = (function() {
 		'osx': 'OSX',
 		'html5': 'HTML5',
 		'vrgames': 'VR',
-		'htcvive': 'Vive'
+		'htcvive': 'Vive',
+		'windows': 'Win'
 	};
 
 	// Also implemented in PHP, see util_format_platforms()
