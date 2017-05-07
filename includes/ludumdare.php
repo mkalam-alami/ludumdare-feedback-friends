@@ -172,17 +172,21 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	$author_link = LD_WEB_ROOT . 'users/' . $entry_author_info['path'];
   $author_page = $entry_author_info['slug'];
 
-  // Locate first picture
+  // Set cover picture, or by default choose first picture from post body
 
-  preg_match_all('/\!\[[^]]*\]\(([^)]*)\)/', $entry_info['body'], $body_urls_match);
-  $first_picture = null;
-  foreach ($body_urls_match[1] as $body_url) {
-  	if (_ld_is_picture_url($body_url)) {
-  		$first_picture = str_replace('///', 'http://static.jam.vg/', $body_url);
-  		log_info('Picture detection info for LDJam: '.$uid.','.$body_url);
-  		break;
-  	}
-  }
+  $picture = $entry_info['meta']['cover'];
+  if (!$picture) {
+	  preg_match_all('/\!\[[^]]*\]\(([^)]*)\)/', $entry_info['body'], $body_urls_match);
+	  foreach ($body_urls_match[1] as $body_url) {
+	  	if (_ld_is_picture_url($body_url)) {
+	  		$picture = $body_url;
+	  		break;
+	  	}
+	  }
+	}
+	if ($picture) {
+	  $picture = str_replace('///', 'http://static.jam.vg/', $picture);
+	}
   
 	// Build entry array
 
@@ -193,10 +197,10 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
     'author_page' => $author_page,
     'entry_page' => str_replace('//', '/', LDFF_ACTIVE_EVENT_PATH . $entry_info['slug']),
     'title' => $entry_info['name'],
-    'type' => ($entry_info['subsubtype'] == 'jam') ? 'jam' : 'compo',
+    'type' => $entry_info['subsubtype'],
     'description' => $description,
     'platforms' => $platforms,
-    'picture' => $first_picture,
+    'picture' => $picture,
     'comments' => $comments
   );
   
