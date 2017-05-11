@@ -75,7 +75,7 @@
 			{{/received}}
 		</div>
 		<div class="col-md-3">
-			<h3>Mentions<br /><span class="note"><b>@{{author}}</b></span></h3>
+			<h3>Mentions<br /><span class="note"><b>@{{author_page}}</b></span></h3>
 			{{#mentions}}
 				<div class="comment clearfix">
 					<h4><span class="note pull-right text-right">{{date}}</span>
@@ -91,7 +91,7 @@
 			{{/mentions}}
 			{{^mentions}}
 				<p class="alert alert-info">
-					If anyone mentions this user by using "<b>@{{author}}</b>" in a comment, it will appear here.
+					If anyone mentions this user by using "<b>@{{author_page}}</b>" in a comment, it will appear here.
 				</p>
 			{{/mentions}}
 		</div>

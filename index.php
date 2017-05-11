@@ -146,15 +146,17 @@ function page_details($db) {
 				'sii', $event_id, $entry['uid'], $uid_author);
 
 			// Mentions
-			$entry_author = "%@{$entry['author']}%";
 			$entry['mentions'] = db_query($db, "SELECT * FROM comment WHERE event_id = ?
-				AND comment LIKE ?
+				AND (comment LIKE ? OR comment LIKE ?)
 				ORDER BY `date` DESC, `order` DESC",
-				'ss', $event_id, $entry_author);
+				'sss', $event_id, "%@{$entry['author']}%", "%@{$entry['author_page']}%");
 
 			// Highlight mentions in bold
+      $possibleMentions = array('@'.$entry['author'], '@'.$entry['author_page']);
 			foreach ($entry['mentions'] as &$mention) {
-				$mention['comment'] = preg_replace('/\@'.$entry['author'].'/i', '<b>@'.$entry['author'].'</b>', $mention['comment']);
+        foreach ($possibleMentions as &$possibleMention) {
+          $mention['comment'] = preg_replace('/'.$possibleMention.'/i', '<b>'.$possibleMention.'</b>', $mention['comment']);
+        }
 			};
 
 			// Friends
