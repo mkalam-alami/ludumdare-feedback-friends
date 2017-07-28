@@ -7,7 +7,7 @@ define('LDFF_JS_CSS_VERSION', 7); // Change the value to force a JS/CSS refresh 
 define('LDFF_PAGE_SIZE', 9);
 define('LDFF_FORCE_REFRESH_DELAY', 5*60);
 define('LD_WEB_ROOT', 'https://ldjam.com');
-define('LD_SCRAPING_ROOT', 'http://api.ludumdare.com/vx/');
+define('LD_SCRAPING_ROOT', 'http://api.ldjam.com/vx/');
 define('LD_OLD_WEB_ROOT', 'http://ludumdare.com/compo/');
 
 
