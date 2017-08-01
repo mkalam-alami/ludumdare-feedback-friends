@@ -12,7 +12,7 @@ function ld_fetch_uids($event_id, $page = 0) {
 	$entry_list = array();
 
 	$query_offset = 25 * $page;
-	$data = _ld_fetch_page('node/feed/'.$event_id.'/parent+superparent/item/game?offset=' . $query_offset . '&limit=25');
+	$data = _ld_fetch_page('node/feed/'.$event_id.'/smart+parent/item/game/compo+jam?offset=' . $query_offset . '&limit=25');
 	$json = json_decode($data, true);
 	
 	foreach($json['feed'] as $node) {
