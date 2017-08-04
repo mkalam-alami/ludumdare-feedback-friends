@@ -64,10 +64,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 		'flash' => [42438],
 		'html5' => [42336],
 		'unity' => ['unity'],
-		'vrgames' => ['htc', 'oculus', 'cardboard'],
-		'htcvive' => ['htc'],
-		'oculus' => ['oculus'],
-		'cardboard' => ['cardboard'],
+		'vrgames' => ['htc', 'oculus', 'google cardboard', ' vr '],
     'ios' => [42346],
     'board' => ['cards ', 'card ', 'board ']
 	);
