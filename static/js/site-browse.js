@@ -92,7 +92,7 @@ function refreshSorting() {
 }
 
 function reset(eventId) {
-	$('#search-sorting').val('coolness');
+	$('#search-sorting').val('smart');
 	$('#search-platforms').val([]);
 	$('#search-platforms').multiselect('refresh');
 	$('#search-query').val('');
@@ -107,7 +107,7 @@ function bindSearch() {
 	$('#userid').val(localStorage ? localStorage.userid : '');
 	$('#username').val(localStorage ? localStorage.username : '');
 	$('#search-event').val(params.event || config.LDFF_ACTIVE_EVENT_ID);
-	$('#search-sorting').val(params.sorting || 'coolness');
+	$('#search-sorting').val(params.sorting || 'smart');
 	$('#search-query').val(params.query);
 	$('#search-platforms').val(params.platforms ? params.platforms.split(',') : '');
 	if (params.category) {
@@ -354,7 +354,7 @@ function sortEntries(sorting, entries) {
 		// ordering will be ill-defined and dependent on the sort implementation.
 		shuffle(entries);
 	} else {
-		var comparator = comparators[sorting] || comparators['coolness'];
+		var comparator = comparators[sorting] || comparators['smart'];
 		entries.sort(comparator);
 	}
 }
