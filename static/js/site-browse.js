@@ -286,6 +286,15 @@ function matchesSearchQuery(queryMatcher, entry) {
 }
 
 var comparators = {
+	sorting: function(a, b) {
+		if (a.balance < b.balance) return 1;
+		if (a.balance > b.balance) return -1;
+		if (a.coolness < b.coolness) return 1;
+		if (a.coolness > b.coolness) return -1;
+		if (a.last_updated < b.last_updated) return 1;
+		if (a.last_updated > b.last_updated) return -1;
+		return 0;
+	},
 	coolness: function(a, b) {
 		if (a.coolness < b.coolness) return 1;
 		if (a.coolness > b.coolness) return -1;
@@ -413,8 +422,13 @@ function renderResults(sorting, results) {
 	var eventId = getEventId();
   
   var title = 'Search results';
-  if (eventId == config.LDFF_ACTIVE_EVENT_ID && !getSearchQuery() && (sorting == 'coolness' || sorting == 'received')) {
-    title = 'These entries need feedback!';
+  console.log(!getSearchQuery(), eventId == config.LDFF_ACTIVE_EVENT_ID, sorting)
+  if (eventId == config.LDFF_ACTIVE_EVENT_ID && !getSearchQuery()) {
+    if (sorting == 'coolness' || sorting == 'received') {
+      title = 'These entries need feedback!';
+    } else if (sorting == 'smart') {
+      title = 'These entries need votes & feedback!';
+    }
   }
 
 	var context = {};

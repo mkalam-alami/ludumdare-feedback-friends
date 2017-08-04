@@ -20,8 +20,8 @@ if (LDFF_SCRAPING_ENABLED) {
 	echo '<pre>';
   //print_r(_scraping_build_author_cache($db, 9405));
   //$author_cache = _scraping_build_author_cache($db, 9405);
-  //print_r(_scraping_run_step_entry($db, 9405, 16318, $author_cache));
-	//print_r(ld_fetch_entry($db, 37727));
+  //print_r(_scraping_run_step_entry($db, 32802, 36945, $author_cache));
+	//print_r(ld_fetch_entry($db, 36945));
   print_r(scraping_run($db));
 	echo '</pre>';
 
