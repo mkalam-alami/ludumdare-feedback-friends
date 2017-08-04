@@ -286,7 +286,7 @@ function matchesSearchQuery(queryMatcher, entry) {
 }
 
 var comparators = {
-	sorting: function(a, b) {
+	smart: function(a, b) {
 		if (a.balance < b.balance) return 1;
 		if (a.balance > b.balance) return -1;
 		if (a.coolness < b.coolness) return 1;
@@ -422,7 +422,6 @@ function renderResults(sorting, results) {
 	var eventId = getEventId();
   
   var title = 'Search results';
-  console.log(!getSearchQuery(), eventId == config.LDFF_ACTIVE_EVENT_ID, sorting)
   if (eventId == config.LDFF_ACTIVE_EVENT_ID && !getSearchQuery()) {
     if (sorting == 'coolness' || sorting == 'received') {
       title = 'These entries need feedback!';
