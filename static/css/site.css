@@ -35,6 +35,22 @@
 
 /* General */
 
+.alakajam-secret {
+  width: 50px;
+  opacity: 0.8;
+  position: absolute;
+  top: 30px;
+  left: 40px;
+}
+.alakajam-secret:hover {
+  opacity: 1;
+}
+@media (max-width: 767px) {
+  .alakajam-secret {
+    display: none;
+  }
+}
+
 body {
 	background: #d3bf9a url('../img/bg.jpg') repeat;
 	font-family: 'Titillium Web', sans-serif;
