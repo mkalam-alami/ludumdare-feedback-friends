@@ -15,7 +15,7 @@ if ($action == 'eventsummary') {
 	$gzip_output = cache_read($cache_key);
 	if (!$gzip_output) {
 		$stmt = mysqli_prepare($db,
-			"SELECT entry.uid, entry.author, entry.title, entry.type, entry.platforms, entry.comments_given, entry.comments_received, entry.coolness, entry.last_updated, entry.entry_page, GROUP_CONCAT(comment.uid_author)
+			"SELECT entry.uid, entry.author, entry.title, entry.type, entry.platforms, entry.comments_given, entry.comments_received, entry.coolness, entry.last_updated, entry.entry_page, GROUP_CONCAT(comment.uid_author), entry.balance
 			 FROM entry
 				  LEFT OUTER JOIN comment ON entry.event_id = comment.event_id AND entry.uid = comment.uid_entry
 			 WHERE entry.event_id = ?
@@ -42,6 +42,7 @@ if ($action == 'eventsummary') {
 				'u' => $row[8], // last_updated
 				'e' => $row[9], // entry_page
 				'i' => $row[10], // commenter_ids
+        'b' => $row[11] // balance
 			));
 		}
 

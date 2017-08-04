@@ -46,7 +46,8 @@ window.api = (function() {
 					c: 'coolness',
 					u: 'last_updated',
 					e: 'entry_page',
-					i: 'commenter_ids'
+					i: 'commenter_ids',
+          b: 'balance'
 				};
 
 				// Augment entries

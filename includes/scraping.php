@@ -132,9 +132,9 @@ function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ign
 		$coolness = score_coolness($comments_given, $comments_received);
 
 		// Update entry table
-		$update_stmt = mysqli_prepare($db, "UPDATE entry SET uid_author=?, author=?, author_page=?, entry_page=?, title=?, type=?, description=?, platforms=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
+		$update_stmt = mysqli_prepare($db, "UPDATE entry SET uid_author=?, author=?, author_page=?, entry_page=?, title=?, type=?, description=?, platforms=?, balance=?, comments_given=?, comments_received=?, coolness=?, last_updated=CURRENT_TIMESTAMP() WHERE uid=? and event_id=?");
 		mysqli_stmt_bind_param($update_stmt,
-			'isssssssiiiis',
+			'isssssssdiiiis',
 			$entry['uid_author'],
 			$entry['author'],
 			$entry['author_page'],
@@ -143,6 +143,7 @@ function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ign
 			$entry['type'],
 			$entry['description'],
 			$entry['platforms'],
+			$entry['balance'],
 			$comments_given,
 			$comments_received,
 			$coolness,
@@ -153,10 +154,10 @@ function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ign
 
 		if (mysqli_stmt_affected_rows($update_stmt) == 0) {
 			db_query($db, "INSERT INTO
-				entry(uid,uid_author,event_id,author,author_page,entry_page,title,type,description,platforms,
+				entry(uid,uid_author,event_id,author,author_page,entry_page,title,type,description,platforms,balance,
 					comments_given,comments_received,coolness,last_updated)
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
-				'iissssssssiii',
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP())",
+				'iissssssssdiii',
 				$uid,
 				$entry['uid_author'],
 				$event_id,
@@ -167,6 +168,7 @@ function _scraping_run_step_entry($db, $event_id, $uid, $author_cache = [], $ign
 				$entry['type'],
 				$entry['description'],
 				$entry['platforms'],
+        $entry['balance'],
 				$comments_given,
 				$comments_received,
 				$coolness);
@@ -348,7 +350,7 @@ function scraping_run($db) {
 				}
 			}
 
-			if ($uid != null) {
+			if (isset($uid) && $uid != null) {
 				$params = $uid . ',' . (($fetching_missing_uid)?'insert':'update');
 				if ($refresh_font_page_uid) {
 					$params .= ',frontpage';

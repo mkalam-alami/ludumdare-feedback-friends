@@ -12,7 +12,7 @@ function ld_fetch_uids($event_id, $page = 0) {
 	$entry_list = array();
 
 	$query_offset = 25 * $page;
-	$data = _ld_fetch_page('node/feed/9405/parent+superparent/item/game?offset=' . $query_offset . '&limit=25');
+	$data = _ld_fetch_page('node/feed/' . $event_id .  '/parent+superparent/item/game?offset=' . $query_offset . '&limit=25');
 	$json = json_decode($data, true);
 	
 	foreach($json['feed'] as $node) {
@@ -40,36 +40,36 @@ function _ld_is_picture_url($url) {
   author_cache = Optionally, a map of cached user names (key = ID, value = name), for performance optimization
 */
 function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = []) {
-	/*static $PLATFORM_KEYWORDS = array(
-		'windows' => ['windows', 'win32', 'win64', 'exe', 'java', 'jar'],
-		'linux' => ['linux', 'debian', 'ubuntu', 'java', 'jar'],
-		'osx' => ['mac', 'osx', 'os/x', 'os x', 'java', 'jar'],
-		'android' => ['android', 'apk'],
-		'web' => ['web', 'flash', 'swf', 'html', 'webgl', 'canvas', 'javascript'],
-		'flash' => ['flash', 'swf'],
-		'html5' => ['html', 'webgl', 'canvas', 'javascript'],
-		'unity' => ['unity'],
-		'vrgam
-		es' => ['vr', 'htc', 'vive', 'oculus', 'cardboard'],
-		'htcvive' => ['htc', 'vive'],
-		'oculus' => ['oculus'],
-		'cardboard' => ['cardboard']
-	);*/
-
-	/* XXX More conservative platform detection until we actually have download links on ldjam.com */
+    
+  /*
+  (Codes can be found by checking the link dropdown's HTML)
+  42336 HTML5
+  42337 Windows
+  42339 macOS
+  42341 Linux
+  42342 Android
+  42346 iOS
+  42349 Java
+  42438 Flash
+  42440 Web
+  42332 Sources
+  */
+    
 	static $PLATFORM_KEYWORDS = array(
-		'windows' => ['windows', 'win32', 'win64', ' java ', ' jar '],
-		'linux' => ['linux', 'debian', 'ubuntu', ' java ', ' jar '],
-		'osx' => [' mac ', ' mac:', 'osx', 'os/x', 'os x', ' java ', ' jar ', 'macos'],
-		'android' => ['android', 'apk'],
-		'web' => [' web ', '(web ', 'swf', 'html', 'webgl', 'javascript'],
-		'flash' => ['swf'],
-		'html5' => ['html', 'webgl', 'javascript'],
+		'windows' => [42349, 42337, ' java ', ' jar '],
+		'linux' => [42349, 42341, ' java ', ' jar '],
+		'osx' => [42349, 42339, ' java ', ' jar '],
+		'android' => [42342],
+		'web' => [42336, 42440, 42438],
+		'flash' => [42438],
+		'html5' => [42336],
 		'unity' => ['unity'],
 		'vrgames' => ['htc', 'oculus', 'cardboard'],
 		'htcvive' => ['htc'],
 		'oculus' => ['oculus'],
-		'cardboard' => ['cardboard']
+		'cardboard' => ['cardboard'],
+    'ios' => [42346],
+    'board' => ['cards ', 'card ', 'board ']
 	);
 
 	// Fetch entry, combine with author if possible
@@ -92,26 +92,36 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 
 	// Guess game platforms from description
 
+  $platform_tags = [];
+  foreach ($entry_info['meta'] as $meta_key => $meta_value) {
+    if (strpos($meta_key, 'link') === 0 && strpos($meta_key, 'tag') === 8) {
+      $platform_tags[] =  $meta_value;
+    }
+  }
+  
   $Parsedown = new Parsedown();
 	$description = preg_replace('/[\t\r\n]+/', ' ', strtolower(strip_tags($Parsedown->text($entry_info['body']))));
 	$platforms = '';
 	foreach ($PLATFORM_KEYWORDS as $platform_name => $keywords) {
 		$found = false;
-		foreach ($keywords as $keyword) {
-			if (strpos($description, $keyword) !== false) {
-				$found = true;
-				break;
-			}
-		}
+    foreach ($keywords as $keyword) {
+      if (gettype($keyword) === 'integer' && array_search($keyword, $platform_tags) !== false
+          || gettype($keyword) === 'string' && strpos($description, $keyword) !== false) {
+        $found = true;
+        break;
+      }
+    }
 
 		if ($found) {
 			if ($platforms != '') {
 				$platforms .= ' ';
 			}
-			$platforms .= $platform_name;
+      if ($platform_name != 'board' || $platforms == '') {
+        $platforms .= $platform_name;
+      }
 		}
 	}
-	if ($platforms == '') {
+	if ($platforms == '' || $platforms == 'src') {
 		$platforms = 'unknown';
 	}
 
@@ -201,6 +211,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
     'description' => $description,
     'platforms' => $platforms,
     'picture' => $picture,
+    'balance' => $entry_info['magic']['smart'],
     'comments' => $comments
   );
   

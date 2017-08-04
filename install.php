@@ -106,6 +106,12 @@ if ($current_version < LDFF_DB_VERSION) {
 		$current_version = write_version($db, $target_version);
 	}
     
+	$target_version = 6;
+	if ($current_version < $target_version) {
+		mysqli_query($db, "ALTER TABLE `entry` ADD `balance` FLOAT(4,4)");
+		$current_version = write_version($db, $target_version);
+	}
+   
 	/*
 	$target_version = X;
 	if ($current_version < $target_version) {
