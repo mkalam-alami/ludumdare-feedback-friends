@@ -176,13 +176,22 @@ span.twitter-typeahead .tt-menu {
 
 
 #header-logo {
+  position: relative;
 	display: block;
 	margin: 20px auto 10px auto;
 	width: 80%;
 	max-width: 400px;
 }
 
-#header-logo:hover {
+#header-logo a {
+  display: inline-block;
+}
+
+#header-logo img {
+  max-width: 400px;
+}
+
+#header-logo a:hover {
 	filter: sepia(50%);
 	-webkit-filter: sepia(50%);
 }
