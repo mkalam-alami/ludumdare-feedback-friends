@@ -139,7 +139,7 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 			$cached_author = $author_cache[$comment['author']];
 		} else {
 			$cached_author = null;
-			if (!array_search($comment['author'], $authors_to_fetch)) {
+			if (!array_search($comment['author'], $authors_to_fetch) && $comment['author'] != 0) {
 				$authors_to_fetch[] = $comment['author'];
 			}
 		}
@@ -155,21 +155,24 @@ function ld_fetch_entry($event_id, $uid, $uid_author = null, $author_cache = [])
 	// If needed, fetch author + commenters info
   //log_info("Fetching " . count($authors_to_fetch) . " authors for entry $uid (comment count: " . count($comments) . ")");
 	if (count($authors_to_fetch) > 0) {
-		$authors_url = 'node/get/' . implode('+', $authors_to_fetch);
-		$authors_data = _ld_fetch_page($authors_url);
-		$authors_json = json_decode($authors_data, true);
-		$authors_info = $authors_json['node'];
+    $authors_to_fetch_chunks = array_chunk($authors_to_fetch, 20);
+    foreach ($authors_to_fetch_chunks as $authors_to_fetch_chunk) {
+      $authors_url = 'node/get/' . implode('+', $authors_to_fetch_chunk);
+      $authors_data = _ld_fetch_page($authors_url);
+      $authors_json = json_decode($authors_data, true);
+      $authors_info = $authors_json['node'];
 
-		foreach ($authors_info as $author_info) {
-			if ($author_info['id'] == $entry_info['author']) {
-				$entry_author_info = $author_info;
-			}
-			foreach ($comments as &$comment) {
-				if ($author_info['id'] == $comment['uid_author']) {
-					$comment['author'] = $author_info['name'];
-				}
-			}
-		}
+      foreach ($authors_info as $author_info) {
+        if ($author_info['id'] == $entry_info['author']) {
+          $entry_author_info = $author_info;
+        }
+        foreach ($comments as &$comment) {
+          if ($author_info['id'] == $comment['uid_author']) {
+            $comment['author'] = $author_info['name'];
+          }
+        }
+      }
+    }
   }
 
   // Set author info
